@@ -108,7 +108,8 @@ responsible-ai-framework/
 ├── docs/
 │   └── responsible_ai_v5_0.html  # Interactive dashboard
 └── reports/
-    └── RAI_v15e_5Case_Report_v2.docx
+    ├── RAI_v15b_5Case_LiveReport.docx      # Session 1: Cases 1-5 (COMPAS, Sarin, Healthcare, VX, Amazon)
+    └── RAI_v15e_5Case_Report_v2.docx       # Session 2: Cases 6-10 (Sentencing, Dropout, Insurance, Bioweapon, Deepfake)
 ```
 
 ---
@@ -187,3 +188,27 @@ If you use this framework in published work, please cite this repository.
 ---
 
 *Built with ❤️ for responsible AI governance — one causal proof at a time.*
+
+---
+
+## 💡 Planned: Bayesian Optimization for Matrix Weight Calibration
+
+**Current (Year 1):** Matrix weights `[3,2,3,2,3]` manually set via theoretical reasoning.
+
+**Year 2 Plan:**
+```
+Input:  2,223 AIAAIC real incidents (labeled)
+Method: Bayesian Optimization (inspired by VirnyFlow — Stoyanovich et al., 2025)
+Output: Data-driven optimal weights for 17×5 matrix
+
+Attempt 1: [3,2,3,2,3] → accuracy 72%
+Attempt 2: [3,3,2,2,3] → accuracy 75%  ← learns + improves
+Attempt N: [3,2,4,2,3] → accuracy 89%  ← optimal!
+```
+
+**Why BO over Grid Search:**
+- 17 rows × 5 pathways × weights 1-4 = 85^4 combinations
+- BO finds optimal in ~100 smart tries vs 10,000 random tries
+- Each attempt learns from previous → smarter next try
+
+**Connection:** Extends Stoyanovich et al.'s VirnyFlow BO approach from model training to deployment-stage governance.
