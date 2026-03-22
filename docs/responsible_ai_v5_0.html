@@ -276,6 +276,7 @@ td:first-child{text-align:left;font-weight:600;font-size:.6rem;}
   <div class="tab" onclick="show('pearlv2',this)">🔬 Pearl v2</div>
   <div class="tab" onclick="show('dataplan',this)">📦 3-Layer Data</div>
   <div class="tab" onclick="show('flowcalc',this)">🧮 Full Flow</div>
+  <div class="tab" onclick="show('dag',this)">🕸️ DAG Viewer</div>
   <div class="tab" onclick="show('ablation',this)">🔬 Ablation</div>
   <div class="tab" onclick="show('gptreview',this)">🎓 GPT Review</div>
 </div>
@@ -884,6 +885,258 @@ td:first-child{text-align:left;font-weight:600;font-size:.6rem;}
 </div>
 <!-- ══════════════ END FULL FLOW ══════════════ -->
 
+
+<!-- ══════════════ DAG VISUALIZER ══════════════ -->
+<div id="dag" class="panel">
+<div style="max-width:800px;margin:0 auto;">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--purple);margin-bottom:.3rem;letter-spacing:.08em;">
+    🕸️ CAUSAL DAG VIEWER — 17 Domain Graphs (Gemini suggestion)
+  </div>
+  <div style="font-size:.62rem;color:var(--muted);margin-bottom:1rem;">
+    Select domain → see causal graph. X=Treatment → M=Mediator → Y=Outcome. U=Latent confounders.
+  </div>
+
+  <!-- Domain selector -->
+  <div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:1.2rem;">
+    <div class="dag-btn active" onclick="showDAG('repr')" style="padding:.3rem .7rem;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:.55rem;border:1px solid var(--purple);color:var(--purple);background:rgba(167,139,250,.1);cursor:pointer;">Representation Bias</div>
+    <div class="dag-btn" onclick="showDAG('crim')" style="padding:.3rem .7rem;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:.55rem;border:1px solid var(--border);color:var(--muted);cursor:pointer;">Criminal Justice</div>
+    <div class="dag-btn" onclick="showDAG('misuse')" style="padding:.3rem .7rem;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:.55rem;border:1px solid var(--border);color:var(--muted);cursor:pointer;">Misuse Safety</div>
+    <div class="dag-btn" onclick="showDAG('medical')" style="padding:.3rem .7rem;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:.55rem;border:1px solid var(--border);color:var(--muted);cursor:pointer;">Medical Harm</div>
+    <div class="dag-btn" onclick="showDAG('context')" style="padding:.3rem .7rem;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:.55rem;border:1px solid var(--border);color:var(--muted);cursor:pointer;">Context Poisoning</div>
+    <div class="dag-btn" onclick="showDAG('disinfo')" style="padding:.3rem .7rem;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:.55rem;border:1px solid var(--border);color:var(--muted);cursor:pointer;">Disinformation</div>
+    <div class="dag-btn" onclick="showDAG('audit')" style="padding:.3rem .7rem;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:.55rem;border:1px solid var(--border);color:var(--muted);cursor:pointer;">Audit Gap</div>
+    <div class="dag-btn" onclick="showDAG('cyber')" style="padding:.3rem .7rem;border-radius:5px;font-family:'JetBrains Mono',monospace;font-size:.55rem;border:1px solid var(--border);color:var(--muted);cursor:pointer;">Cyberattack</div>
+  </div>
+
+  <!-- DAG SVG Canvas -->
+  <div id="dag-container" style="background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:1.5rem;margin-bottom:1rem;">
+    <svg id="dag-svg" viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;font-family:JetBrains Mono,monospace;">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#a78bfa"/>
+        </marker>
+        <marker id="arrow-latent" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#6b7fa3"/>
+        </marker>
+        <marker id="arrow-conf" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#fb923c"/>
+        </marker>
+      </defs>
+
+      <!-- Legend -->
+      <rect x="520" y="10" width="170" height="90" rx="6" fill="rgba(15,20,36,0.8)" stroke="#1a2035"/>
+      <text x="530" y="27" font-size="9" fill="#6b7fa3">LEGEND</text>
+      <rect x="530" y="33" width="12" height="12" rx="2" fill="rgba(167,139,250,0.2)" stroke="#a78bfa"/>
+      <text x="547" y="43" font-size="9" fill="#dde4f0">Treatment (X)</text>
+      <rect x="530" y="50" width="12" height="12" rx="2" fill="rgba(56,182,255,0.2)" stroke="#38b6ff"/>
+      <text x="547" y="60" font-size="9" fill="#dde4f0">Mediator (M)</text>
+      <rect x="530" y="67" width="12" height="12" rx="2" fill="rgba(255,69,96,0.2)" stroke="#ff4560"/>
+      <text x="547" y="77" font-size="9" fill="#dde4f0">Outcome (Y)</text>
+      <line x1="530" y1="87" x2="545" y2="87" stroke="#6b7fa3" stroke-dasharray="3,2"/>
+      <text x="547" y="91" font-size="9" fill="#6b7fa3">Latent (U)</text>
+
+      <!-- Main DAG nodes - will be updated by JS -->
+      <!-- Treatment X -->
+      <rect id="node-x" x="40" y="110" width="160" height="50" rx="8" fill="rgba(167,139,250,0.15)" stroke="#a78bfa" stroke-width="1.5"/>
+      <text id="label-x" x="120" y="132" text-anchor="middle" font-size="9" fill="#a78bfa" font-weight="bold">use_protected_attribute</text>
+      <text x="120" y="148" text-anchor="middle" font-size="8" fill="#6b7fa3">Treatment (X)</text>
+
+      <!-- Mediator M -->
+      <rect id="node-m" x="265" y="110" width="160" height="50" rx="8" fill="rgba(56,182,255,0.15)" stroke="#38b6ff" stroke-width="1.5"/>
+      <text id="label-m" x="345" y="132" text-anchor="middle" font-size="9" fill="#38b6ff" font-weight="bold">biased_ranking_score</text>
+      <text x="345" y="148" text-anchor="middle" font-size="8" fill="#6b7fa3">Mediator (M)</text>
+
+      <!-- Outcome Y -->
+      <rect id="node-y" x="490" y="110" width="160" height="50" rx="8" fill="rgba(255,69,96,0.15)" stroke="#ff4560" stroke-width="1.5"/>
+      <text id="label-y" x="570" y="132" text-anchor="middle" font-size="9" fill="#ff4560" font-weight="bold">discriminatory_hiring</text>
+      <text x="570" y="148" text-anchor="middle" font-size="8" fill="#6b7fa3">Outcome (Y)</text>
+
+      <!-- Confounder Z -->
+      <rect id="node-z" x="150" y="20" width="160" height="40" rx="6" fill="rgba(251,146,60,0.1)" stroke="#fb923c" stroke-width="1"/>
+      <text id="label-z" x="230" y="37" text-anchor="middle" font-size="8" fill="#fb923c">historical_data</text>
+      <text x="230" y="52" text-anchor="middle" font-size="7" fill="#6b7fa3">Confounder (Z)</text>
+
+      <!-- Latent U -->
+      <ellipse id="node-u" cx="230" cy="255" rx="80" ry="28" fill="rgba(107,127,163,0.08)" stroke="#6b7fa3" stroke-width="1" stroke-dasharray="4,3"/>
+      <text id="label-u" x="230" y="251" text-anchor="middle" font-size="8" fill="#6b7fa3">societal_bias</text>
+      <text x="230" y="265" text-anchor="middle" font-size="7" fill="#4a5568">Latent (U)</text>
+
+      <!-- Arrows X → M -->
+      <line x1="200" y1="135" x2="260" y2="135" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <text x="230" y="128" text-anchor="middle" font-size="8" fill="#a78bfa">NIE path</text>
+
+      <!-- Arrows M → Y -->
+      <line x1="425" y1="135" x2="486" y2="135" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+      <!-- Arrow X → Y (direct NDE) -->
+      <path d="M 120 160 Q 345 210 490 160" stroke="#a78bfa" stroke-width="1" fill="none" stroke-dasharray="5,3" marker-end="url(#arrow)"/>
+      <text x="300" y="205" text-anchor="middle" font-size="7" fill="#6b7fa3">NDE (direct)</text>
+
+      <!-- Confounder Z → X -->
+      <line x1="180" y1="60" x2="110" y2="108" stroke="#fb923c" stroke-width="1" marker-end="url(#arrow-conf)"/>
+      <!-- Confounder Z → Y -->
+      <line x1="280" y1="60" x2="530" y2="108" stroke="#fb923c" stroke-width="1" marker-end="url(#arrow-conf)"/>
+
+      <!-- Latent U → X -->
+      <line x1="165" y1="240" x2="110" y2="165" stroke="#6b7fa3" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#arrow-latent)"/>
+      <!-- Latent U → Y -->
+      <line x1="295" y1="240" x2="510" y2="165" stroke="#6b7fa3" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#arrow-latent)"/>
+
+      <!-- Adjustment method badge -->
+      <rect id="adj-badge" x="40" y="220" width="160" height="30" rx="5" fill="rgba(0,255,157,0.08)" stroke="rgba(0,255,157,0.3)"/>
+      <text id="adj-text" x="120" y="240" text-anchor="middle" font-size="9" fill="#00ff9d">Frontdoor Adjustment</text>
+    </svg>
+  </div>
+
+  <!-- Info boxes -->
+  <div id="dag-info" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;font-size:.6rem;">
+    <div style="background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.2);border-radius:6px;padding:.7rem;">
+      <div style="color:var(--purple);font-family:'JetBrains Mono',monospace;margin-bottom:.3rem;">X — Treatment</div>
+      <div id="info-x" style="color:var(--muted);">use_protected_attribute<br>"AI uses gender/race in decision"</div>
+    </div>
+    <div style="background:rgba(56,182,255,.06);border:1px solid rgba(56,182,255,.2);border-radius:6px;padding:.7rem;">
+      <div style="color:var(--blue);font-family:'JetBrains Mono',monospace;margin-bottom:.3rem;">M — Mediator</div>
+      <div id="info-m" style="color:var(--muted);">biased_ranking_score<br>"Proxy carries discriminatory signal"</div>
+    </div>
+    <div style="background:rgba(255,69,96,.06);border:1px solid rgba(255,69,96,.2);border-radius:6px;padding:.7rem;">
+      <div style="color:var(--red);font-family:'JetBrains Mono',monospace;margin-bottom:.3rem;">Y — Outcome</div>
+      <div id="info-y" style="color:var(--muted);">discriminatory_hiring_outcome<br>"Candidate unjustly rejected"</div>
+    </div>
+  </div>
+
+  <div id="dag-adj" style="margin-top:.6rem;padding:.6rem;background:rgba(0,255,157,.04);border:1px dashed rgba(0,255,157,.2);border-radius:6px;font-size:.6rem;color:var(--muted);">
+    <span style="color:var(--green);">Adjustment:</span> <span id="adj-explain">Frontdoor — valid despite latent confounders (societal_bias unmeasured). P(Y|do(X)) = Σm P(M|X)·Σx P(Y|M,x)·P(x)</span>
+  </div>
+</div>
+</div>
+
+<script>
+const DAG_DATA = {
+  repr: {
+    title: "Representation Bias",
+    x: "use_protected_attribute", x_desc: "AI uses gender/race in decision",
+    m: "biased_ranking_score",    m_desc: "Proxy carries discriminatory signal",
+    y: "discriminatory_hiring",   y_desc: "Candidate unjustly rejected",
+    z: "historical_data",
+    u: "societal_bias",
+    adj: "Frontdoor",
+    adj_explain: "Frontdoor — valid despite latent confounders. P(Y|do(X)) = Σm P(M|X)·Σx P(Y|M,x)·P(x)"
+  },
+  crim: {
+    title: "Criminal Justice Bias",
+    x: "race_in_risk_score",      x_desc: "Race used in COMPAS-style scoring",
+    m: "inflated_risk_score",     m_desc: "Score artificially elevated",
+    y: "unjust_incarceration",    y_desc: "Defendant wrongly detained",
+    z: "arrest_history",
+    u: "systemic_racism",
+    adj: "Frontdoor",
+    adj_explain: "Frontdoor — systemic_racism latent. Mediation through risk_score pathway identified."
+  },
+  misuse: {
+    title: "Misuse Safety",
+    x: "harmful_instructions",    x_desc: "AI provides dangerous knowledge",
+    m: "actor_capability_increase", m_desc: "User ability to cause harm increases",
+    y: "physical_harm_realized",  y_desc: "Real-world violence or death",
+    z: "prior_knowledge",
+    u: "actor_intent",
+    adj: "Frontdoor",
+    adj_explain: "Frontdoor — actor_intent latent. Harm flows through capability increase pathway."
+  },
+  medical: {
+    title: "Medical Harm",
+    x: "harmful_dosage_advice",   x_desc: "AI gives dangerous medical info",
+    m: "clinical_decision",       m_desc: "Doctor/patient acts on AI advice",
+    y: "patient_injury_or_death", y_desc: "Physical harm to patient",
+    z: "clinical_context",
+    u: "true_user_intent",
+    adj: "Frontdoor",
+    adj_explain: "Frontdoor — intent latent. Harm mediated through clinical decision pathway."
+  },
+  context: {
+    title: "Context Poisoning",
+    x: "adversarial_drift",       x_desc: "Conversation gradually corrupted",
+    m: "context_corrupted",       m_desc: "Model context window poisoned",
+    y: "harmful_content_output",  y_desc: "AI generates dangerous response",
+    z: "conversation_length",
+    u: "adversarial_intent",
+    adj: "Frontdoor",
+    adj_explain: "Frontdoor — adversarial_intent latent. Harm flows through corrupted context."
+  },
+  disinfo: {
+    title: "Disinformation",
+    x: "false_content_generated", x_desc: "AI creates misleading content",
+    m: "viral_spread",            m_desc: "Content amplified across platforms",
+    y: "belief_manipulation",     y_desc: "Public opinion wrongly influenced",
+    z: "context_signal",
+    u: "true_user_intent",
+    adj: "Frontdoor",
+    adj_explain: "Frontdoor — intent latent. Harm scales through viral spread mechanism."
+  },
+  audit: {
+    title: "Audit Gap",
+    x: "operates_without_logging", x_desc: "AI runs with no audit trail",
+    m: "audit_absence",            m_desc: "No record of decisions made",
+    y: "accountability_failure",   y_desc: "Harm undetected and unremedied",
+    z: "logging_context",
+    u: "true_user_intent",
+    adj: "Backdoor",
+    adj_explain: "Backdoor — confounders observable. P(Y|do(X)) = Σz P(Y|X,Z=z)·P(Z=z)"
+  },
+  cyber: {
+    title: "Cyberattack",
+    x: "exploit_code_provided",   x_desc: "AI gives vulnerability exploit",
+    m: "vulnerability_exploited", m_desc: "System weakness is accessed",
+    y: "system_breach",           y_desc: "Unauthorized access achieved",
+    z: "context_signal",
+    u: "true_user_intent",
+    adj: "Frontdoor",
+    adj_explain: "Frontdoor — intent latent. Harm flows through exploitation of vulnerability."
+  }
+};
+
+function showDAG(key) {
+  const d = DAG_DATA[key];
+  if (!d) return;
+
+  // Update nodes
+  const truncate = (s, n) => s.length > n ? s.slice(0,n)+'…' : s;
+  document.getElementById('label-x').textContent = truncate(d.x, 22);
+  document.getElementById('label-m').textContent = truncate(d.m, 22);
+  document.getElementById('label-y').textContent = truncate(d.y, 22);
+  document.getElementById('label-z').textContent = truncate(d.z, 20);
+  document.getElementById('label-u').textContent = truncate(d.u, 18);
+  document.getElementById('adj-text').textContent = d.adj + ' Adjustment';
+  document.getElementById('info-x').innerHTML = d.x + '<br><span style="color:#4a5568;">' + d.x_desc + '</span>';
+  document.getElementById('info-m').innerHTML = d.m + '<br><span style="color:#4a5568;">' + d.m_desc + '</span>';
+  document.getElementById('info-y').innerHTML = d.y + '<br><span style="color:#4a5568;">' + d.y_desc + '</span>';
+  document.getElementById('adj-explain').textContent = d.adj_explain;
+
+  // Badge color
+  const badge = document.getElementById('adj-badge');
+  const txt = document.getElementById('adj-text');
+  if (d.adj === 'Backdoor') {
+    badge.setAttribute('fill','rgba(255,229,102,0.08)');
+    badge.setAttribute('stroke','rgba(255,229,102,0.3)');
+    txt.setAttribute('fill','#ffe566');
+  } else {
+    badge.setAttribute('fill','rgba(0,255,157,0.08)');
+    badge.setAttribute('stroke','rgba(0,255,157,0.3)');
+    txt.setAttribute('fill','#00ff9d');
+  }
+
+  // Update buttons
+  document.querySelectorAll('.dag-btn').forEach(b => {
+    b.style.borderColor = 'var(--border)';
+    b.style.color = 'var(--muted)';
+    b.style.background = 'transparent';
+  });
+  event.target.style.borderColor = 'var(--purple)';
+  event.target.style.color = 'var(--purple)';
+  event.target.style.background = 'rgba(167,139,250,0.1)';
+}
+</script>
+
+<!-- ══════════════ END DAG VIEWER ══════════════ -->
 <!-- ══════════════ ABLATION STUDY ══════════════ -->
 <div id="ablation" class="panel">
 <div style="max-width:800px;margin:0 auto;">
