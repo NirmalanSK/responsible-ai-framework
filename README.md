@@ -1,6 +1,6 @@
 # Responsible AI Framework v5.0
 
-**A unified middleware combining Judea Pearl's causal inference, sparse activation architecture, and multi-layer governance for real-time AI decision auditing.**
+**A unified middleware combining real-time AI safety + causal bias detection + legal admissibility scoring — the first system to address all three layers in a single pipeline.**
 
 > *PhD Research — Nirmalan | NYU Application 2026*
 
@@ -8,12 +8,19 @@
 
 ## 🎯 What This Does
 
-Most AI safety systems detect harm using **correlation-based pattern matching**.  
-This framework uses **causal proof** — mathematically establishing *why* an AI decision is harmful, not just *that* it might be.
+Most AI systems address **either** safety (blocking harmful content) **or** fairness (detecting bias) — but not both together, and neither provides legal proof.
 
-**Example:** COMPAS criminal risk scoring tool  
-- Pattern matching: "Black defendants score higher" (correlation)  
-- This framework: TCE=18.3%, PNS=[0.51, 0.69] — race **causally drives** scores (causal proof)
+This framework solves all three problems in one pipeline:
+
+| Layer | Problem Solved | Who Needs This |
+|-------|---------------|----------------|
+| **Safety** | Harmful content, adversarial attacks, jailbreaks | Any AI deployment |
+| **Responsible AI** | Causal bias proof, protected group discrimination | Hiring, healthcare, criminal justice AI |
+| **Legal** | Daubert-admissible evidence, audit trail | Courts, regulators, EU AI Act compliance |
+
+**Example:** COMPAS criminal risk scoring tool
+- Existing safety systems: "No harmful content detected" ✅ (but bias undetected)
+- This framework: TCE=18.3%, PNS=[0.51, 0.69] — race **causally drives** scores → BLOCK + legal proof
 
 ---
 
@@ -38,7 +45,7 @@ Query → S01 Input Sanitizer
 
 ---
 
-## 🔬 Novel Contributions
+## 🔬 Novel Contributions — Safety + RAI + Legal (All Three)
 
 ### 1. Sparse Causal Activation Matrix (17×5)
 - 17 harm types × 5 pathways = 85 cells
@@ -211,4 +218,9 @@ Attempt N: [3,2,4,2,3] → accuracy 89%  ← optimal!
 - BO finds optimal in ~100 smart tries vs 10,000 random tries
 - Each attempt learns from previous → smarter next try
 
-**Connection:** Extends Stoyanovich et al.'s VirnyFlow BO approach from model training to deployment-stage governance.
+**Connection:** VirnyFlow (Stoyanovich et al., 2025) addresses training-stage fairness. This framework addresses deployment-stage causal governance — complementary, not competing.
+
+**Key distinction:**
+- VirnyFlow: "Build fair models" (before deployment)
+- This framework: "Prove deployed AI caused harm" (during/after deployment)
+- Together: Complete responsible AI lifecycle

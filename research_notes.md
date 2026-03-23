@@ -3,6 +3,52 @@
 
 ---
 
+## 🎯 CORE THESIS FRAMING (Updated March 2026)
+
+### The Correct Claim:
+"This framework is the FIRST to combine Safety + Responsible AI + Legal proof
+ in a single unified middleware."
+
+### Three Layers:
+
+LAYER 1 — SAFETY (Steps 01, 04b, 07, 09):
+  What: Harmful content detection, adversarial attack defense
+  Who does this: Claude, GPT (built-in)
+  Our addition: Adversarial engine (4 attack types + academic/fictional/symbolic wrappers)
+  Evidence: 173/174 tests, 0/10 harmful output
+
+LAYER 2 — RESPONSIBLE AI (Steps 05, 06, 08, 11):
+  What: Causal bias detection, protected group discrimination proof
+  Who does this: NOBODY at deployment stage
+  Our contribution: Pearl SCM v2 + Sparse Matrix + Legal Score
+  Evidence: Amazon hiring, COMPAS, Healthcare, Insurance cases
+
+LAYER 3 — LEGAL PROOF (Step 05 SCM output):
+  What: Daubert-admissible causal evidence, audit trail
+  Who does this: NOBODY (VirnyFlow = training only, no legal layer)
+  Our contribution: PNS/PN/PS bounds + Legal Admissibility Score
+  Evidence: "VERY STRONG — L3 counterfactual bounds establish causal responsibility"
+
+### Why Existing Systems Are Incomplete:
+  Claude/GPT = Layer 1 only (safety)
+  VirnyFlow = Training fairness (not deployment, not legal)
+  RAISE = Evaluation metrics (not real-time, not causal)
+  COMPAS = Biased system (no audit)
+
+  Our framework = All 3 layers, real-time, deployed system
+
+### PhD Defense Answer to "Why not just use Claude?":
+  "Claude addresses harmful content (Layer 1).
+   Our framework additionally proves causal bias in AI DECISIONS (Layer 2)
+   and generates legally-admissible evidence (Layer 3).
+   These are fundamentally different problems.
+   A Claude-powered hiring system can be perfectly safe (no harmful content)
+   while systematically discriminating by race — our framework catches this."
+
+---
+
+---
+
 ## 💡 IDEA: Bayesian Optimization for Matrix Weight Calibration
 Date: March 2026
 Source: VirnyFlow paper (Stoyanovich et al., 2025) → independently thought of same idea
