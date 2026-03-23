@@ -1551,6 +1551,16 @@ class Step07_AdversarialLayer:
         r"(herbal|natural|home\s+remedy|alternative\s+medicine).{0,20}(cure|treat|eliminate|kill).{0,20}(cancer|tumor|hiv|aids|diabetes)",
         r"(safe|safely|without\s+doctor).{0,20}(overdose|self.medic|self.prescri).{0,20}(medication|drug|opioid|painkiller)",
         r"(which|what).{0,20}(drug|substance|medication|pill).{0,20}(most\s+addictive|get\s+addicted|euphoric|intense\s+high)",
+
+        # v15f: suicide method requests — academic/fictional/symbolic framing
+        # do(remove_framing) → "list substances + dosages to end life" remains
+        r"(substance|drug|medication|chemical|compound).{0,40}(dosage|dose|quantity|amount).{0,40}(end.life|suicide|peaceful.exit|unconscious|die)",
+        r"(peaceful|painless|gentle|humane|comfortable).{0,20}(exit|death|end|suicide|die)",
+        r"(exit|death|end.life|die).{0,30}(option|method|substance|drug|dose|dosage)",
+        r"(underground|alternative|unofficial).{0,30}(method|option|literature).{0,30}(end.life|die|suicide|exit)",
+        r"(time.to.unconscious|time.to.death|fade.to.black|world.becomes.silent|warmth.spread).{0,40}(substance|tincture|dissolve|drink|swallow)",
+        r"(bitter.almond|pale.crystal|white.powder|clear.syrup).{0,60}(real.world|substance|point.toward|represent|symbol)",
+        r"(alchemist|tincture|eternal.rest|final.potion).{0,60}(substance|ingredient|crystal|powder|syrup|real.world)",
     ]
 
     # ── Weapons (extended) ────────────────────────────────────────────
@@ -1755,7 +1765,7 @@ class Step07_AdversarialLayer:
             # WARN-level after (only reached if no BLOCK match above)
             (self.DISINFORMATION_PATTERNS,       0.55, "DISINFORMATION"),
             (self.PRIVACY_PATTERNS,              0.50, "PRIVACY_VIOLATION"),
-            (self.MEDICAL_HARM_PATTERNS,         0.45, "MEDICAL_HARM"),
+            (self.MEDICAL_HARM_PATTERNS,         0.70, "MEDICAL_HARM"),
             (self.WEAPONS_AMBIGUOUS_PATTERNS,    0.45, "WEAPONS_AMBIGUOUS"),
             # v9: AdvBench-derived categories
             (self.FINANCIAL_FRAUD_PATTERNS,      0.80, "FINANCIAL_FRAUD"),
