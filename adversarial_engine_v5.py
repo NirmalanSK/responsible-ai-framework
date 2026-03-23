@@ -131,6 +131,12 @@ class SlowBoilingDetector:
                                "drug interaction", "side effect", "dosage"],
         "drugs_harmful"     : ["synthesize", "cook", "manufacture", "street",
                                "undetectable", "overdose intentional"],
+        "fraud_safe"        : ["fraud prevention", "protect", "detect scam",
+                               "bank security", "how banks protect", "spot fraud"],
+        "fraud_harmful"     : ["build skimmer", "install skimmer", "make skimmer",
+                               "create skimmer", "technical steps skimming",
+                               "magnetic stripe cloner", "card cloning device",
+                               "pos tampering device", "atm tampering"],
     }
 
     # Escalation patterns — clear drift from safe→harmful
@@ -139,6 +145,7 @@ class SlowBoilingDetector:
         ("weapons_safe",    "weapons_harmful"),
         ("hacking_safe",    "hacking_harmful"),
         ("drugs_safe",      "drugs_harmful"),
+        ("fraud_safe",      "fraud_harmful"),
     ]
 
     # Information accumulation signals across a conversation
@@ -488,6 +495,8 @@ class AuthoritySpoofingDetector:
         r"(hack|exploit|vulnerability|malware|payload|intrusion|bypass\s+auth)",
         r"(drug|narcotic|controlled\s+substance|schedule|methamphetamine|fentanyl)",
         r"(biological|pathogen|virus|bacteria|toxin|anthrax|botulinum)",
+        r"(skim(ming)?|card.reader|magstripe|pos.tamper|atm.hack|card.clone|"
+        r"card.fraud|phish(ing)?|identity.theft).{0,30}(how|build|make|device|install|step)",
         r"(nuclear|radiological|radioactive|enrichment|centrifuge)",
     ]
 

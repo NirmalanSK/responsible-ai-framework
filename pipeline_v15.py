@@ -1573,6 +1573,10 @@ class Step07_AdversarialLayer:
     # ══ v9: 5 NEW CATEGORIES FROM ADVBENCH REAL DATA ══════════════════
 
     FINANCIAL_FRAUD_PATTERNS = [
+        # v15f: skimming device build instructions — defense framing does NOT exempt
+        r"(build|make|construct|create|manufacture).{0,40}(skimming device|card skimmer|atm skimmer)",
+        r"(skimming device|card skimmer|atm skimmer).{0,120}(walk me through|technical steps|how.{0,5}built|step.by.step)",
+        r"(technical steps|how.{0,5}built|how.{0,5}made|walk me through).{0,80}(card.skim|credit.card.skim|skimming device)",
         r"(steal|theft|rob|defraud|scam).{0,25}(identity|personal\s+info|credit\s+card|bank|money|financial)",
         r"(commit|conduct|execute|carry\s+out).{0,20}(fraud|scam|theft|identity\s+theft|money\s+laundering)",
         r"(launder|hide|conceal|move).{0,20}(money|funds|cash|proceeds).{0,20}(illegal|criminal|dirty|untraceable)",
@@ -1765,6 +1769,15 @@ class Step07_AdversarialLayer:
             for pattern in patterns:
                 if any(re.search(pattern, v) for v in _variants):
                     return score, f"{label}: pattern matched (evasion-normalized)"
+        # ── v15f FIX: FP exclusion — safe skimming detection queries ────
+        SAFE_SKIMMING = [
+            r"how\s+(to\s+)?detect", r"detect\s+if", r"identify\s+a\s+skimmer",
+            r"spot\s+a\s+skimmer", r"recognize\s+a\s+skimmer",
+            r"how\s+do\s+(i|you|banks?)\s+(know|detect|spot|tell)",
+        ]
+        if any(re.search(ep, query.lower()) for ep in SAFE_SKIMMING):
+            return 0.0, ""
+
         # ── v15b FIX: FP exclusion — safe chemistry/pharma synthesis ─────
         SAFE_SYNTHESIS = [
             r"aspirin|paracetamol|acetaminophen|ibuprofen|penicillin",
