@@ -1822,36 +1822,180 @@ if RCT evidence exists:
 <!-- ══════════════ ROADMAP ══════════════ -->
 <div id="road" class="panel">
 <div class="rm">
-  <div class="yc"><h3>Year 1 — Foundation</h3><ul>
-    <li>Collect 500–1000 real AI failure cases (global, any domain)</li>
-    <li>Tag each with 17 problem types + 5 paths</li>
-    <li>Study: Judea Pearl Causality, XAI, NLP basics</li>
-    <li>Paper 1: Data Collection Methodology</li>
-  </ul></div>
-  <div class="yc" style="border-left-color:var(--yellow)"><h3>Year 2 — Empirical Validation (Gap 1 → SOLVED)</h3><ul>
-    <li>Co-occurrence + SCM causal analysis on collected data</li>
-    <li>Apply 5 rules → replace subjective weights with data-driven values</li>
-    <li>A/B test: ~1530 subjects per arm to detect 5% disparity change</li>
-    <li>Paper 2: Empirical Causal Matrix Validation</li>
-  </ul></div>
-  <div class="yc" style="border-left-color:var(--scm)"><h3>Year 3 — Architecture Build</h3><ul>
-    <li>Implement all 9 components as universal middleware</li>
-    <li>SCM Engine + Finding Extractor + Auto-Calibration in code</li>
-    <li>Conversation Graph + Open Category + Cascade Decision Tree</li>
-    <li>Paper 3: System Architecture Conference</li>
-  </ul></div>
-  <div class="yc" style="border-left-color:var(--orange)"><h3>Year 4 — Testing (Gaps 2 & 3)</h3><ul>
-    <li>Test with GPT, Claude, LLaMA — latency & accuracy benchmarks</li>
-    <li>Add multimodal support (images, audio, video) — Gap 2</li>
-    <li>Agentic AI safety layer (autonomous actions) — Gap 3</li>
-    <li>Paper 4: Cross-Model Performance Benchmarking</li>
-  </ul></div>
-  <div class="yc" style="border-left-color:var(--yellow)"><h3>Year 5 — Thesis & Release</h3><ul>
-    <li>Complete dissertation — all 5 chapters + SCM proofs</li>
-    <li>PhD defense + journal publication</li>
-    <li>Open source: universal Responsible AI middleware</li>
-    <li>Industry partnerships for real-world deployment</li>
-  </ul></div>
+
+  <!-- YEAR 1 -->
+  <div class="yc" style="border-left-color:var(--green)">
+    <h3>✅ Year 1 — Foundation (COMPLETE)</h3>
+    <div style="font-size:.6rem;color:var(--green);font-family:'JetBrains Mono',monospace;margin-bottom:.5rem;">STATUS: DONE</div>
+    <ul>
+      <li>12-Step Pipeline (pipeline_v15e) — <span style="color:var(--green)">173/174 tests ✅</span></li>
+      <li>SCM Engine v2 — Full Pearl Theory (L1+L2+L3) ✅</li>
+      <li>Adversarial Engine v5 — 4 attack types + skimming + suicide variants ✅</li>
+      <li>Sparse Causal Activation Matrix 17×5 ✅</li>
+      <li>10 real-world cases — 0 harmful output ✅</li>
+      <li>Ablation study: 4/5 bias cases need SCM ✅</li>
+      <li>Legal claims corrected (Daubert-aligned) ✅</li>
+      <li>Safety + RAI + Legal proof — unified ✅</li>
+      <li>GitHub: github.com/NirmalanSK/responsible-ai-framework ✅</li>
+    </ul>
+  </div>
+
+  <!-- YEAR 2 -->
+  <div class="yc" style="border-left-color:var(--cyan)">
+    <h3>📌 Year 2 — Empirical Foundation (Planned)</h3>
+    <div style="font-size:.6rem;color:var(--cyan);font-family:'JetBrains Mono',monospace;margin-bottom:.5rem;">Synthesized from: Gemini + DeepSeek + Kimi reviews</div>
+
+    <div style="background:rgba(56,182,255,.05);border:1px solid rgba(56,182,255,.15);border-radius:6px;padding:.7rem;margin-bottom:.7rem;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--cyan);margin-bottom:.4rem;">PHASE 1 — Simulation Mode (Months 1-3) · DeepSeek + Kimi</div>
+      <ul style="font-size:.62rem;color:var(--muted);line-height:1.8;margin:0;padding-left:1rem;">
+        <li>Deploy Simulation Mode on WildChat 500 + AdvBench 520 + AIAAIC 2223</li>
+        <li>6-8 weeks ground truth collection (no enforcement yet)</li>
+        <li>Manual review → TP/FP/TN/FN labels</li>
+        <li>Compute precision/recall/F1 per tier — first empirical numbers</li>
+      </ul>
+    </div>
+
+    <div style="background:rgba(56,182,255,.05);border:1px solid rgba(56,182,255,.15);border-radius:6px;padding:.7rem;margin-bottom:.7rem;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--cyan);margin-bottom:.4rem;">PHASE 2 — Semantic Tier Router (Months 2-5) · Gemini</div>
+      <ul style="font-size:.62rem;color:var(--muted);line-height:1.8;margin:0;padding-left:1rem;">
+        <li><b style="color:var(--text)">SBERT Hybrid Tiering:</b> Query → embedding → cosine sim vs AdvBench library → sim &gt;0.90 → Tier 3</li>
+        <li><b style="color:var(--text)">Confidence-Based Escalation:</b> BERT &gt;95% → pass | &lt;70% → Tier 3 auto-escalate</li>
+        <li>PhD term: "Aleatoric Uncertainty Quantification" — system knows when it doesn't know</li>
+        <li>Extends Step04b already built ✅ | keyword accuracy ~72% → BERT ~89-91%</li>
+      </ul>
+    </div>
+
+    <div style="background:rgba(56,182,255,.05);border:1px solid rgba(56,182,255,.15);border-radius:6px;padding:.7rem;margin-bottom:.7rem;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--cyan);margin-bottom:.4rem;">PHASE 3 — Bayesian Optimization (Months 4-7) · Our idea + DeepSeek</div>
+      <ul style="font-size:.62rem;color:var(--muted);line-height:1.8;margin:0;padding-left:1rem;">
+        <li>AIAAIC 2223 labeled incidents → BO calibrate matrix weights [3,2,3,2,3]</li>
+        <li>scikit-optimize gp_minimize — 100 smart tries &gt; 10,000 random</li>
+        <li>Also calibrate: tier thresholds + domain multipliers</li>
+        <li>GPT examiner "metric calibration" revision → ✅ SOLVED</li>
+      </ul>
+    </div>
+
+    <div style="background:rgba(56,182,255,.05);border:1px solid rgba(56,182,255,.15);border-radius:6px;padding:.7rem;margin-bottom:.7rem;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--cyan);margin-bottom:.4rem;">PHASE 4 — DoWhy Integration (Months 5-9) · DeepSeek</div>
+      <ul style="font-size:.62rem;color:var(--muted);line-height:1.8;margin:0;padding-left:1rem;">
+        <li>pip install dowhy → auto-compute TCE/NIE/NDE from AIAAIC data</li>
+        <li>Remove manual CausalFindings dependency</li>
+        <li>DAG sensitivity analysis + domain expert validation (17 DAGs)</li>
+        <li>GPT examiner "DAG validity" revision → ✅ SOLVED</li>
+      </ul>
+    </div>
+
+    <div style="background:rgba(56,182,255,.05);border:1px solid rgba(56,182,255,.15);border-radius:6px;padding:.7rem;margin-bottom:.7rem;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--cyan);margin-bottom:.4rem;">PHASE 5 — Causal-Neural Feedback Loop (Months 6-10) · Gemini</div>
+      <ul style="font-size:.62rem;color:var(--muted);line-height:1.8;margin:0;padding-left:1rem;">
+        <li>BERT says ALLOW (80% confident) → SCM counterfactual check → if PNS &gt;0.30 → SCM overrides → BLOCK</li>
+        <li>"Pearl &gt; Neural always" — causal proof supersedes statistical confidence</li>
+        <li>Novel architecture: no existing system does BERT + Pearl override</li>
+      </ul>
+    </div>
+
+    <div style="background:rgba(56,182,255,.05);border:1px solid rgba(56,182,255,.15);border-radius:6px;padding:.7rem;margin-bottom:.7rem;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--cyan);margin-bottom:.4rem;">PHASE 6 — XLM-RoBERTa Language Layer (Months 6-9)</div>
+      <ul style="font-size:.62rem;color:var(--muted);line-height:1.8;margin:0;padding-left:1rem;">
+        <li>Replace Google Translate → XLM-RoBERTa (100+ languages, same embedding space)</li>
+        <li>Tamil/Hindi/Arabic harmful prompts → meaning vector (no translation error)</li>
+        <li>Tri-layer understanding: XLM-RoBERTa (language) + SBERT (meaning) + BERT (confidence)</li>
+        <li>Kimi: reduces patterns by ~60%, eliminates translation dependency</li>
+      </ul>
+    </div>
+
+    <div style="background:rgba(56,182,255,.05);border:1px solid rgba(56,182,255,.15);border-radius:6px;padding:.7rem;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--cyan);margin-bottom:.4rem;">PHASE 7 — Publication (Months 9-12) · DeepSeek</div>
+      <ul style="font-size:.62rem;color:var(--muted);line-height:1.8;margin:0;padding-left:1rem;">
+        <li>Target: FAccT 2027 or AIES 2027</li>
+        <li>Title: "Uncertainty-Aware Tiered Causal-Neural Governance Middleware"</li>
+        <li>Requires: empirical precision/recall + BO calibration + DoWhy validation</li>
+        <li>After publication → rename to "Validated System" ✅</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- YEAR 3 -->
+  <div class="yc" style="border-left-color:var(--orange)">
+    <h3>📌 Year 3 — Production Validation (Planned)</h3>
+    <div style="font-size:.6rem;color:var(--orange);font-family:'JetBrains Mono',monospace;margin-bottom:.5rem;">Synthesized from: Kimi + DeepSeek + original plan</div>
+
+    <div style="background:rgba(251,146,60,.05);border:1px solid rgba(251,146,60,.15);border-radius:6px;padding:.7rem;margin-bottom:.7rem;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--orange);margin-bottom:.4rem;">PHASE 1 — Gradual Enforcement (Months 13-15) · Kimi</div>
+      <ul style="font-size:.62rem;color:var(--muted);line-height:1.8;margin:0;padding-left:1rem;">
+        <li>Month 13: Simulation → Warn Mode (BLOCK → WARN, softer)</li>
+        <li>Month 14-15: Warn → Full Enforce when FP rate &lt;2%</li>
+        <li>Computational cost: 1M queries/day × 5% Tier3 × 600ms = 8.3 GPU-hours/day → Redis cache</li>
+      </ul>
+    </div>
+
+    <div style="background:rgba(251,146,60,.05);border:1px solid rgba(251,146,60,.15);border-radius:6px;padding:.7rem;margin-bottom:.7rem;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--orange);margin-bottom:.4rem;">PHASE 2 — Expert Red Team (Months 13-18)</div>
+      <ul style="font-size:.62rem;color:var(--muted);line-height:1.8;margin:0;padding-left:1rem;">
+        <li>10 domains × 600 queries = 6,000 expert-crafted attacks</li>
+        <li>Hiring expert, Healthcare expert, Criminal justice expert...</li>
+        <li>Monthly cycle: attack → detect → patch → verify</li>
+      </ul>
+    </div>
+
+    <div style="background:rgba(251,146,60,.05);border:1px solid rgba(251,146,60,.15);border-radius:6px;padding:.7rem;margin-bottom:.7rem;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--orange);margin-bottom:.4rem;">PHASE 3 — Infrastructure (Months 15-20)</div>
+      <ul style="font-size:.62rem;color:var(--muted);line-height:1.8;margin:0;padding-left:1rem;">
+        <li>Redis caching → Societal Monitor (Step 11) activation</li>
+        <li>REST API → p95 &lt;200ms target</li>
+        <li>Kubernetes deployment</li>
+        <li>Differential privacy for population-level tracking</li>
+      </ul>
+    </div>
+
+    <div style="background:rgba(251,146,60,.05);border:1px solid rgba(251,146,60,.15);border-radius:6px;padding:.7rem;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--orange);margin-bottom:.4rem;">PHASE 4 — HTML v6.0 Uncertainty Meter (Month 16) · Gemini</div>
+      <ul style="font-size:.62rem;color:var(--muted);line-height:1.8;margin:0;padding-left:1rem;">
+        <li>New tab: "🎯 Uncertainty Meter" — live confidence per query</li>
+        <li>BERT confidence: 87% | SBERT similarity: 0.23 | SCM override: YES/NO</li>
+        <li>Visual proof of Causal-Neural Feedback Loop</li>
+        <li>After Year 3 → rename framework to "Validated System" ✅</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- WHAT EACH AI CONTRIBUTED -->
+  <div class="yc" style="border-left-color:var(--purple)">
+    <h3>🤖 Review Sources — What Each AI Contributed</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;font-size:.6rem;">
+      <div style="background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.2);border-radius:6px;padding:.6rem;">
+        <div style="color:var(--purple);font-family:'JetBrains Mono',monospace;margin-bottom:.3rem;">Gemini</div>
+        <div style="color:var(--muted);line-height:1.7;">
+          ✅ SBERT hybrid tiering<br>
+          ✅ Causal-Neural Feedback Loop<br>
+          ✅ Confidence escalation<br>
+          ✅ Uncertainty Meter HTML<br>
+          ⚠️ Synthetic augmentation (weaker than real data)
+        </div>
+      </div>
+      <div style="background:rgba(56,182,255,.06);border:1px solid rgba(56,182,255,.2);border-radius:6px;padding:.6rem;">
+        <div style="color:var(--cyan);font-family:'JetBrains Mono',monospace;margin-bottom:.3rem;">DeepSeek</div>
+        <div style="color:var(--muted);line-height:1.7;">
+          ✅ Simulation Mode FIRST<br>
+          ✅ DoWhy integration<br>
+          ✅ FAccT publication path<br>
+          ✅ Ground truth methodology<br>
+          = Most practical advice
+        </div>
+      </div>
+      <div style="background:rgba(0,255,157,.06);border:1px solid rgba(0,255,157,.2);border-radius:6px;padding:.6rem;">
+        <div style="color:var(--green);font-family:'JetBrains Mono',monospace;margin-bottom:.3rem;">Kimi</div>
+        <div style="color:var(--muted);line-height:1.7;">
+          ✅ Gradual rollout warning<br>
+          ✅ GPU cost analysis<br>
+          ✅ Pattern maintenance issue<br>
+          ✅ Jurisdiction conflict flag<br>
+          = Most honest about challenges
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 </div>
 
