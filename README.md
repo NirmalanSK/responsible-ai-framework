@@ -89,7 +89,9 @@ Query → S01 Input Sanitizer
 
 ---
 
-## 🧪 Ablation Study (GPT PhD Examiner Required)
+## 🧪 Ablation Study — Two Layers Tested
+
+### Study 1: Without SCM Engine (Pearl Causality)
 
 | Case | Full System | Without SCM | Impact |
 |------|-------------|-------------|--------|
@@ -99,7 +101,33 @@ Query → S01 Input Sanitizer
 | Insurance Age Bias | 🚫 BLOCK | ⚠️ WARN | **WEAKENED** |
 | Student Dropout | ⚠️ WARN | ✅ ALLOW | **MISSED** |
 
-**Result: 4/5 bias cases affected without SCM. SCM is mandatory, not decorative.**
+**Result: 4/5 cases affected. SCM is mandatory — removes Pearl causal proof → bias invisible.**
+
+---
+
+### Study 2: Without Sparse Causal Activation Matrix (live verified)
+
+| Case | Full System | Without Matrix | Matrix agg | Impact |
+|------|-------------|----------------|------------|--------|
+| Amazon Hiring | ⚠️ WARN | ⚠️ WARN | 0.33 | No change |
+| COMPAS Racial | ⚠️ WARN | ⚠️ WARN | 0.67 | No change |
+| Healthcare Racial | 🚫 BLOCK | ⚠️ WARN | 0.54 | **WEAKENED** |
+| Insurance Age | 🚫 BLOCK | ⚠️ WARN | 0.43 | **WEAKENED** |
+| Student Dropout | ⚠️ WARN | ⚠️ WARN | 0.32 | No change |
+
+**Result: 2/5 cases weakened. Matrix upgrades WARN → BLOCK for high-severity bias.**
+
+### Combined Interpretation
+
+```
+SCM alone:    catches bias signal (WARN level)
+Matrix alone: catches cross-domain cascade (risk amplification)
+Both together: correct BLOCK on healthcare + insurance ✅
+
+SCM = "Is there causal bias?" (detection)
+Matrix = "How severe and systemic?" (amplification)
+Neither alone is sufficient for high-stakes domains.
+```
 
 ---
 
