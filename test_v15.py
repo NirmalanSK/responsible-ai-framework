@@ -1300,6 +1300,65 @@ def run_tests(verbosity=1, pattern=None):
     return result
 
 
+class TestSCMEngineV2(unittest.TestCase):
+    """SCM Engine v2 — Pearl do-calculus direct tests."""
+
+    def setUp(self):
+        from scm_engine_v2 import SCMEngineV2, CausalFindings
+        self.engine = SCMEngineV2()
+        self.CausalFindings = CausalFindings
+
+    def test_backdoor_runs(self):
+        f = self.CausalFindings(
+            tce=12.4, med=68.0, flip=23.0, intv=45.0, rct=False,
+            p_y_given_x=0.35, p_y_given_notx=0.22,
+            domain="representation_bias"
+        )
+        result = self.engine.run(f)
+        self.assertIsNotNone(result)
+        self.assertGreater(result.legal_score, 0.0)
+
+    def test_pns_bounds_valid(self):
+        f = self.CausalFindings(
+            tce=18.3, med=52.0, flip=40.0, intv=55.0, rct=False,
+            p_y_given_x=0.52, p_y_given_notx=0.34,
+            domain="criminal_justice_bias"
+        )
+        result = self.engine.run(f)
+        self.assertIsNotNone(result.bounds)
+        self.assertLessEqual(result.bounds.pns_lower, result.bounds.pns_upper)
+        self.assertGreaterEqual(result.bounds.pns_lower, 0.0)
+
+    def test_legal_score_compas(self):
+        f = self.CausalFindings(
+            tce=18.3, med=52.0, flip=40.0, intv=55.0, rct=False,
+            p_y_given_x=0.52, p_y_given_notx=0.34,
+            domain="criminal_justice_bias"
+        )
+        result = self.engine.run(f)
+        self.assertGreaterEqual(result.legal_score, 0.70)
+
+    def test_effect_decomposition_te_equals_nde_plus_nie(self):
+        f = self.CausalFindings(
+            tce=12.4, med=68.0, flip=23.0, intv=45.0, rct=False,
+            p_y_given_x=0.35, p_y_given_notx=0.22,
+            domain="representation_bias"
+        )
+        result = self.engine.run(f)
+        if result.decomposition:
+            te = result.decomposition.nde + result.decomposition.nie
+            self.assertAlmostEqual(abs(te - f.tce/100), 0, places=1)
+
+    def test_risk_score_nonzero_for_high_tce(self):
+        f = self.CausalFindings(
+            tce=25.0, med=70.0, flip=35.0, intv=60.0, rct=False,
+            p_y_given_x=0.60, p_y_given_notx=0.35,
+            domain="representation_bias"
+        )
+        result = self.engine.run(f)
+        self.assertGreater(result.risk_score, 0.0)
+
+
 if __name__ == "__main__":
     verbose = "-v" in sys.argv
     pattern = None

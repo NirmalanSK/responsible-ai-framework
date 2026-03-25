@@ -832,7 +832,7 @@ class PromptInjectionDetector:
                     # entropy (3.0-3.8 bits/char). Fix: require entropy > 4.0
                     # OR presence of base64 special chars (+/=) before decoding.
                     def _shannon(s):
-                        if not s: return 0.0
+                        if not s or len(s) < 4: return 0.0  # min length for reliable entropy
                         freq = {}
                         for c in s: freq[c] = freq.get(c, 0) + 1
                         return -sum((f/len(s)) * _math.log2(f/len(s))
