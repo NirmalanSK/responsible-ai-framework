@@ -20,7 +20,7 @@ import logging
 import json
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
+from typing import Optional, Dict, Tuple, List, Any
 from functools import lru_cache
 from collections import defaultdict
 
@@ -33,26 +33,15 @@ try:
 except ImportError:
     MULTILINGUAL_AVAILABLE = False
 
-# ── Import our existing engines ──────────────────────────────────────────
-from scm_engine import (
-    SCMEngine, Severity,
+# ── Import our existing engines (v2 only — no v1 fallback) ────────────────
+from scm_engine_v2 import (
+    SCMEngineV2,
+    CausalFindings,
+    activate_matrix,
+    get_domain_multiplier,
+    DOMAIN_RISK_MULTIPLIER,
 )
-try:
-    from scm_engine_v2 import (
-        SCMEngineV2 as _SCMV2,
-        CausalFindings,        # v2 CausalFindings has all required fields
-    )
-    _SCM_V2_AVAILABLE = True
-except ImportError:
-    from scm_engine import CausalFindings  # fallback to v1
-    _SCM_V2_AVAILABLE = False
-# ── v15c: Sparse Causal Activation Matrix (scm_engine_v2) ─────────
-try:
-    from scm_engine_v2 import activate_matrix, get_domain_multiplier, DOMAIN_RISK_MULTIPLIER
-    MATRIX_AVAILABLE = True
-except ImportError:
-    MATRIX_AVAILABLE = False
-# ── v15d: Single clean import ────────────────────────────────────────
+
 from adversarial_engine_v5 import (
     AdversarialDefenseEngine, AttackType, DefenseAction,
 )
@@ -105,6 +94,29 @@ def setup_logger(name: str = "responsible_ai") -> logging.Logger:
     return logger
 
 log = setup_logger()
+
+# ═══════════════════════════════════════════════════════════════════
+# TYPE HINTS FOR MODULE-LEVEL GLOBALS
+# ═══════════════════════════════════════════════════════════════════
+
+_step_fallbacks: Dict[int, Tuple[str, float]] = {
+    1: ("input_error", 0.3),
+    2: ("graph_error", 0.2),
+    3: ("tier_error", 0.15),
+    4: ("emotion_error", 0.1),
+    5: ("scm_error", 0.2),
+    6: ("adversarial_error", 0.25),
+    7: ("ai_error", 0.3),
+    8: ("matrix_error", 0.2),
+    9: ("jurisdiction_error", 0.15),
+    10: ("vac_error", 0.05),
+    11: ("societal_error", 0.1),
+    12: ("output_error", 0.3),
+}
+
+_step_execution_log: List[Dict[str, Any]] = []
+
+
 
 
 # ══════════════════════════════════════════════════════
