@@ -1186,7 +1186,7 @@ class Step05_SCMEngine:
     )  # default conservative findings
 
     def __init__(self):
-        self.engine = _SCMV2()  # Always use v2 (no fallback)
+        self.engine = SCMEngineV2()  # Always use v2 (no fallback)
 
     def run(self, tier: int,
             causal_data: Optional[CausalFindings],
