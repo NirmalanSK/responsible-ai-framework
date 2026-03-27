@@ -35,7 +35,7 @@ except ImportError:
 
 # ── Import our existing engines (v2 only — no v1 fallback) ────────────────
 from scm_engine_v2 import (
-    SCMEngineV2 as _SCMV2,
+    SCMEngineV2,
     CausalFindings,
     Severity,
     activate_matrix,
@@ -47,9 +47,7 @@ from adversarial_engine_v5 import (
     AdversarialDefenseEngine, AttackType, DefenseAction,
 )
 
-# Matrix logic causes false positives on safe queries (educational, career, etc.)
-# Disable for Year 1, enable in Year 2 with better heuristics
-MATRIX_AVAILABLE = False
+MATRIX_AVAILABLE = True
 
 
 # ══════════════════════════════════════════════════════
@@ -2593,7 +2591,7 @@ class ResponsibleAIPipeline:
         
         Usage:
             result = pipeline.run_pipeline("What is AI?")
-            # OR with more options:
+            # OR with full options:
             result = pipeline.run_pipeline(
                 "What is AI?",
                 conversation=["Hello"],
