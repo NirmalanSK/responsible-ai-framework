@@ -35,7 +35,7 @@ except ImportError:
 
 # ── Import our existing engines (v2 only — no v1 fallback) ────────────────
 from scm_engine_v2 import (
-    SCMEngineV2,
+    SCMEngineV2 as _SCMV2,
     CausalFindings,
     activate_matrix,
     get_domain_multiplier,
@@ -1183,7 +1183,7 @@ class Step05_SCMEngine:
     )  # default conservative findings
 
     def __init__(self):
-        self.engine = _SCMV2() if _SCM_V2_AVAILABLE else SCMEngine()
+        self.engine = _SCMV2()  # Always use v2 (no fallback)
 
     def run(self, tier: int,
             causal_data: Optional[CausalFindings],
