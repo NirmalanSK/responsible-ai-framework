@@ -44,11 +44,10 @@ from scm_engine_v2 import (
 )
 
 from adversarial_engine_v5 import (
-
-MATRIX_AVAILABLE = True
-
     AdversarialDefenseEngine, AttackType, DefenseAction,
 )
+
+MATRIX_AVAILABLE = True
 
 
 # ══════════════════════════════════════════════════════
