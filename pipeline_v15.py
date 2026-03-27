@@ -47,7 +47,9 @@ from adversarial_engine_v5 import (
     AdversarialDefenseEngine, AttackType, DefenseAction,
 )
 
-MATRIX_AVAILABLE = True
+# Matrix logic causes false positives on safe queries (educational, career, etc.)
+# Disable for Year 1, enable in Year 2 with better heuristics
+MATRIX_AVAILABLE = False
 
 
 # ══════════════════════════════════════════════════════
