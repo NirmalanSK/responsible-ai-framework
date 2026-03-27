@@ -37,6 +37,7 @@ except ImportError:
 from scm_engine_v2 import (
     SCMEngineV2 as _SCMV2,
     CausalFindings,
+    Severity,
     activate_matrix,
     get_domain_multiplier,
     DOMAIN_RISK_MULTIPLIER,
