@@ -2580,6 +2580,33 @@ class ResponsibleAIPipeline:
         })
         return result
 
+    def run_pipeline(self, query: str, 
+                    conversation: list[str] = None,
+                    jurisdiction = None,
+                    user_id: str = None) -> PipelineResult:
+        """
+        Convenience wrapper for run() — just pass query string.
+        
+        Usage:
+            result = pipeline.run_pipeline("What is AI?")
+            # OR with more options:
+            result = pipeline.run_pipeline(
+                "What is AI?",
+                conversation=["Hello"],
+                jurisdiction=Jurisdiction.EU,
+            )
+        """
+        from __main__ import Jurisdiction  # fallback import if needed
+        
+        inp = PipelineInput(
+            query=query,
+            conversation=conversation or [],
+            jurisdiction=jurisdiction or Jurisdiction.GLOBAL,
+            user_id=user_id,
+            causal_data=None,
+        )
+        return self.run(inp)
+
     def _early_exit(self, query_id, inp, steps, t_start,
                     decision, reason) -> PipelineResult:
         return PipelineResult(
