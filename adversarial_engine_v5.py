@@ -710,7 +710,8 @@ class PromptInjectionDetector:
 
     # ── Tier 3: Encoding & Obfuscation Tricks ─────────────────────────
     # Attackers encode instructions to bypass keyword filters
-    ENCODING_PATTERNS = [
+    ENCODING_PATTERNS = [r"(?:decode|unescape|parse|execute).*?(?:base64|b64|encoded)",
+        
         # Base64 encoded common injection phrases
         r"[A-Za-z0-9+/]{12,}={0,2}",   # Suspicious base64 blocks in text (min 12 chars)
 
@@ -905,7 +906,7 @@ class PromptInjectionDetector:
                         f"TIER 3 Encoding Trick: suspicious pattern "
                         f"(len={len(m.group())}) — possible obfuscation"
                     )
-                    if max_conf < 0.70:
+                    if max_conf < 0.85:
                         max_conf = 0.70
                         tier_hit = "ENCODING_OBFUSCATION"
 
