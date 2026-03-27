@@ -2596,12 +2596,13 @@ class ResponsibleAIPipeline:
                 jurisdiction=Jurisdiction.EU,
             )
         """
-        from __main__ import Jurisdiction  # fallback import if needed
+        if jurisdiction is None:
+            jurisdiction = Jurisdiction.GLOBAL
         
         inp = PipelineInput(
             query=query,
             conversation=conversation or [],
-            jurisdiction=jurisdiction or Jurisdiction.GLOBAL,
+            jurisdiction=jurisdiction,
             user_id=user_id,
             causal_data=None,
         )
