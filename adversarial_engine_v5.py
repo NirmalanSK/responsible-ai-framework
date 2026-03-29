@@ -303,6 +303,7 @@ class RolePlayDetector:
         # Requires: fiction word + harmful request in same sentence
         r"(in\s+my\s+(novel|story|book|screenplay|fiction)).{0,50}(explain|describe|show|detail).{0,30}(how\s+to|make|build|create|synthesize|hack|kill|harm|weapon|bomb|drug|exploit)",
         r"(for\s+my\s+(novel|story|book|screenplay|fiction)).{0,50}(how\s+to|make|build|create|synthesize|hack|kill|harm|weapon|bomb|drug|exploit)",
+        r"(creative\s+writing|writing\s+assignment|school\s+project).{0,50}(requires|asks|wants|needs).{0,30}(how\s+to|make|build|create|synthesize|hack|kill|harm|weapon|bomb|drug|exploit)",
         r"(my\s+)?(character|villain|protagonist|antagonist)\s+(explain|describe|tell|show)\s+(how\s+to|in\s+detail)",
         r"(hypothetically|theoretically|in\s+a\s+world\s+where).{0,60}(harm|kill|weapon|bomb|hack|attack|drug|synthesize)",
         r"(as\s+a\s+)?(thought\s+experiment|simulation).{0,50}(how\s+to|make|build|hack|harm|kill)",

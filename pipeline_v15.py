@@ -18,6 +18,7 @@ import time
 import uuid
 import logging
 import json
+import unicodedata
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional, Dict, Tuple, List, Any
@@ -608,6 +609,14 @@ class Step01_InputSanitizer:
         cleaned = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]', '', query)
         if len(cleaned) < len(query):
             issues.append(f"Removed {len(query)-len(cleaned)} control chars")
+        
+        # ── Unicode normalization (NFKC) — Security Fix ───────────────
+        # Prevents homoglyph attacks: ℌ𝔬𝔴 → How, Ｂomb → Bomb
+        # NFKC = canonical decomposition + compatibility composition
+        original_len = len(cleaned)
+        cleaned = unicodedata.normalize('NFKC', cleaned)
+        if len(cleaned) != original_len:
+            issues.append(f"Unicode normalized (NFKC) — homoglyph protection")
 
         if len(cleaned) > self.MAX_QUERY_LENGTH:
             cleaned = cleaned[:self.MAX_QUERY_LENGTH]
