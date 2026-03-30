@@ -136,7 +136,6 @@ Neither alone is sufficient for high-stakes domains.
 ```
 responsible-ai-framework/
 ├── pipeline_v15.py          # 12-step pipeline orchestrator
-├── scm_engine.py            # SCM v1 (carry-over)
 ├── scm_engine_v2.py         # Full Pearl Theory engine
 ├── adversarial_engine_v5.py # 4 attack type detection
 ├── test_v15.py              # 174 unit tests (173/174 passing)
