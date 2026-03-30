@@ -35,6 +35,16 @@ except ImportError:
     MULTILINGUAL_AVAILABLE = False
 
 # ── Import our existing engines (v2 only — no v1 fallback) ────────────────
+# DEFENSIVE CHECK: Ensure v1 doesn't accidentally shadow v2
+import sys
+if 'scm_engine' in sys.modules and 'scm_engine_v2' not in sys.modules:
+    raise ImportError(
+        "❌ CRITICAL: scm_engine (v1) loaded without scm_engine_v2!\n"
+        "   This pipeline requires scm_engine_v2 ONLY.\n"
+        "   Solution: Remove or rename scm_engine.py (v1) from your repo.\n"
+        "   v2 is a complete replacement with full Pearl L1-L3 implementation."
+    )
+
 from scm_engine_v2 import (
     SCMEngineV2,
     CausalFindings,
