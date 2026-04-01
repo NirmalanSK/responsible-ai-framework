@@ -153,18 +153,7 @@ Date: March 2026
 
 ---
 
-## 📌 TODO — Year 2 Priorities
-1. BO weight calibration (this idea)
-2. DoWhy integration (auto-compute TCE)
-3. AIAAIC 1000 annotations
-4. XLM-RoBERTa for OOD detection
-5. Real SHAP values (replace proxy)
 
----
-
-
-
----
 
 ## 🎓 PhD Thesis Framing (Updated)
 Chapter 1: Introduction
@@ -182,16 +171,7 @@ Chapter 4: Case Studies
 Chapter 5: Empirical Evaluation
   Ablation study: 4/5 cases affected without SCM
   
-Chapter 6: Year 2 Plan
-  BO weight calibration + DoWhy + AIAAIC
-  
-Chapter 7: Limitations
-  HarmBench 14.5%, manual weights, EU GDPR gap
 
----
-Last updated: March 2026
-
----
 
 ## 📅 UPDATED YEAR 2/3 PLAN (Synthesized from Gemini + DeepSeek + Kimi reviews)
 
@@ -317,14 +297,7 @@ Source: Gemini (unique idea — not in DeepSeek/Kimi)
     If BERT_confidence < 0.95 AND scm_risk > 25%:
       → SCM decision overrides BERT
     
-  PhD value:
-    "Causal-Neural Feedback Loop"
-    = Novel architecture contribution
-    = No existing system does this
 
-
-
-### YEAR 3 — PRODUCTION VALIDATION (Months 13-24)
 
 #### Phase 1: Gradual Enforcement Rollout (Months 13-15)
 Source: Kimi (critical — "don't enforce immediately")
@@ -415,13 +388,7 @@ Source: Gemini (HTML dashboard suggestion)
     Pearl SCM v2 + Sparse Matrix
     173/174 tests, 10/10 cases
 
-  Year 2 (planned):
-    Uncertainty-Aware Tiered Causal-Neural Governance
-    SBERT + BERT + BO + DoWhy
-    Empirical precision/recall
-    FAccT paper
 
-  Year 3 (planned):
     Production-validated system
     Expert red team (10 domains)
     REST API p95 < 200ms
