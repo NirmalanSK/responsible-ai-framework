@@ -264,14 +264,17 @@ Literature acknowledges: *"Responsible, Fair, and Explainable AI has several wea
 - Emphasizes: *"Biases originating from data collection propagate downstream"*
 - **Our framework:** Catches what propagates to **deployment stage**
 
-**Plecko & Bareinboim — Causal Fairness Analysis**
-- Decomposes total variation into direct/indirect effects
-- Uses Pearl's mediation formulas
-- **Our framework extends this with:** PNS bounds + legal scoring + real-time governance
 
-**3. Production Safety Systems:**
-- **LlamaGuard, NeMo Guardrails, Guardrails AI:** Safety-only (no causal proof)
-- **This framework:** First to unify safety + causal bias detection + legal evidence
+
+**SafeNudge (Fonseca, Bell & Stoyanovich, 2025)**
+- *"Safeguarding Large Language Models in Real-time with Tunable Safety-Performance Trade-offs"*
+- arXiv: 2501.02018 | Submitted to EMNLP 2025
+- Real-time jailbreak prevention via controlled text generation + "nudging"
+- Reduces jailbreak success by ~30% with minimal latency
+- **Focus:** Generation-time safety (inside model during token generation)
+- **Gap:** Safety-only — no fairness detection, no legal proof, no causal reasoning
+- **Complementarity:** SafeNudge operates at token-level (inside model); our framework at request-level (middleware). Together = defense-in-depth
+- **Year 2 Integration Possibility:** Could enhance our Step 7 (Adversarial Layer) with generation-time nudging while preserving our causal governance core
 
 ### Research Gap Addressed
 
@@ -344,13 +347,7 @@ python scm_engine_v2.py
 
 ---
 
-## 🗺️ Roadmap
 
-| Year | Milestone |
-|------|-----------|
-| Year 1 (Now) | Pattern-based detection, Pearl SCM, Sparse Matrix, 177/179 tests ✅ |
-| Year 2 | DoWhy integration, AIAAIC 2223 cases, XLM-RoBERTa, empirical validation |
-| Year 3 | Expert red team (10 domains × 6000 queries), REST API, federated learning |
 
 ---
 
@@ -373,6 +370,7 @@ python scm_engine_v2.py
 
 ### Responsible AI Systems
 - Herasymuk, D., Protsiv, M., & Stoyanovich, J. (2025). VirnyFlow: A framework for responsible model development. *ACM FAccT*.
+- Fonseca, J., Bell, A., & Stoyanovich, J. (2025). SafeNudge: Safeguarding Large Language Models in Real-time with Tunable Safety-Performance Trade-offs. *arXiv preprint arXiv:2501.02018*. (Submitted to EMNLP 2025)
 - Plecko, D. & Bareinboim, E. (2022). Causal fairness analysis. *arXiv preprint*.
 
 ### Legal & Regulatory
@@ -468,3 +466,22 @@ Attempt N: [3,2,4,2,3] → accuracy 89%  ← optimal!
 - VirnyFlow: "Build fair models" (before deployment)
 - This framework: "Prove deployed AI caused harm" (during/after deployment)
 - Together: Complete responsible AI lifecycle
+
+**Year 2 Enhancement — SafeNudge Integration:**
+SafeNudge (Fonseca, Bell & Stoyanovich, 2025) provides generation-time jailbreak prevention via "nudging" at the token level. Potential integration:
+```python
+# Current Step 7: Pattern-based detection (Year 1)
+if detect_jailbreak_patterns(query):
+    return BLOCK
+    
+# Enhanced Step 7: Pattern + Generation-time defense (Year 2)
+if detect_jailbreak_patterns(query):
+    return BLOCK  # Obvious attacks → immediate block
+elif jailbreak_suspected(query):
+    return safenudge_guide(query)  # Borderline cases → guide during generation
+```
+
+**Complementarity:**
+- SafeNudge: Token-level safety (inside model)
+- This framework: Request-level causal governance (middleware)
+- Together: Defense-in-depth at multiple granularities

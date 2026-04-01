@@ -162,12 +162,7 @@ Date: March 2026
 
 ---
 
-## 📚 Key Papers to Cite
-- VirnyFlow: Herasymuk, Protsiv, Stoyanovich (2025) — BO for fair ML
-- Pearl (2009) — Causality
-- Tian & Pearl (2000) — PNS bounds
-- Obermeyer et al. (2019, Science) — Healthcare AI racial bias
-- ProPublica COMPAS (2016) — Criminal justice AI bias
+
 
 ---
 
@@ -327,26 +322,7 @@ Source: Gemini (unique idea — not in DeepSeek/Kimi)
     = Novel architecture contribution
     = No existing system does this
 
-#### Phase 6: Publication (Months 9-12)
-Source: DeepSeek (strongly recommended)
 
-  Target conferences:
-    FAccT 2027 (Fairness, Accountability, Transparency)
-    AIES 2027 (AI, Ethics, Society)
-    
-  Paper title candidates:
-    "Causal-Neural Governance Middleware for
-     Real-time Responsible AI Enforcement"
-    
-    "An Uncertainty-Aware Tiered Framework
-     for Causal Bias Detection in Deployed AI"
-    
-  Required for paper:
-    Empirical precision/recall (Phase 1) ✅
-    BO calibration (Phase 3) ✅
-    DoWhy validation (Phase 4) ✅
-
----
 
 ### YEAR 3 — PRODUCTION VALIDATION (Months 13-24)
 
@@ -451,6 +427,4 @@ Source: Gemini (HTML dashboard suggestion)
     REST API p95 < 200ms
     "Validated System" label earned
 
----
-Last updated: March 2026
-Synthesized from: Gemini + DeepSeek + Kimi reviews
+
