@@ -296,7 +296,128 @@ Source: Gemini (unique idea — not in DeepSeek/Kimi)
   Implementation:
     If BERT_confidence < 0.95 AND scm_risk > 25%:
       → SCM decision overrides BERT
-    
+
+---
+
+#### Phase 6: Publication (Months 9-12)
+Source: DeepSeek
+
+  Target: FAccT 2027 or AIES 2027
+  Title: "Uncertainty-Aware Tiered Causal-Neural Governance Middleware"
+  Requires: empirical precision/recall + BO calibration + DoWhy validation
+  After publication → rename to "Validated System" ✅
+
+---
+
+#### Phase 7: SafeNudge Integration & Fairness Audit (Months 10-12)
+Source: DeepSeek + Claude analysis (April 2026)
+Paper: Fonseca, Bell & Stoyanovich (2025) — arXiv:2501.02018
+       "Safeguarding Large Language Models in Real-time with Tunable Safety-Performance Trade-offs"
+       → Same NYU lab as VirnyFlow. Submitted to EMNLP 2025.
+
+### Background
+  SafeNudge = generation-time jailbreak prevention via "nudging"
+  Reduces jailbreak success: 28.1% to 37.3%
+  Operates INSIDE model during token generation (not middleware)
+  Tunable Safety-Performance Trade-offs (SPT) supported
+
+  KEY LIMITATION: SafeNudge = safety only
+    ❌ No fairness detection
+    ❌ No legal proof
+    ❌ No causal reasoning
+    ❌ No jurisdiction check
+    ❌ No bias audit
+
+### How Our Framework Relates
+  SafeNudge: Inside model (token-level)
+  Our framework: Outside model (middleware / request-level)
+  Together: Defense-in-depth at TWO granularities
+
+  Current Step 7 (Year 1):
+    if detect_jailbreak_patterns(query):
+        return BLOCK
+
+  Enhanced Step 7 (Year 2 + SafeNudge):
+    if detect_jailbreak_patterns(query):
+        return BLOCK         # Layer 1: obvious attacks → block
+    elif jailbreak_suspected(query):
+        return nudge_to_safe_response(query)  # Layer 2: borderline → guide
+
+### NOVEL CONTRIBUTION: "Audit SafeNudge for Fairness Violations"
+  The core idea: SafeNudge nudges all users — but does it nudge
+  different demographic groups differently?
+
+  Method (uses our SCM Engine):
+    do(race=X) → measure SafeNudge intervention rate
+    do(race=Y) → measure SafeNudge intervention rate
+    If PNS > 0.20 → SafeNudge introduces demographic bias
+
+  Result:
+    → First framework to audit a safety mechanism for fairness
+    → "Who watches the watchmen?" — meta-governance
+    → Uses Pearl's do-calculus on SafeNudge behaviour itself
+
+  Why this matters:
+    SafeNudge was designed for safety, not fairness
+    It may inadvertently block/nudge certain groups more
+    Nobody has tested this — zero papers on safety-tool fairness auditing
+    Our SCM Engine is uniquely positioned to do this
+
+### Integration Architecture
+  Sequential (default):
+    Query → Our Step 7 detection → [if borderline] → SafeNudge → generation
+    Pro: clear separation | Con: adds latency
+
+  Parallel (Year 2+ option):
+    Query → Our detection + SafeNudge simultaneously
+    Combine signals → final decision
+    Pro: lower latency | Con: more complex
+
+### Expected Performance Gains
+  Current HarmBench recall:     14.5%  (pattern ceiling)
+  + SafeNudge integration:      45-50% (semantic generation-time defense)
+  + XLM-RoBERTa (Phase 6):     75-80% (full semantic upgrade)
+
+### 12-Week Implementation Plan
+  Weeks 1-2:  SafeNudge baseline testing on AdvBench 520
+  Weeks 3-4:  Integration prototype (Sequential + Parallel)
+  Weeks 5-6:  Performance benchmarking — precision/recall/latency
+  Weeks 7-8:  Fairness audit using SCM Engine [NOVEL]
+  Weeks 9-10: Latency optimization (p95 < 200ms target)
+  Weeks 11-12: Write FAccT paper Section 4.3 — findings
+
+### Research Questions (RQ1-RQ4)
+  RQ1: Does SafeNudge improve HarmBench beyond 14.5% pattern ceiling?
+  RQ2: Does combined system outperform either alone?
+  RQ3: Does SafeNudge treat demographic groups differently?
+       (uses SCM — NOVEL — no existing work on this)
+  RQ4: Sequential vs Parallel — which has better safety-latency trade-off?
+
+### NYU Collaboration Vision
+  This creates a natural link to Prof. Stoyanovich's group:
+  
+  VirnyFlow (Stoyanovich 2025)  →  Training-stage fairness
+        ↓
+  SafeNudge (Stoyanovich 2025)  →  Generation-time safety
+        ↓
+  Our Framework (2026)          →  Deployment-stage governance + Legal proof
+        ↓
+  Together = Complete RAI Lifecycle ✅
+
+### Expected Outputs (4 deliverables)
+  1. SafeNudge fairness audit report (novel finding)
+  2. Step 7 enhanced with dual-layer defense
+  3. FAccT paper Section 4.3
+  4. HarmBench recall: 14.5% → 45-50% documented
+
+### Key Papers to Cite
+  Primary: Fonseca, J., Bell, A., & Stoyanovich, J. (2025).
+           SafeNudge: Safeguarding Large Language Models in Real-time
+           with Tunable Safety-Performance Trade-offs.
+           arXiv:2501.02018.
+  Secondary: Herasymuk et al. (2025) — VirnyFlow (same lab)
+  Context: Together = complete RAI lifecycle
+
 
 
 #### Phase 1: Gradual Enforcement Rollout (Months 13-15)
