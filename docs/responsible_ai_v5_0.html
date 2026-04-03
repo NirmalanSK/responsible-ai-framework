@@ -2013,11 +2013,7 @@ if RCT evidence exists:
       </ul>
     </div>
 
-<<<<<<< HEAD
     <div style="background:rgba(56,182,255,.05);border:1px solid rgba(56,182,255,.15);border-radius:6px;padding:.7rem;margin-bottom:.7rem;">
-=======
-    <div style="background:rgba(56,182,255,.05);border:1px solid rgba(56,182,255,.15);border-radius:6px;padding:.7rem;">
->>>>>>> 99b1a1e2ff9b67cf3f4e299c417c60ab08239099
       <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--cyan);margin-bottom:.4rem;">PHASE 7 — Publication (Months 9-12) · DeepSeek</div>
       <ul style="font-size:.62rem;color:var(--muted);line-height:1.8;margin:0;padding-left:1rem;">
         <li>Target: FAccT 2027 or AIES 2027</li>
@@ -2026,7 +2022,6 @@ if RCT evidence exists:
         <li>After publication → rename to "Validated System" ✅</li>
       </ul>
     </div>
-<<<<<<< HEAD
 
     <div style="background:rgba(0,255,157,.05);border:2px solid rgba(0,255,157,.3);border-radius:10px;padding:.9rem;margin-bottom:.7rem;">
       <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--green);margin-bottom:.5rem;letter-spacing:.08em;">⭐ PHASE 8 — SafeNudge Integration &amp; Fairness Audit (Months 10-12) · DeepSeek + Claude</div>
@@ -2110,10 +2105,70 @@ if RCT evidence exists:
     </div>
   </div>
 
-=======
+    <div style="background:rgba(192,132,252,.05);border:2px solid rgba(192,132,252,.3);border-radius:10px;padding:.9rem;margin-bottom:.7rem;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--purple);margin-bottom:.5rem;letter-spacing:.08em;">📚 PHASE 9 — Binkytė-Inspired SCM Enhancements (Months 11-14) · Arena AI + Claude</div>
+
+      <div style="font-size:.6rem;color:var(--text);margin-bottom:.6rem;line-height:1.7;">
+        <b style="color:var(--purple)">Closest Academic Competitor:</b> Binkytė et al. (2025) — "On the Need and Applicability of Causality for Fairness: A Unified Framework for AI Auditing and Legal Analysis." arXiv:2207.04053v4.<br>
+        <span style="color:var(--muted)">Pearl L1+L2 (no L3) · Post-hoc only · No safety · Theory-only (no code)  →  Our framework extends all gaps.</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.6rem;">
+        <div style="background:rgba(192,132,252,.04);border:1px solid rgba(192,132,252,.15);border-radius:6px;padding:.6rem;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.54rem;color:var(--purple);margin-bottom:.3rem;">Binkytė (2025)</div>
+          <div style="font-size:.58rem;color:var(--muted);line-height:1.6;">Pearl L1+L2 (TE/NDE/NIE)<br>Post-hoc court auditing<br>EU cases only · Theory only</div>
+        </div>
+        <div style="background:rgba(192,132,252,.04);border:1px solid rgba(192,132,252,.15);border-radius:6px;padding:.6rem;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.54rem;color:var(--purple);margin-bottom:.3rem;">Our Framework</div>
+          <div style="font-size:.58rem;color:var(--muted);line-height:1.6;"><b style="color:var(--text)">Full Pearl L1+L2+L3</b> (PNS/PN/PS)<br>Real-time middleware · US+EU<br>177/179 tests working</div>
+        </div>
+      </div>
+
+      <div style="background:rgba(192,132,252,.07);border-left:3px solid var(--purple);border-radius:0 6px 6px 0;padding:.6rem;margin-bottom:.6rem;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.56rem;color:var(--purple);margin-bottom:.3rem;">⚠️ CRITICAL WARNING from Binkytė (2023) PMLR paper</div>
+        <div style="font-size:.6rem;color:var(--text);line-height:1.7;">
+          "1 DAG edge flip → fairness verdict changes in ~50% of cases"<br>
+          <b style="color:var(--yellow)">Our current risk:</b> 17 domain DAGs are expert-defined. Examiner will ask: <i>"How do you validate your DAGs?"</i><br>
+          <b style="color:var(--green)">Year 2 fix:</b> DAG sensitivity analysis via DoWhy (Phase 4 extension)
+        </div>
+      </div>
+
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.54rem;color:var(--muted);margin-bottom:.3rem;">PHASE 9A — S05b: DAG Sensitivity Checker (Months 11-12)</div>
+      <ul style="font-size:.58rem;color:var(--muted);line-height:1.8;margin:0 0 .6rem;padding-left:1rem;">
+        <li>For each SCM query: flip each DAG edge → re-run → compare verdict</li>
+        <li>If verdict variance &gt;15% across candidate DAGs → auto-ESCALATE</li>
+        <li>Report: <code style="background:rgba(192,132,252,.1);padding:.1rem .3rem;border-radius:3px;">"Verdict stable across 8/9 candidate DAGs ✅"</code></li>
+        <li>PhD defence: "Our system self-reports when causal graph is uncertain" — no existing system does this</li>
+      </ul>
+
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.54rem;color:var(--muted);margin-bottom:.3rem;">PHASE 9B — S05c: Bias Source Attribution (Months 12-14) · Binkytė "Dissecting Causal Biases" (2023)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.6rem;">
+        <div style="background:rgba(0,0,0,.2);border-radius:6px;padding:.5rem;">
+          <div style="font-size:.54rem;color:var(--red);font-family:'JetBrains Mono',monospace;margin-bottom:.2rem;">Current (Year 1)</div>
+          <div style="font-size:.56rem;color:var(--muted);">"TCE = 12.4% → BLOCK"<br><i>Court asks: "What kind of bias?"</i></div>
+        </div>
+        <div style="background:rgba(0,0,0,.2);border-radius:6px;padding:.5rem;">
+          <div style="font-size:.54rem;color:var(--green);font-family:'JetBrains Mono',monospace;margin-bottom:.2rem;">Enhanced (Year 2)</div>
+          <div style="font-size:.56rem;color:var(--muted);">Measurement=0.61 · Selection=0.12<br>"Proxy path encodes gender" → court-specific</div>
+        </div>
+      </div>
+
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.54rem;color:var(--muted);margin-bottom:.3rem;">YEAR 3 — Fairness Repair Engine (BaBE-inspired)</div>
+      <ul style="font-size:.58rem;color:var(--muted);line-height:1.8;margin:0 0 .6rem;padding-left:1rem;">
+        <li>Beyond BLOCK — suggest HOW to fix the bias</li>
+        <li>"Remove biased_score proxy → use direct qualification path → TCE drops 12.4% → 2.1%"</li>
+        <li>PhD evolution: Detect → Block → <b style="color:var(--text)">Remediate</b></li>
+      </ul>
+
+      <div style="background:rgba(192,132,252,.04);border:1px solid rgba(192,132,252,.15);border-radius:6px;padding:.5rem;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.54rem;color:var(--purple);margin-bottom:.2rem;">KEY FRAMING (use in SOP)</div>
+        <div style="font-size:.58rem;color:var(--muted);line-height:1.7;font-style:italic;">
+          "Building on Binkytė et al.'s (2025) theoretical argument that causality is essential for legal discrimination proof, our framework operationalizes this claim as a real-time deployment middleware — extending their post-hoc auditing approach to runtime prevention with full L3 counterfactual bounds."
+        </div>
+      </div>
+    </div>
   </div>
 
->>>>>>> 99b1a1e2ff9b67cf3f4e299c417c60ab08239099
   <!-- YEAR 3 -->
   <div class="yc" style="border-left-color:var(--orange)">
     <h3>📌 Year 3 — Production Validation (Planned)</h3>

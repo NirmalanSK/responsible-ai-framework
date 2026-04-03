@@ -418,6 +418,139 @@ Paper: Fonseca, Bell & Stoyanovich (2025) — arXiv:2501.02018
   Secondary: Herasymuk et al. (2025) — VirnyFlow (same lab)
   Context: Together = complete RAI lifecycle
 
+---
+
+#### Phase 8: Binkytė-Inspired SCM Enhancements (Months 11-14)
+Source: Arena AI + Claude analysis (April 2026)
+
+Papers:
+  (A) Binkytė, R., Grozdanovski, L., Zhioua, S. (2025).
+      "On the Need and Applicability of Causality for Fairness:
+       A Unified Framework for AI Auditing and Legal Analysis."
+      arXiv:2207.04053v4 — CLOSEST ACADEMIC COMPETITOR
+
+  (B) Binkytė, R., et al. (2023).
+      "Causal Discovery for Fairness." PMLR 214 (ICML Workshop).
+      KEY WARNING: DAG edge flip → verdict changes 50% of cases
+
+  (C) Binkytė, R., et al. (2023).
+      "Dissecting Causal Biases."
+      Taxonomy: confounding, selection, measurement, interaction
+
+### How Binkytė Relates To Our Framework
+  Binkytė Unified (2025) vs Ours:
+    Pearl coverage:   They = L1+L2    | Ours = L1+L2+L3 (PNS/PN/PS) ← STRONGER
+    Deployment:       They = post-hoc | Ours = real-time middleware ← UNIQUE
+    Safety:           They = none     | Ours = 4 attack types ← UNIQUE
+    Code:             They = theory   | Ours = 177/179 tests ← STRONGER
+    DAG approach:     They = auto-discover | Ours = expert-defined (Year 2: fix)
+
+  KEY FRAMING (use in SOP + thesis):
+    "Building on Binkytė et al.'s (2025) theoretical argument that
+     causality is essential for legal discrimination proof, our framework
+     operationalizes this claim as a real-time deployment middleware —
+     extending their post-hoc auditing approach to runtime prevention
+     with L3 counterfactual bounds."
+
+### URGENT: DAG Sensitivity — Our Current Vulnerability
+  Binkytė (2023) finding: 1 edge flip in DAG → 50% verdict change
+  Our current state: 17 domain DAGs are MANUALLY DEFINED
+
+  This is a KNOWN examiner question:
+    "How do you validate your DAGs?"
+    "What if your DAG is wrong?"
+
+  Year 1 answer (in pearl_theory_notes.md):
+    "Frontdoor is robust to unmeasured confounders.
+     Sensitivity analysis planned Year 2."
+  
+  Year 2 fix (Phase 4 DoWhy Integration — extend this):
+    def dag_sensitivity_check(base_dag, findings):
+      results = []
+      for edge in base_dag.edges:
+          modified = base_dag.copy()
+          modified.reverse_edge(edge)  # flip each edge
+          result = run_scm(modified, findings)
+          results.append(result.risk_score)
+      variance = max(results) - min(results)
+      if variance > 15.0:
+          return "DAG_UNSTABLE" → ESCALATE
+      return "DAG_STABLE" → proceed with confidence
+
+### Phase 8A: S05b — DAG Sensitivity Checker (Months 11-12)
+  Inspired by: Binkytė et al. (2023) PMLR paper
+  
+  Implementation:
+    For each query reaching SCM:
+      1. Run base DAG → get TCE, risk_score
+      2. Flip each edge → re-run SCM
+      3. Compare variance across results
+      4. If variance > threshold → ESCALATE (DAG unreliable)
+      5. Report: "Verdict stable across 8/9 candidate DAGs ✅"
+  
+  PhD value:
+    Direct response to "DAG validity" examiner question
+    "Our system self-reports when causal graph is uncertain"
+    No existing governance system does this
+
+### Phase 8B: S05c — Bias Source Attribution (Months 12-14)
+  Inspired by: Binkytė et al. (2023) "Dissecting Causal Biases"
+  
+  Current SCM output:
+    "TCE = 12.4% → BLOCK"
+  
+  Enhanced output (S05c):
+    Bias Source:
+      Confounding  = 0.08  (historical data correlates gender/hiring)
+      Selection    = 0.12  (who is in training data)
+      Measurement  = 0.61  (biased_score proxy encodes gender)  ← PRIMARY
+      Interaction  = 0.08  (race × zip code compound)
+    
+    Legal report: "Measurement bias primary driver (0.61).
+                   Resume proxy scores encode gender indirectly."
+  
+  Why stronger than current:
+    Current: "Bias detected" → court asks "what kind?"
+    Enhanced: "Measurement bias via proxy path" → legally specific
+    = Expert witness quality output
+
+### Phase 8C: Year 3 — Fairness Repair Engine
+  Inspired by: Binkytė et al. (2024) BaBE paper
+  
+  Concept: Don't just BLOCK — suggest HOW to fix
+    if decision == BLOCK:
+        remediation = {
+            "remove_proxy": "biased_score pathway",
+            "use_instead": "direct_qualification_score",
+            "expected_tce_reduction": "12.4% → 2.1%"
+        }
+  
+  PhD framing: "Detect → Block → Remediate"
+    = From governance to repair (Year 3 novelty)
+
+### Updated Key Papers to Cite (Full List)
+  FOUNDATIONAL:
+    Pearl (2009/2018) — SCM theory
+    Tian & Pearl (2000) — PNS/PN/PS bounds
+
+  DEPLOYMENT SAFETY:
+    Fonseca, Bell & Stoyanovich (2025) — SafeNudge
+    Herasymuk et al. (2025) — VirnyFlow
+
+  CAUSAL FAIRNESS (NEW):
+    Binkytė et al. (2025) — Unified Framework (arXiv:2207.04053v4)
+    Binkytė et al. (2023) — Causal Discovery (PMLR 214)
+    Binkytė et al. (2023) — Dissecting Causal Biases
+    Plecko & Bareinboim (2022) — Causal fairness analysis
+
+  LEGAL:
+    EU AI Act Art.13 (2024)
+    Daubert v. Merrell Dow (1993)
+
+  BIAS CASES:
+    Obermeyer et al. (2019) — Healthcare racial bias (Science)
+    Angwin et al. (2016) — COMPAS ProPublica
+
 
 
 #### Phase 1: Gradual Enforcement Rollout (Months 13-15)

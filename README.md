@@ -164,17 +164,18 @@ if intent_score > 0.75:
 
 ### Comparison with Existing Systems
 
-| Feature | **This Framework** | LlamaGuard | NeMo Guardrails | Guardrails AI | VirnyFlow |
-|---------|-------------------|------------|-----------------|---------------|-----------|
-| **Safety Layer** | ✅ 4 attack types | ✅ Basic | ✅ Basic | ✅ Basic | ❌ |
-| **Causal Bias Detection** | ✅ Pearl L1-L3 | ❌ | ❌ | ❌ | ✅ Training-stage |
-| **Legal Proof (PNS/PN/PS)** | ✅ Daubert-aligned | ❌ | ❌ | ❌ | ❌ |
-| **Real-Time Deployment** | ✅ Middleware | ✅ | ✅ | ✅ | ❌ (Pre-deployment) |
-| **Adversarial Defense** | ✅ Full | Partial | Partial | Partial | ❌ |
-| **Multi-Domain DAGs** | ✅ 17 domains | ❌ | ❌ | ❌ | Configurable |
-| **Counterfactual Reasoning** | ✅ L3 (PNS bounds) | ❌ | ❌ | ❌ | ❌ |
-| **Sparse Causal Matrix** | ✅ 17×5 | ❌ | ❌ | ❌ | ❌ |
-| **Open Source** | ✅ MIT | ✅ | ✅ | ✅ | ✅ |
+| Feature | **This Framework** | LlamaGuard | NeMo Guardrails | Guardrails AI | VirnyFlow | Binkytė et al. |
+|---------|-------------------|------------|-----------------|---------------|-----------|----------------|
+| **Safety Layer** | ✅ 4 attack types | ✅ Basic | ✅ Basic | ✅ Basic | ❌ | ❌ |
+| **Causal Bias Detection** | ✅ Pearl L1-L3 | ❌ | ❌ | ❌ | ✅ Training-stage | ✅ Pearl L1-L2 |
+| **Legal Proof (PNS/PN/PS)** | ✅ Daubert-aligned | ❌ | ❌ | ❌ | ❌ | ✅ EU only |
+| **Real-Time Deployment** | ✅ Middleware | ✅ | ✅ | ✅ | ❌ (Pre-deployment) | ❌ Post-hoc only |
+| **Adversarial Defense** | ✅ Full | Partial | Partial | Partial | ❌ | ❌ |
+| **Multi-Domain DAGs** | ✅ 17 domains | ❌ | ❌ | ❌ | Configurable | ✅ Auto-discovery |
+| **Counterfactual Reasoning** | ✅ L3 (PNS bounds) | ❌ | ❌ | ❌ | ❌ | Partial (implied) |
+| **Sparse Causal Matrix** | ✅ 17×5 | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Working Code + Tests** | ✅ 177/179 tests | ✅ | ✅ | ✅ | ✅ | ❌ Theory only |
+| **Open Source** | ✅ MIT | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ### Key Differentiators
 
@@ -276,6 +277,21 @@ Literature acknowledges: *"Responsible, Fair, and Explainable AI has several wea
 - **Complementarity:** SafeNudge operates at token-level (inside model); our framework at request-level (middleware). Together = defense-in-depth
 - **Year 2 Integration Possibility:** Could enhance our Step 7 (Adversarial Layer) with generation-time nudging while preserving our causal governance core
 
+**Binkytė et al. (2025) — Unified Framework for AI Auditing & Legal Analysis (arXiv:2207.04053v4)**
+- Integrates Pearl SCM (TE/NDE/NIE/PSE) with EU legal framework (AI Act/AILD) for post-hoc discrimination proof
+- Case studies: COMPAS-Loomis, Cook v. HSBC — but-for causation as court evidence
+- **Key finding:** DAG edge reversal changes fairness verdict in ~50% of cases — causal graph validity is critical
+- **Gap 1:** Post-hoc auditing only — no real-time deployment pipeline
+- **Gap 2:** Pearl L1-L2 only — no L3 counterfactual bounds (PNS/PN/PS not implemented)
+- **Gap 3:** No safety/adversarial defense layer
+- **Our extension:** Real-time 12-step middleware with full Pearl L1-L3 + safety + Sparse Matrix
+- **Complementarity:** Binkytė for post-decision court audits → Our framework for pre-decision real-time prevention
+
+**Binkytė et al. (2023) — Causal Discovery for Fairness (PMLR 214)**
+- Reviews causal discovery algorithms (PC, FCI, GES, LiNGAM) for learning fairness DAGs from data
+- Critical warning: different discovered DAGs produce significantly different fairness conclusions
+- **Year 2 relevance:** DAG sensitivity analysis for our 17 expert-defined domain DAGs (Phase 4)
+
 ### Research Gap Addressed
 
 **Existing Work:**
@@ -353,10 +369,12 @@ python scm_engine_v2.py
 
 ## ⚠️ Honest Limitations
 
-- Matrix weights: currently logical estimates → Year 2: data-driven calibration
+- Matrix weights: currently logical estimates → Year 2: data-driven calibration (Bayesian Optimization on AIAAIC 2,223 incidents)
 - Legal claims: Daubert-aligned evidence, **not court-decisive** (domain expert validation required)
 - HarmBench 14.5%: pattern ceiling — semantic understanding needs Year 2 ML (XLM-RoBERTa target: 75-80%)
 - Societal Monitor (Step 11): stub — Redis + differential privacy needed Year 3
+- **DAG validation:** 17 domain DAGs are expert-defined. Binkytė et al. (2023) show DAG edge changes alter fairness verdicts in ~50% of cases. Year 2 plan: DoWhy sensitivity analysis across candidate DAGs per domain (Phase 4)
+- **Bias source attribution:** Current system detects overall TCE. Year 2: decompose into confounding / selection / measurement / interaction bias sources (Binkytė et al., 2023)
 
 ---
 
@@ -372,6 +390,11 @@ python scm_engine_v2.py
 - Herasymuk, D., Protsiv, M., & Stoyanovich, J. (2025). VirnyFlow: A framework for responsible model development. *ACM FAccT*.
 - Fonseca, J., Bell, A., & Stoyanovich, J. (2025). SafeNudge: Safeguarding Large Language Models in Real-time with Tunable Safety-Performance Trade-offs. *arXiv preprint arXiv:2501.02018*. (Submitted to EMNLP 2025)
 - Plecko, D. & Bareinboim, E. (2022). Causal fairness analysis. *arXiv preprint*.
+
+### Causal Fairness & Legal Auditing
+- Binkytė, R., Grozdanovski, L., & Zhioua, S. (2025). On the Need and Applicability of Causality for Fairness: A Unified Framework for AI Auditing and Legal Analysis. *arXiv:2207.04053v4*. (Closest academic related work — post-hoc auditing; our framework extends to real-time deployment)
+- Binkytė, R., et al. (2023). Causal Discovery for Fairness. *PMLR 214* (ICML Workshop). (DAG discovery algorithms + fairness conclusion sensitivity analysis)
+- Binkytė, R., et al. (2023). Dissecting Causal Biases. (Confounding/selection/measurement/interaction bias taxonomy — Year 2 integration target)
 
 ### Legal & Regulatory
 - EU AI Act Article 13 (2024). Transparency and provision of information to deployers.
