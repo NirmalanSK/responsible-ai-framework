@@ -1,0 +1,23 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Logs & outputs
+pipeline.log
+batch_results.csv
+*.log
+
+# VS Code / IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Year 2 models (large files)
+*.pt
+*.bin
+models/
