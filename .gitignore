@@ -21,3 +21,16 @@ Thumbs.db
 *.pt
 *.bin
 models/
+
+# Personal notes (local only)
+personal-notes/
+
+# Excel data files (too large for git)
+*.xlsx
+
+# Generated HTML reports from tools
+pipeline_refinement_report.html
+pipeline_refinement_report_files/
+
+# AI failure collection (local data)
+ai_failure_collection.xlsx
