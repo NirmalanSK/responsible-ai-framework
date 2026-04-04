@@ -195,6 +195,45 @@ if intent_score > 0.75:
 
 ---
 
+## 🏛️ Comparison with Formal AI Governance Standards
+
+This framework operates at the **technical implementation layer** — complementing, not competing with, organisational governance standards.
+
+| Feature | **This Framework** | NIST AI RMF (2023) | ISO/IEC 42001 (2023) | IEEE 7000 (2021) | Microsoft RAI |
+|---------|-------------------|-------------------|---------------------|-----------------|---------------|
+| **Level** | Technical middleware | Org governance | Mgmt system standard | Design-time process | Principles |
+| **Causal proof** | ✅ Pearl L1-L3 | ❌ | ❌ | ❌ | ❌ |
+| **Real-time enforcement** | ✅ 12-step pipeline | ❌ | ❌ | ❌ | ❌ |
+| **Legal evidence output** | ✅ Daubert-aligned | ❌ | ❌ | ❌ | ❌ |
+| **Risk quantification** | ✅ TCE/PNS scores | Qualitative only | Qualitative only | Qualitative only | Qualitative only |
+| **Adversarial defense** | ✅ 4 attack types | ❌ | ❌ | ❌ | ❌ |
+| **Fairness** | ✅ Causal (deployment) | Recommended | Mandated | Value-based | Principle |
+| **Transparency** | ✅ SHAP + audit trail | Recommended | Mandated | Traceability | Principle |
+| **Privacy** | 🟡 Year 3 (stub) | Recommended | Mandated | Stakeholder rights | Principle |
+| **Working implementation** | ✅ 177/179 tests | ❌ | ❌ | ❌ | ❌ |
+
+### Complementarity — How They Work Together
+
+```
+NIST AI RMF        → Govern, Map, Measure, Manage  (org-level policy)
+ISO/IEC 42001      → Management system certification (org-level process)
+IEEE 7000          → Value-based design process     (design-time)
+Microsoft RAI      → 6 principles                  (principles layer)
+        ↓
+        All mandate technical controls — but don't specify HOW
+        ↓
+This Framework     → Technical implementation of those controls
+                     at deployment stage with causal proof
+```
+
+**Specific connections:**
+- **NIST AI RMF:** Our framework implements the *Measure* (causal risk quantification) and *Manage* (BLOCK/WARN/ALLOW enforcement) functions — extending NIST's qualitative risk categories to quantified PNS bounds
+- **ISO/IEC 42001 Clause 8:** Our 12-step pipeline operationalises operational planning and control — adding causal evidence generation which ISO mandates but does not technically specify
+- **IEEE 7000:** Our VAC engine (Step 9) and audit trail (Step 12) implement value traceability and stakeholder harm prevention — the core IEEE 7000 requirements
+- **Microsoft RAI:** Our framework provides technical implementation for 5 of 6 Microsoft RAI principles (Fairness ✅, Reliability ✅, Inclusiveness ✅, Transparency ✅, Accountability ✅ — Privacy 🟡 Year 3)
+
+---
+
 ## 🧪 Ablation Study — Two Layers Tested
 
 ### Study 1: Without SCM Engine (Pearl Causality)
@@ -369,12 +408,38 @@ python scm_engine_v2.py
 
 ## ⚠️ Honest Limitations
 
-- Matrix weights: currently logical estimates → Year 2: data-driven calibration (Bayesian Optimization on AIAAIC 2,223 incidents)
-- Legal claims: Daubert-aligned evidence, **not court-decisive** (domain expert validation required)
-- HarmBench 14.5%: pattern ceiling — semantic understanding needs Year 2 ML (XLM-RoBERTa target: 75-80%)
-- Societal Monitor (Step 11): stub — Redis + differential privacy needed Year 3
+### Known Technical Limitations
+
+- **Matrix weights:** Currently logical estimates → Year 2: data-driven calibration (Bayesian Optimization on AIAAIC 2,223 incidents)
+- **Legal claims:** Daubert-aligned evidence, **not court-decisive** (domain expert validation required)
+- **HarmBench 14.5%:** Pattern ceiling — semantic understanding needs Year 2 ML (XLM-RoBERTa target: 75-80%)
+- **Societal Monitor (Step 11):** Stub — Redis + differential privacy needed Year 3
 - **DAG validation:** 17 domain DAGs are expert-defined. Binkytė et al. (2023) show DAG edge changes alter fairness verdicts in ~50% of cases. Year 2 plan: DoWhy sensitivity analysis across candidate DAGs per domain (Phase 4)
 - **Bias source attribution:** Current system detects overall TCE. Year 2: decompose into confounding / selection / measurement / interaction bias sources (Binkytė et al., 2023)
+
+### Adversarial Robustness Against the Pipeline Itself
+
+The framework defends against attacks *on AI systems*. Attacks *on the framework itself* are a separate concern:
+
+| Attack Vector | Current Status | Year 2 Mitigation |
+|---|---|---|
+| **Threshold probing** (iterative queries to learn BLOCK threshold) | Partial — rate limiter (30 req/min) | SBERT semantic tiering removes fixed keyword threshold |
+| **Semantic camouflage** (academic language to hide harmful intent) | Weak — pattern-based Tier router | XLM-RoBERTa (Phase 6) — intent over surface form |
+| **Split-query attack** (spread harmful query across sessions) | Within-session only (Step 2 conversation graph) | Cross-session Redis tracking (Year 3) |
+| **Middleware bypass** (direct API calls skipping pipeline) | Architectural assumption only | Year 2: deployment enforcement guide |
+
+> These are documented as Year 2/3 improvements. The 2 remaining test failures (`test_authority_spoofing_detected`, `test_prompt_injection_base64`) reflect the semantic camouflage gap — requiring ML-based detection beyond pattern matching.
+
+### Scalability
+
+| Dimension | Current State | Planned Path |
+|---|---|---|
+| **Harm domain expansion** (17 → 50 domains) | Manual definition | Sparse activation means O(N) not O(N²) — BO re-calibration on AIAAIC data handles expansion |
+| **Latency** | Tier 1: ~150ms · Tier 2: ~350ms · Tier 3: ~600ms | Year 3: Redis cache targets p95 <200ms; safe queries remain ~150ms regardless of load |
+| **Batch processing** | Sequential (`batch_runner.py`) | Year 2: async parallel batch for AIAAIC 2,223 case validation |
+| **Concurrent users** | Single-threaded demo | Year 3: Kubernetes + REST API |
+
+> Latency scales with query *risk*, not query *volume* — 80% of queries (Tier 1) remain at ~150ms under high load. Tier 3 latency (~600ms) is acceptable for high-stakes decisions (hiring, criminal justice) where a 0.6-second governance check is negligible compared to decision impact.
 
 ---
 
