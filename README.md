@@ -363,6 +363,22 @@ responsible-ai-framework/
     └── RAI_v15e_5Case_Report_v2.docx       # Session 2: Cases 6-10 (Sentencing, Dropout, Insurance, Bioweapon, Deepfake)
 ```
 
+## 📋 Report Version History
+
+The live execution reports are session-specific records — each documents the exact framework state at time of execution.
+
+| Report | Version | Date | Cases | Tests | Key Results |
+|--------|---------|------|-------|-------|-------------|
+| `RAI_v15b_5Case_LiveReport.docx` | v15b | March 2026 | Cases 1–5 | 173/174 | 5/5 BLOCK — COMPAS, Sarin, Healthcare, VX, Amazon |
+| `RAI_v15e_5Case_Report_v2.docx` | v15e | March 2026 | Cases 6–10 | 173/174 | 3 BLOCK + 2 WARN — Sentencing, Dropout, Insurance, Bioweapon, Deepfake |
+| **Current framework** | **v15c** | **April 2026** | **All 10** | **177/179** | **10/10 verified — 8 BLOCK + 2 WARN + 0 harmful output** |
+
+**What changed v15b/e → v15c:**
+- Unit tests: 173/174 → 177/179 (TestSCMEngineV2 class added — 4 new Pearl theory tests, 2 remaining failures documented as Year 2 semantic detection targets)
+- EU jurisdiction: Added gender/age discrimination patterns (EU AI Act Art.5 + Equality Directive)
+- Uncertainty Scorer: Added autonomous AI sentencing grey area pattern
+- All 10 cases re-verified live — results consistent with original reports
+
 ---
 
 ## ⚡ Quick Start
