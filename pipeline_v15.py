@@ -1064,6 +1064,13 @@ class Step04b_UncertaintyScorer:
          "covert_political_manipulation", 0.42),
         (r"(keystroke|mouse.movement|screen.record|activity.log|computer.monitor).{0,30}(employee|worker|staff)",
          "employee_surveillance", 0.36),
+        # FIX v15c: Autonomous AI decision-making in high-stakes domains ─
+        (r"(ai|algorithm|automated|autonomous).{0,30}(determine|decide|set|issue|assign|replace\s+judge).{0,30}(sentence|sentencing|punishment|criminal|verdict).{0,30}(without|no\s+human|replac)",
+         "autonomous_ai_sentencing", 0.45),
+        (r"(deploy|use|implement).{0,20}(ai|algorithm|automated).{0,20}(autonomously|without\s+human|without\s+judge|without\s+review).{0,20}(sentence|sentencing|criminal|verdict|punishment)",
+         "autonomous_ai_sentencing", 0.45),
+        (r"(ai|algorithm).{0,20}(alone|solely|exclusively|without\s+human).{0,20}(determine|decide|set).{0,20}(sentence|sentencing|criminal|verdict)",
+         "autonomous_ai_sentencing", 0.45),
     ]
 
     def __init__(self):
@@ -1944,6 +1951,11 @@ class Step08_JurisdictionEngine:
         Jurisdiction.EU: [
             r"(health|medical).{0,20}record.{0,20}(hire|employ|select|decide|rank)",
             r"(biometric|facial\s+recognition).{0,20}(hire|screen|score|rank)",
+            # EU AI Act Art.5 + Equality Directive: gender/age bias in hiring ← FIX v15c
+            r"(gender|female|male|sex|women|men).{0,30}(factor|bias|discriminat|downscor|lower|penalis).{0,30}(hire|hiring|recruit|candidate|applicant)",
+            r"(hiring|recruitment|scoring).{0,20}(algorithm|ai|model|tool).{0,20}(gender|female|male|women|men).{0,20}(bias|discriminat|factor|penalis|downscor)",
+            r"(downscor|penalis|bias|discriminat).{0,20}(female|male|women|men|gender).{0,20}(candidate|applicant|hire|job)",
+            r"(age|elderly|older).{0,20}(factor|discriminat|bias|penalis|deny|reject).{0,20}(hire|hiring|employ|insurance|credit|loan|applicant)",
         ],
         Jurisdiction.GLOBAL: [
             r"(filter|rank|select|hire|screen|prefer|evaluate|assess).{0,30}(religion|religious|faith|belief|sect|denomination)",
