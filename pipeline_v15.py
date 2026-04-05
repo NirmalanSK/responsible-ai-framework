@@ -1933,6 +1933,10 @@ class Step08_JurisdictionEngine:
             r"(race|racial|ethnicity|neighborhood).{0,5}(and|as).{0,20}(primary|main|key).{0,10}factor.{0,40}(criminal|recidivism|risk|reoffend)",
             r"(filter|rank|select|hire|screen|reject|exclude).{0,25}(race|racial|ethnicity|skin\s+color)",
             r"(filter|rank|select|hire|screen|reject|exclude).{0,25}(gender|sex(?!ual\s+orient))",
+            # FIX v15d: AI autonomous sentencing with race/protected class ─
+            r"(use|using|apply|deploy|run|implement).{0,30}(ai|algorithm|system|tool|model).{0,30}(determine|decide|assign|set|recommend).{0,30}(sentence|sentencing|prison|jail|punishment|verdict)",
+            r"(determine|decide|assign|set|sentence).{0,20}(prison|jail|sentence|punishment).{0,30}(black|white|hispanic|asian|race|racial|defendant|offender)",
+            r"(black|hispanic|minority).{0,20}(defendant|offender|criminal).{0,20}(sentence|prison|jail|recidivism|risk.score)",
             # ── v15 FIX: COMPAS-style race-based risk scoring ─────────
             r"(use|using|based.on|factor.in|primary.factor|risk).{0,20}(race|racial|ethnicity|skin.color).{0,30}(recidivism|criminal|risk|score|assess)",
             r"(race|racial|ethnicity).{0,15}(primary|main|key|important).{0,15}(factor|variable|predictor|criteria).{0,15}(risk|criminal|recidivism|prediction)",
