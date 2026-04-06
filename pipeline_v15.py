@@ -1933,12 +1933,6 @@ class Step08_JurisdictionEngine:
             r"(race|racial|ethnicity|neighborhood).{0,5}(and|as).{0,20}(primary|main|key).{0,10}factor.{0,40}(criminal|recidivism|risk|reoffend)",
             r"(filter|rank|select|hire|screen|reject|exclude).{0,25}(race|racial|ethnicity|skin\s+color)",
             r"(filter|rank|select|hire|screen|reject|exclude).{0,25}(gender|sex(?!ual\s+orient))",
-            # FIX v15d: AI autonomous sentencing with race/protected class ─
-            r"(use|using|apply|deploy|run|implement).{0,30}(ai|algorithm|system|tool|model).{0,30}(determin|decide|assign|set|recommend).{0,30}(sentence|sentencing|prison|jail|punishment|verdict)",
-            r"(determin|decide|assign|set).{0,20}(prison|jail|sentence|punishment).{0,30}(black|white|hispanic|asian|race|racial|defendant|offender)",
-            r"(black|hispanic|minority).{0,20}(defendant|offender|criminal).{0,20}(sentence|prison|jail|recidivism|risk.score)",
-            r"(prison|jail|sentence|punishment).{0,30}(black|hispanic|minority|racial).{0,20}(defendant|offender|criminal)",
-            r"(ai|algorithm|system).{0,20}(sentence|sentencing|prison|punishment).{0,30}(defendant|offender|black|race)",
             # ── v15 FIX: COMPAS-style race-based risk scoring ─────────
             r"(use|using|based.on|factor.in|primary.factor|risk).{0,20}(race|racial|ethnicity|skin.color).{0,30}(recidivism|criminal|risk|score|assess)",
             r"(race|racial|ethnicity).{0,15}(primary|main|key|important).{0,15}(factor|variable|predictor|criteria).{0,15}(risk|criminal|recidivism|prediction)",
@@ -1947,6 +1941,13 @@ class Step08_JurisdictionEngine:
             r"(white|black|asian|hispanic).{0,10}(patient|person|individual).{0,20}(over|priority|before|higher|better).{0,20}(black|white|asian|hispanic|other)",
             r"(race|racial|ethnicity|skin.color).{0,20}(basis|criteria|factor).{0,20}(healthcare|medical|treatment|resource|allocat)",
             r"(filter|rank|select|hire|screen|reject|exclude|prefer).{0,30}(age|older|younger|born\s+in)",
+            # FIX v15d: Autonomous AI sentencing + protected class
+            r"(use|using|apply|deploy|run|implement).{0,25}(ai|algorithm|system|tool|model).{0,40}(sentence|sentencing|prison|jail|punishment|verdict).{0,40}(black|hispanic|minority|race|racial|defendant|offender)",
+            r"(use|using|apply|deploy|run|implement).{0,25}(ai|algorithm|system|tool|model).{0,25}(determin|decide|assign|set|recommend).{0,25}(sentence|sentencing|prison|jail|punishment|verdict)",
+            r"(determin|decide|assign|set|deploy).{0,20}(prison|jail|sentence|punishment).{0,30}(black|hispanic|minority|racial|defendant|offender)",
+            r"(black|hispanic|minority).{0,20}(defendant|offender|criminal).{0,20}(sentence|prison|jail|recidivism|risk.score|punishment)",
+            r"(prison|jail|sentence|punishment).{0,30}(black|hispanic|minority|racial).{0,20}(defendant|offender|criminal)",
+            r"(ai|algorithm|system).{0,25}(sentence|sentencing|prison|punishment).{0,30}(defendant|offender|black|race|minority)",
             r"(over|above|under|below)\s+\d{2,3}\s*(year|yr)?.{0,20}(filter|reject|exclude|prefer|screen|hire)",
             r"(filter|exclude|reject|screen).{0,20}(over|above)\s+\d{2,3}",
             # FIX v7: disability + pregnancy discrimination
