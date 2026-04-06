@@ -14,7 +14,7 @@ from pipeline_v15 import (
 
 # ── Setup ─────────────────────────────────────
 pipeline = ResponsibleAIPipeline()
-client   = Groq(api_key="GROQ_API_KEY")
+client = Groq(api_key=os.environ.get("GROQ_API_KEY", ""))
 
 def call_llm(query: str) -> str:
     """Send approved query to Llama 3 via Groq."""
