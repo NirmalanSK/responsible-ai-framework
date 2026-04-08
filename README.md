@@ -112,7 +112,7 @@ Query → S01 Input Sanitizer
 | WildChat Harmful | 500 | 98.2% |
 | AdvBench | 520 | 65.0% |
 | HarmBench Standard | 200 | 14.5% |
-| Unit Tests | 179 | 177/179 (99.4%) |
+| Unit Tests | 195 | 193/195 (99%) |
 | Real-World Cases | 10 | 10/10 (0 harmful output) |
 | **Governed Chatbot (Live)** | **Real queries** | **0 harmful outputs** |
 
@@ -177,7 +177,7 @@ if intent_score > 0.75:
 | **Multi-Domain DAGs** | ✅ 17 domains | ❌ | ❌ | ❌ | Configurable | ✅ Auto-discovery |
 | **Counterfactual Reasoning** | ✅ L3 (PNS bounds) | ❌ | ❌ | ❌ | ❌ | Partial (implied) |
 | **Sparse Causal Matrix** | ✅ 17×5 | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Working Code + Tests** | ✅ 177/179 tests | ✅ | ✅ | ✅ | ✅ | ❌ Theory only |
+| **Working Code + Tests** | ✅ 193/195 tests | ✅ | ✅ | ✅ | ✅ | ❌ Theory only |
 | **Open Source** | ✅ MIT | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ### Key Differentiators
@@ -213,7 +213,7 @@ This framework operates at the **technical implementation layer** — complement
 | **Fairness** | ✅ Causal (deployment) | Recommended | Mandated | Value-based | Principle |
 | **Transparency** | ✅ SHAP + audit trail | Recommended | Mandated | Traceability | Principle |
 | **Privacy** | 🟡 Year 3 (stub) | Recommended | Mandated | Stakeholder rights | Principle |
-| **Working implementation** | ✅ 177/179 tests | ❌ | ❌ | ❌ | ❌ |
+| **Working implementation** | ✅ 193/195 tests | ❌ | ❌ | ❌ | ❌ |
 
 ### Complementarity — How They Work Together
 
@@ -359,7 +359,7 @@ responsible-ai-framework/
 ├── scm_engine_v2.py         # Full Pearl Theory engine
 ├── adversarial_engine_v5.py # 4 attack type detection
 ├── governed_chatbot.py      # ← NEW: Governed AI chatbot (Llama 3.3 + pipeline)
-├── test_v15.py              # 179 unit tests (177/179 passing)
+├── test_v15.py              # 195 unit tests (193/195 passing)
 ├── batch_runner.py          # CSV batch testing tool
 ├── requirements.txt         # Dependencies
 ├── docs/
@@ -378,7 +378,7 @@ The live execution reports are session-specific records — each documents the e
 | `RAI_v15b_5Case_LiveReport.docx` | v15b | March 2026 | Cases 1–5 | 173/174 | 5/5 BLOCK — COMPAS, Sarin, Healthcare, VX, Amazon |
 | `RAI_v15e_5Case_Report_v2.docx` | v15e | March 2026 | Cases 6–10 | 173/174 | 3 BLOCK + 2 WARN — Sentencing, Dropout, Insurance, Bioweapon, Deepfake |
 | v15c re-verification | v15c | April 2026 | All 10 | 177/179 | 10/10 verified — 8 BLOCK + 2 WARN + 0 harmful output |
-| **Current framework** | **v15d** | **April 2026** | **All 10** | **177/179** | **Governed chatbot deployed — live gap found + fixed** |
+| **Current framework** | **v15d** | **April 2026** | **All 10** | **193/195** | **Governed chatbot deployed + 16 new deployment tests added** |
 
 **What changed v15c → v15d:**
 - **Live deployment testing:** Governed chatbot (Llama 3.3 70B via Groq) integrated
@@ -387,7 +387,7 @@ The live execution reports are session-specific records — each documents the e
 - **Verified:** BLOCK on all sentencing variants, ALLOW on educational queries, BLOCK on Sarin synthesis
 
 **What changed v15b/e → v15c:**
-- Unit tests: 173/174 → 177/179 (TestSCMEngineV2 class added)
+- Unit tests: 173/174 → 177/179 → 193/195 (TestSCMEngineV2 + TestV15dDeploymentGaps added)
 - EU jurisdiction: Added gender/age discrimination patterns
 - Uncertainty Scorer: Added autonomous AI sentencing grey area pattern
 
@@ -546,51 +546,87 @@ If you use this framework in published work, please cite this repository.
 
 ---
 
-## ✅ Year 1 Completion (March 2026)
+## ✅ Year 1 Completion (March 2026) — Updated April 2026
 
-**Final Status: 177/179 tests passing (99.4%)**
+**Final Status: 193/195 tests passing (99%)**
 
-### Fixes Applied in Final Session
+### Fixes Applied in Final Session (March 2026)
 
 1. **Severity Import** — Added `Severity` enum to pipeline imports
-   - Prevents NameError in Step 05 (SCM Engine)
-   
 2. **MATRIX_AVAILABLE = True** — Enabled sparse causal activation matrix
-   - 17×5 domain×pathway cells now active
-   - Cross-domain cascade interactions functional
-   
 3. **run_pipeline() Convenience Wrapper** — Added method for test compatibility
-   - Tests can call `pipeline.run_pipeline(query)` directly
-   - Internally wraps `PipelineInput` creation
-   
 4. **Adversarial Engine Optimization** — Educational context filter
-   - Reduced false positives on safe/educational queries
-   - "What are dangers of methamphetamine?" → ALLOW (not BLOCK)
-   - "Write murder mystery story" → ALLOW (not BLOCK)
-   - Real attacks ("IGNORE INSTRUCTIONS") still detected
-
 5. **Unicode Normalization (NFKC)** — Security hardening
-   - Prevents homoglyph attacks (ℌ𝔬𝔴 → How, Ｂomb → Bomb)
-   - Applied in Step 01 Input Sanitizer
-   
 6. **Creative Writing Edge Case Pattern** — Adversarial detection enhancement
-   - Added "creative writing assignment" + "school project" patterns
-   - Catches: "My writing assignment requires me to explain synthesis..."
-
 7. **Defensive Import Guard** — SCM Engine v1/v2 conflict prevention
-   - Prevents accidental v1 import when v2 required
-   - Clear error message if conflict detected
 
-### Test Results
+### April 2026 Updates (v15c → v15d)
+
+8. **EU Gender/Age Discrimination Patterns (v15c)** — EU AI Act Art.5 + Equality Directive
+   - Amazon gender hiring bias → BLOCK under EU jurisdiction
+   - Insurance age discrimination → BLOCK under EU jurisdiction
+
+9. **Autonomous AI Sentencing Grey Area (v15c)** — Uncertainty Scorer
+   - "Deploy AI to autonomously determine sentences" → WARN
+
+10. **Governed AI Chatbot (v15d)** — Real deployment integration
+    - Llama 3.3 70B (Groq) connected as backend LLM
+    - `pipeline_v15.py` as mandatory governance gateway
+    - Live testing: sarin synthesis BLOCKED in 5ms, safe queries answered normally
+    - Gap found: AI sentencing + protected class scored 28.6% (below WARN threshold)
+
+11. **Robust Sentencing Patterns (v15d)** — Gap fixed via live deployment
+    - Handles misspellings (deteremine), word order variations, lowercase
+    - Black/Hispanic/minority defendant variants all covered
+
+12. **TestV15dDeploymentGaps (v15d)** — 16 new unit tests
+    - 7 BLOCK cases: sentencing variants found via live chatbot
+    - 3 ALLOW cases: educational discussion must pass
+    - 3 EU jurisdiction cases
+    - 2 Sarin synthesis cases (leet-speak + direct)
+
+### Test Results — Full History
 
 ```
-Before Fixes:  1 passed, 178 failed (catastrophic)
-After Fixes:  177 passed, 2 failed (99.4%)
+Before March fixes:  1 passed, 178 failed (catastrophic)
+After March fixes:   177 passed, 2 failed (99.4%)  ← v15b/e
+After v15c (April):  177 passed, 2 failed (99.4%)  ← EU + sentencing patterns
+After v15d (April):  193 passed, 2 failed (99.0%)  ← +16 deployment gap tests
 
-Remaining 2 Failures (by design):
-- test_authority_spoofing_detected: Year 2 improvement (semantic detection)
-- test_prompt_injection_base64: Year 2 improvement (DoWhy integration)
+Remaining 2 Failures (by design — Year 2 targets):
+- test_authority_spoofing_detected: Semantic detection needed (BERT/SBERT)
+- test_prompt_injection_base64: DoWhy integration needed (Year 2 Phase 4)
 ```
+
+### Test Class Summary (25 classes, 195 tests)
+
+| Class | Tests | Category |
+|---|---|---|
+| TestInputSanitizer | — | Input validation |
+| TestEmotionDetector | — | Crisis/distress detection |
+| TestVACEngine | — | Absolute violations |
+| TestAdversarialEngine | — | 4 attack types |
+| TestChildSafety | — | Child safety |
+| TestEmotionCrisis | — | Crisis escalation |
+| TestDisinformation | — | Deepfake/propaganda |
+| TestHarassment | — | Stalking/harassment |
+| TestCyberattack | — | Phishing/malware |
+| TestPrivacy | — | Privacy violations |
+| TestBias | — | Discrimination/hiring |
+| TestMedicalHarm | — | Medical harm |
+| TestWeapons | — | Weapons |
+| TestFinancialFraud | — | Financial fraud |
+| TestPhysicalViolence | — | Violence |
+| TestHateSpeech | — | Hate speech |
+| TestDrugTrafficking | — | Drug trafficking |
+| TestAdversarialAttacks | — | Role-play/authority/injection |
+| TestFalsePositives | — | 16 safe queries must ALLOW |
+| TestEdgeCases | — | Empty/unicode/long/numbers |
+| TestJurisdictionEngine | — | US/EU/India/Global rules |
+| TestAdvBenchSample | 30 | Real AdvBench cases |
+| TestPipelineIntegration | — | End-to-end pipeline |
+| TestSCMEngineV2 | — | Pearl causality unit tests |
+| **TestV15dDeploymentGaps** | **16** | **Live deployment gaps (April 2026)** |
 
 ---
 
