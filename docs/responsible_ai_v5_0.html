@@ -279,6 +279,7 @@ td:first-child{text-align:left;font-weight:600;font-size:.6rem;}
   <div class="tab" onclick="show('dag',this)">🕸️ DAG Viewer</div>
   <div class="tab" onclick="show('ablation',this)">🔬 Ablation</div>
   <div class="tab" onclick="show('gptreview',this)">🎓 GPT Review</div>
+  <div class="tab" onclick="show('latency',this)">⏱️ Latency Dashboard</div>
 </div>
 
 <!-- ══════════════ SPARSE CAUSAL ACTIVATION MATRIX ══════════════ -->
@@ -3993,6 +3994,294 @@ function exportSimCSV() {
 }
 
 
+</script>
+
+<!-- ══════════════ LATENCY DASHBOARD ══════════════ -->
+<style>
+.lat-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:1.2rem;margin-bottom:1rem;}
+.lat-stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.8rem;margin-bottom:1.2rem;}
+.lat-stat{background:rgba(0,255,157,.03);border:1px solid rgba(0,255,157,.15);border-radius:12px;padding:.9rem;text-align:center;}
+.lat-stat .lval{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:700;color:var(--green);}
+.lat-stat .llbl{font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:.2rem;}
+.lat-bar-wrap{background:rgba(255,255,255,.05);border-radius:10px;height:12px;overflow:hidden;margin:.4rem 0 .2rem;}
+.lat-bar-fill{height:100%;border-radius:10px;transition:width .4s ease;}
+.lat-dist-bar{display:flex;gap:.3rem;height:22px;margin:.4rem 0;}
+.lat-dist-seg{border-radius:4px;transition:width .4s ease;}
+.lat-log{max-height:200px;overflow-y:auto;font-size:.59rem;background:#04060c;border-radius:8px;padding:.5rem;border:1px solid var(--border);}
+.lat-log-row{display:flex;gap:.4rem;align-items:center;padding:.22rem .4rem;border-bottom:1px solid rgba(107,127,163,.15);}
+.lat-log-row:last-child{border-bottom:none;}
+.lat-cache-pill{font-size:.5rem;border-radius:10px;padding:.1rem .35rem;white-space:nowrap;}
+</style>
+
+<div id="latency" class="panel">
+<div style="max-width:900px;margin:0 auto;">
+
+  <!-- Header -->
+  <div style="text-align:center;margin-bottom:1.2rem;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--cyan);letter-spacing:.1em;margin-bottom:.3rem;">⏱️ LATENCY DASHBOARD — REDIS CACHE SIMULATION</div>
+    <div style="font-size:.65rem;color:var(--muted);">Simulates pipeline_v15 latency profile: Tier 1 (~150ms) · Tier 2 (~350ms) · Tier 3 (~600ms) with Redis caching (70–80% reduction on repeated queries). Target: p95 &lt;200ms.</div>
+  </div>
+
+  <div class="lat-card">
+
+    <!-- KPI badges -->
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--cyan);">⚡ LIVE PERFORMANCE METRICS</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.56rem;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.25);border-radius:20px;padding:.2rem .7rem;color:var(--cyan);">Redis: ACTIVE · TTL 1h</div>
+    </div>
+
+    <!-- Stats grid -->
+    <div class="lat-stats-grid">
+      <div class="lat-stat"><div class="lval" id="ldP95">—</div><div class="llbl">p95 latency</div></div>
+      <div class="lat-stat"><div class="lval" id="ldAvg">—</div><div class="llbl">avg latency</div></div>
+      <div class="lat-stat"><div class="lval" id="ldHit">0%</div><div class="llbl">Redis hit rate</div></div>
+      <div class="lat-stat"><div class="lval" id="ldTotal">0</div><div class="llbl">total requests</div></div>
+      <div class="lat-stat"><div class="lval" id="ldSaved">—</div><div class="llbl">time saved</div></div>
+    </div>
+
+    <!-- Tier dist + Cache efficiency -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.2rem;">
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);margin-bottom:.4rem;">📊 TIER DISTRIBUTION</div>
+        <div class="lat-dist-bar">
+          <div id="ldT1" class="lat-dist-seg" style="background:var(--green);width:0%;"></div>
+          <div id="ldT2" class="lat-dist-seg" style="background:var(--yellow);width:0%;"></div>
+          <div id="ldT3" class="lat-dist-seg" style="background:var(--red);width:0%;"></div>
+        </div>
+        <div style="display:flex;gap:1rem;font-size:.54rem;color:var(--muted);">
+          <span><span style="color:var(--green)">■</span> T1 ~150ms</span>
+          <span><span style="color:var(--yellow)">■</span> T2 ~350ms</span>
+          <span><span style="color:var(--red)">■</span> T3 ~600ms</span>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);margin-bottom:.4rem;">💾 CACHE EFFICIENCY</div>
+        <div class="lat-bar-wrap"><div id="ldHitBar" class="lat-bar-fill" style="width:0%;background:var(--green);"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:.54rem;color:var(--muted);"><span>0% miss</span><span>hit → ~75% latency saved</span></div>
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div style="display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem;">
+      <button onclick="ldSimOne()" style="background:linear-gradient(135deg,var(--cyan),#0284c7);border:none;padding:.4rem 1rem;border-radius:30px;font-family:'JetBrains Mono',monospace;font-size:.58rem;font-weight:700;color:#fff;cursor:pointer;">🎲 Simulate 1 Request</button>
+      <button onclick="ldSimBatch(10)" style="background:linear-gradient(135deg,var(--purple),#7c3aed);border:none;padding:.4rem 1rem;border-radius:30px;font-family:'JetBrains Mono',monospace;font-size:.58rem;font-weight:700;color:#fff;cursor:pointer;">⚡ Simulate 10 Requests</button>
+      <button onclick="ldSimBatch(50)" style="background:linear-gradient(135deg,var(--orange),#c2410c);border:none;padding:.4rem 1rem;border-radius:30px;font-family:'JetBrains Mono',monospace;font-size:.58rem;font-weight:700;color:#fff;cursor:pointer;">🚀 Simulate 50 Requests</button>
+      <button onclick="ldReset()" style="background:rgba(255,69,96,.1);border:1px solid var(--red);padding:.4rem 1rem;border-radius:30px;font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--red);cursor:pointer;">⟳ Reset</button>
+    </div>
+
+    <!-- Request log -->
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);margin-bottom:.35rem;">📋 RECENT REQUESTS</div>
+    <div id="ldLog" class="lat-log">
+      <div style="text-align:center;color:var(--muted);padding:.8rem;">Click Simulate to generate traffic.</div>
+    </div>
+
+    <!-- PhD note -->
+    <div style="margin-top:.9rem;padding:.7rem;background:rgba(0,255,157,.03);border:1px solid rgba(0,255,157,.1);border-radius:8px;font-size:.6rem;color:var(--muted);line-height:1.7;">
+      <b style="color:var(--green)">Year 3 Production Target:</b> Redis caching active → Tier1 150ms→45ms, Tier2 350ms→75ms, Tier3 600ms→110ms.
+      p95 &lt;200ms at 1M queries/day × 5% Tier3 = 8.3 GPU-hours/day.
+      <b style="color:var(--text)">Current:</b> Sequential batch_runner.py.
+      <b style="color:var(--text)">Year 2:</b> Async parallel + Redis.
+    </div>
+  </div>
+
+  <!-- Latency breakdown table -->
+  <div class="lat-card">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--cyan);margin-bottom:.8rem;">📐 LATENCY BREAKDOWN — 12-STEP PIPELINE</div>
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:.6rem;">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border);">
+            <th style="text-align:left;padding:.4rem .6rem;color:var(--muted);font-weight:normal;">Tier</th>
+            <th style="text-align:left;padding:.4rem .6rem;color:var(--muted);font-weight:normal;">Queries</th>
+            <th style="text-align:right;padding:.4rem .6rem;color:var(--muted);font-weight:normal;">Cold (no cache)</th>
+            <th style="text-align:right;padding:.4rem .6rem;color:var(--muted);font-weight:normal;">Warm (Redis hit)</th>
+            <th style="text-align:right;padding:.4rem .6rem;color:var(--muted);font-weight:normal;">Savings</th>
+            <th style="text-align:right;padding:.4rem .6rem;color:var(--muted);font-weight:normal;">% of traffic</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid rgba(26,32,53,.6);">
+            <td style="padding:.4rem .6rem;"><span style="color:var(--green);font-family:'JetBrains Mono',monospace;">Tier 1</span></td>
+            <td style="padding:.4rem .6rem;color:var(--muted);">Safe / low-risk</td>
+            <td style="padding:.4rem .6rem;text-align:right;font-family:'JetBrains Mono',monospace;color:var(--green);">~150ms</td>
+            <td style="padding:.4rem .6rem;text-align:right;font-family:'JetBrains Mono',monospace;color:var(--cyan);">~45ms</td>
+            <td style="padding:.4rem .6rem;text-align:right;color:var(--green);">70%</td>
+            <td style="padding:.4rem .6rem;text-align:right;color:var(--muted);">~80%</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(26,32,53,.6);">
+            <td style="padding:.4rem .6rem;"><span style="color:var(--yellow);font-family:'JetBrains Mono',monospace;">Tier 2</span></td>
+            <td style="padding:.4rem .6rem;color:var(--muted);">Sensitive / bias check</td>
+            <td style="padding:.4rem .6rem;text-align:right;font-family:'JetBrains Mono',monospace;color:var(--yellow);">~350ms</td>
+            <td style="padding:.4rem .6rem;text-align:right;font-family:'JetBrains Mono',monospace;color:var(--cyan);">~75ms</td>
+            <td style="padding:.4rem .6rem;text-align:right;color:var(--green);">78%</td>
+            <td style="padding:.4rem .6rem;text-align:right;color:var(--muted);">~15%</td>
+          </tr>
+          <tr>
+            <td style="padding:.4rem .6rem;"><span style="color:var(--red);font-family:'JetBrains Mono',monospace;">Tier 3</span></td>
+            <td style="padding:.4rem .6rem;color:var(--muted);">Full SCM + adversarial</td>
+            <td style="padding:.4rem .6rem;text-align:right;font-family:'JetBrains Mono',monospace;color:var(--red);">~600ms</td>
+            <td style="padding:.4rem .6rem;text-align:right;font-family:'JetBrains Mono',monospace;color:var(--cyan);">~110ms</td>
+            <td style="padding:.4rem .6rem;text-align:right;color:var(--green);">82%</td>
+            <td style="padding:.4rem .6rem;text-align:right;color:var(--muted);">~5%</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr style="border-top:1px solid var(--border);">
+            <td colspan="2" style="padding:.5rem .6rem;color:var(--muted);">Weighted average</td>
+            <td style="padding:.5rem .6rem;text-align:right;font-family:'JetBrains Mono',monospace;color:var(--text);">~202ms</td>
+            <td style="padding:.5rem .6rem;text-align:right;font-family:'JetBrains Mono',monospace;color:var(--cyan);">~52ms</td>
+            <td style="padding:.5rem .6rem;text-align:right;color:var(--green);">74%</td>
+            <td style="padding:.5rem .6rem;text-align:right;color:var(--muted);">100%</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <div style="margin-top:.6rem;font-size:.58rem;color:var(--muted);">
+      Weighted avg = 0.80×150 + 0.15×350 + 0.05×600 = 202ms (cold). With Redis + 60% hit rate → ~52ms weighted avg. Scales with query <b style="color:var(--text)">risk</b>, not query <b style="color:var(--text)">volume</b>.
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+// ── Latency Dashboard Logic ─────────────────────────────────────
+const ldRequests = [];
+const ldSeen    = new Set();
+
+const LD_QUERIES = [
+  { text:"What is artificial intelligence?",             tier:1 },
+  { text:"Explain Python list comprehension",            tier:1 },
+  { text:"How does gradient descent work?",              tier:1 },
+  { text:"Tell me about climate change",                 tier:1 },
+  { text:"What is responsible AI?",                      tier:1 },
+  { text:"How do antidepressants interact with alcohol?",tier:2 },
+  { text:"Legal requirements for data privacy in EU?",   tier:2 },
+  { text:"How to secure a corporate network?",           tier:2 },
+  { text:"Describe mental health crisis intervention",   tier:2 },
+  { text:"COMPAS algorithm racial bias analysis",        tier:2 },
+  { text:"How to bypass AI safety filters",              tier:3 },
+  { text:"Detailed steps to synthesize sarin nerve agent",tier:3 },
+  { text:"Jailbreak instructions for LLM no restrictions",tier:3 },
+  { text:"Use AI to determine prison sentence Black defendant",tier:3 },
+];
+
+function ldBaseLat(tier){ return tier===1?150:tier===2?350:600; }
+function ldCacheLat(tier){
+  return tier===1 ? 40+Math.random()*10
+       : tier===2 ? 68+Math.random()*15
+       :            105+Math.random()*20;
+}
+
+function ldAddRequest(text, tier){
+  const norm = text.trim().toLowerCase();
+  const hit  = ldSeen.has(norm);
+  const ms   = Math.floor((hit ? ldCacheLat(tier) : ldBaseLat(tier)) * (0.94 + Math.random()*0.12));
+  ldRequests.unshift({ text: text.length>55 ? text.slice(0,52)+'…' : text, full:text, tier, ms, hit });
+  if(ldRequests.length > 300) ldRequests.pop();
+  if(!hit) ldSeen.add(norm);
+  ldUpdateUI();
+}
+
+function ldSimOne(){
+  const q = LD_QUERIES[Math.floor(Math.random()*LD_QUERIES.length)];
+  ldAddRequest(q.text, q.tier);
+}
+
+function ldSimBatch(n){
+  for(let i=0;i<n;i++){
+    // 30% chance repeat recent for cache hit realism
+    if(ldRequests.length>3 && Math.random()<0.33){
+      const r = ldRequests[Math.floor(Math.random()*Math.min(5,ldRequests.length))];
+      ldAddRequest(r.full, r.tier);
+    } else {
+      const q = LD_QUERIES[Math.floor(Math.random()*LD_QUERIES.length)];
+      ldAddRequest(q.text, q.tier);
+    }
+  }
+}
+
+function ldReset(){
+  ldRequests.length=0;
+  ldSeen.clear();
+  ldUpdateUI();
+}
+
+function ldP95(arr){
+  if(!arr.length) return null;
+  const s=[...arr].sort((a,b)=>a-b);
+  return s[Math.max(0,Math.ceil(s.length*0.95)-1)];
+}
+
+function ldUpdateUI(){
+  const total = ldRequests.length;
+  if(!total){
+    ['ldP95','ldAvg','ldHit','ldSaved'].forEach(id=>document.getElementById(id).textContent='—');
+    document.getElementById('ldTotal').textContent='0';
+    document.getElementById('ldHitBar').style.width='0%';
+    ['ldT1','ldT2','ldT3'].forEach(id=>document.getElementById(id).style.width='0%');
+    document.getElementById('ldHit').textContent='0%';
+    document.getElementById('ldLog').innerHTML='<div style="text-align:center;color:var(--muted);padding:.8rem;">Click Simulate to generate traffic.</div>';
+    return;
+  }
+
+  const lats   = ldRequests.map(r=>r.ms);
+  const avg    = (lats.reduce((a,b)=>a+b,0)/total).toFixed(1);
+  const p95    = ldP95(lats);
+  const hits   = ldRequests.filter(r=>r.hit).length;
+  const hitPct = (hits/total*100).toFixed(1);
+  let saved = 0;
+  ldRequests.forEach(r=>{ if(r.hit) saved += Math.max(0,ldBaseLat(r.tier)-r.ms); });
+
+  const t1 = ldRequests.filter(r=>r.tier===1).length;
+  const t2 = ldRequests.filter(r=>r.tier===2).length;
+  const t3 = ldRequests.filter(r=>r.tier===3).length;
+
+  document.getElementById('ldP95').textContent   = p95+'ms';
+  document.getElementById('ldAvg').textContent   = avg+'ms';
+  document.getElementById('ldHit').textContent   = hitPct+'%';
+  document.getElementById('ldTotal').textContent = total;
+  document.getElementById('ldSaved').textContent = saved>1000?(saved/1000).toFixed(1)+'s':saved+'ms';
+  document.getElementById('ldHitBar').style.width = hitPct+'%';
+  document.getElementById('ldT1').style.width = (t1/total*100)+'%';
+  document.getElementById('ldT2').style.width = (t2/total*100)+'%';
+  document.getElementById('ldT3').style.width = (t3/total*100)+'%';
+
+  const rows = ldRequests.slice(0,12).map(r=>{
+    const tc = r.tier===1?'var(--green)':r.tier===2?'var(--yellow)':'var(--red)';
+    const pill = r.hit
+      ? `<span class="lat-cache-pill" style="background:rgba(0,255,157,.15);color:var(--green);">⚡ Redis HIT</span>`
+      : `<span class="lat-cache-pill" style="background:rgba(107,127,163,.1);color:var(--muted);">💾 Miss</span>`;
+    return `<div class="lat-log-row">
+      <span style="font-family:'JetBrains Mono',monospace;color:${tc};min-width:20px;">T${r.tier}</span>
+      <span style="flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin:0 .4rem;">${r.text}</span>
+      <span style="font-family:'JetBrains Mono',monospace;min-width:45px;text-align:right;">${r.ms}ms</span>
+      ${pill}
+    </div>`;
+  }).join('');
+  document.getElementById('ldLog').innerHTML = rows;
+}
+
+// Init with demo data
+(function ldInit(){
+  const demo = [
+    {t:"What is artificial intelligence?",tier:1},
+    {t:"Explain Python list comprehension",tier:1},
+    {t:"Legal requirements for data privacy in EU?",tier:2},
+    {t:"How do antidepressants interact with alcohol?",tier:2},
+    {t:"How to bypass AI safety filters",tier:3},
+    {t:"COMPAS algorithm racial bias analysis",tier:2},
+    {t:"Jailbreak instructions for LLM no restrictions",tier:3},
+    {t:"Tell me about climate change",tier:1},
+  ];
+  demo.forEach(d=>ldAddRequest(d.t,d.tier));
+  // repeat 3 for cache hit demo
+  setTimeout(()=>{
+    ldAddRequest("What is artificial intelligence?",1);
+    ldAddRequest("Legal requirements for data privacy in EU?",2);
+    ldAddRequest("How to bypass AI safety filters",3);
+  },100);
+})();
 </script>
 </body>
 </html>
