@@ -280,6 +280,7 @@ td:first-child{text-align:left;font-weight:600;font-size:.6rem;}
   <div class="tab" onclick="show('ablation',this)">🔬 Ablation</div>
   <div class="tab" onclick="show('gptreview',this)">🎓 GPT Review</div>
   <div class="tab" onclick="show('latency',this)">⏱️ Latency Dashboard</div>
+  <div class="tab" onclick="show('hybrid',this)">⚗️ Hybrid Fusion</div>
 </div>
 
 <!-- ══════════════ SPARSE CAUSAL ACTIVATION MATRIX ══════════════ -->
@@ -4282,6 +4283,321 @@ function ldUpdateUI(){
     ldAddRequest("How to bypass AI safety filters",3);
   },100);
 })();
+</script>
+
+<!-- ══════════════ HYBRID FUSION ENGINE ══════════════ -->
+<div id="hybrid" class="panel">
+<div style="max-width:900px;margin:0 auto;">
+
+  <!-- Header -->
+  <div style="text-align:center;margin-bottom:1.5rem;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--purple);letter-spacing:.1em;margin-bottom:.3rem;">⚗️ HYBRID DECISION FUSION ENGINE — Year 2 Upgrade</div>
+    <div style="font-size:.65rem;color:var(--muted);">Replaces fixed 60/40 formula with domain-adaptive, legally-integrated, uncertainty-aware fusion.</div>
+  </div>
+
+  <!-- Current vs Proposed -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+    <div style="background:rgba(255,69,96,.05);border:1px solid rgba(255,69,96,.2);border-radius:12px;padding:1rem;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--red);margin-bottom:.6rem;">❌ CURRENT (Year 1) — Fixed Formula</div>
+      <pre style="font-size:.58rem;color:var(--muted);line-height:1.7;background:rgba(0,0,0,.3);padding:.7rem;border-radius:6px;">combined =
+  0.60 × SCM_risk +
+  0.40 × Matrix_risk
+
+BLOCK if combined ≥ 70%
+WARN  if combined ≥ 30%</pre>
+      <div style="margin-top:.6rem;font-size:.58rem;color:var(--muted);">
+        ❌ Legal score ignored<br>
+        ❌ Fixed alpha (no domain adapt)<br>
+        ❌ Uncertainty separate<br>
+        ❌ Cascade not rewarded
+      </div>
+    </div>
+    <div style="background:rgba(0,255,157,.05);border:1px solid rgba(0,255,157,.2);border-radius:12px;padding:1rem;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--green);margin-bottom:.6rem;">✅ PROPOSED (Year 2) — Hybrid Formula</div>
+      <pre style="font-size:.58rem;color:var(--muted);line-height:1.7;background:rgba(0,0,0,.3);padding:.7rem;border-radius:6px;">final_risk =
+  <span style="color:var(--purple)">α</span> × SCM_risk +
+  (1-<span style="color:var(--purple)">α</span>) × Matrix_risk +
+  0.08 × legal_score +
+  0.06 × cascade_bonus +
+  0.10 × uncertainty</pre>
+      <div style="margin-top:.6rem;font-size:.58rem;color:var(--muted);">
+        ✅ Legal score integrated<br>
+        ✅ Domain-adaptive α<br>
+        ✅ Uncertainty penalty direct<br>
+        ✅ Cascade bonus rewarded
+      </div>
+    </div>
+  </div>
+
+  <!-- Architecture Flow Diagram -->
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:1.2rem;margin-bottom:1.2rem;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--purple);margin-bottom:1rem;text-align:center;">HYBRID FUSION — DATA FLOW</div>
+
+    <!-- Flow boxes -->
+    <div style="max-width:700px;margin:0 auto;">
+
+      <!-- Query box -->
+      <div style="text-align:center;margin-bottom:.5rem;">
+        <div style="display:inline-block;padding:.5rem 1.5rem;background:rgba(192,132,252,.1);border:1px solid rgba(192,132,252,.3);border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--purple);">User Query</div>
+      </div>
+      <div style="text-align:center;color:var(--muted);font-size:1rem;margin-bottom:.5rem;">↓</div>
+
+      <!-- Three parallel inputs -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;margin-bottom:.5rem;">
+        <div style="background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.2);border-radius:8px;padding:.7rem;text-align:center;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.54rem;color:var(--scm);margin-bottom:.3rem;">🔬 SCM Engine v2</div>
+          <div style="font-size:.56rem;color:var(--muted);">Pearl L1-L3<br>TCE · PNS · NDE/NIE</div>
+          <div style="margin-top:.4rem;font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--purple);font-weight:700;">SCM_risk<br>legal_score</div>
+        </div>
+        <div style="background:rgba(56,182,255,.07);border:1px solid rgba(56,182,255,.2);border-radius:8px;padding:.7rem;text-align:center;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.54rem;color:var(--blue);margin-bottom:.3rem;">📊 17×5 Matrix</div>
+          <div style="font-size:.56rem;color:var(--muted);">Sparse activation<br>Central node cascade</div>
+          <div style="margin-top:.4rem;font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--blue);font-weight:700;">Matrix_risk<br>cascade_active</div>
+        </div>
+        <div style="background:rgba(251,146,60,.07);border:1px solid rgba(251,146,60,.2);border-radius:8px;padding:.7rem;text-align:center;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.54rem;color:var(--orange);margin-bottom:.3rem;">🎯 Step 04b</div>
+          <div style="font-size:.56rem;color:var(--muted);">OOD detection<br>Embedding similarity</div>
+          <div style="margin-top:.4rem;font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--orange);font-weight:700;">uncertainty_score</div>
+        </div>
+      </div>
+
+      <!-- Arrow down -->
+      <div style="text-align:center;color:var(--muted);font-size:1rem;margin-bottom:.5rem;">↓ ↓ ↓</div>
+
+      <!-- Fusion box -->
+      <div style="background:rgba(192,132,252,.08);border:2px solid rgba(192,132,252,.35);border-radius:10px;padding:.9rem;margin-bottom:.5rem;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--purple);margin-bottom:.6rem;text-align:center;">⚗️ HYBRID FUSION ENGINE (Step 10)</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--text);line-height:2;background:rgba(0,0,0,.3);padding:.7rem;border-radius:6px;">
+          <span style="color:var(--purple)">α</span> = get_alpha(<span style="color:var(--blue)">domain</span>)  <span style="color:var(--muted);font-size:.52rem;">← 0.50–0.80 domain-adaptive</span><br>
+          <br>
+          final_risk = <span style="color:var(--purple)">α</span> × <span style="color:var(--scm)">SCM_risk</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ (1−<span style="color:var(--purple)">α</span>) × <span style="color:var(--blue)">Matrix_risk</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span style="color:var(--yellow)">0.08</span> × legal_score &nbsp;&nbsp;&nbsp;<span style="color:var(--muted);font-size:.52rem;">← legal boost</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span style="color:var(--green)">0.06</span> × cascade_bonus <span style="color:var(--muted);font-size:.52rem;">← multi-row reward</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <span style="color:var(--orange)">0.10</span> × <span style="color:var(--orange)">uncertainty</span> &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--muted);font-size:.52rem;">← safety penalty</span>
+        </div>
+      </div>
+
+      <!-- Arrow + Decision -->
+      <div style="text-align:center;color:var(--muted);font-size:1rem;margin-bottom:.5rem;">↓</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:.5rem;">
+        <div style="text-align:center;padding:.5rem;background:rgba(255,69,96,.1);border:1px solid rgba(255,69,96,.3);border-radius:8px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.56rem;color:var(--red);">🚫 BLOCK</div>
+          <div style="font-size:.52rem;color:var(--muted);margin-top:.2rem;">≥ 0.72</div>
+        </div>
+        <div style="text-align:center;padding:.5rem;background:rgba(251,146,60,.1);border:1px solid rgba(251,146,60,.3);border-radius:8px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.56rem;color:var(--orange);">👤 EXPERT</div>
+          <div style="font-size:.52rem;color:var(--muted);margin-top:.2rem;">0.55–0.72 + crisis</div>
+        </div>
+        <div style="text-align:center;padding:.5rem;background:rgba(255,229,102,.1);border:1px solid rgba(255,229,102,.3);border-radius:8px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.56rem;color:var(--yellow);">⚠️ WARN</div>
+          <div style="font-size:.52rem;color:var(--muted);margin-top:.2rem;">0.32–0.72</div>
+        </div>
+        <div style="text-align:center;padding:.5rem;background:rgba(0,255,157,.1);border:1px solid rgba(0,255,157,.3);border-radius:8px;">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.56rem;color:var(--green);">✅ ALLOW</div>
+          <div style="font-size:.52rem;color:var(--muted);margin-top:.2rem;">&lt; 0.32</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alpha table -->
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:1.2rem;margin-bottom:1.2rem;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--purple);margin-bottom:.8rem;">α (ALPHA) — DOMAIN-ADAPTIVE SCM WEIGHT</div>
+    <div style="font-size:.62rem;color:var(--muted);margin-bottom:.8rem;">Higher α → more weight to SCM (causal rigor + legal strength). Lower α → faster Matrix path.</div>
+
+    <!-- Interactive alpha slider -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+      <div>
+        <label style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);">Domain:</label>
+        <select id="hfDomain" onchange="hfUpdate()" style="width:100%;margin-top:.3rem;background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:.4rem;font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--text);">
+          <option value="0.78">Healthcare (α=0.78)</option>
+          <option value="0.80">Criminal Justice (α=0.80)</option>
+          <option value="0.72">Financial Fraud (α=0.72)</option>
+          <option value="0.75">Misuse Safety / Weapons (α=0.75)</option>
+          <option value="0.65" selected>General (α=0.65)</option>
+          <option value="0.55">Education (α=0.55)</option>
+          <option value="0.50">Entertainment (α=0.50)</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);">Selected α:</label>
+        <div id="hfAlphaDisplay" style="margin-top:.3rem;font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:700;color:var(--purple);">0.65</div>
+      </div>
+    </div>
+
+    <!-- Weight bar -->
+    <div style="margin-bottom:.5rem;font-family:'JetBrains Mono',monospace;font-size:.56rem;color:var(--muted);">Weight split:</div>
+    <div style="display:flex;height:28px;border-radius:8px;overflow:hidden;margin-bottom:.4rem;">
+      <div id="hfSCMBar" style="background:var(--purple);width:65%;transition:width .4s;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.56rem;color:#fff;font-weight:700;">SCM 65%</div>
+      <div id="hfMatBar" style="background:var(--blue);width:35%;transition:width .4s;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.56rem;color:#fff;font-weight:700;">Matrix 35%</div>
+    </div>
+    <div style="font-size:.56rem;color:var(--muted);">+ legal(×0.08) + cascade(×0.06) + uncertainty(×0.10)</div>
+  </div>
+
+  <!-- Live calculator -->
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:1.2rem;margin-bottom:1.2rem;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--cyan);margin-bottom:.8rem;">🧮 LIVE FUSION CALCULATOR</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem;margin-bottom:.8rem;">
+      <div>
+        <label style="font-family:'JetBrains Mono',monospace;font-size:.56rem;color:var(--muted);">SCM Risk (%)</label>
+        <input id="hfSCM" type="range" min="0" max="100" value="37" oninput="hfCalc()" style="width:100%;margin:.3rem 0;accent-color:var(--purple);">
+        <div id="hfSCMVal" style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--purple);">37%</div>
+      </div>
+      <div>
+        <label style="font-family:'JetBrains Mono',monospace;font-size:.56rem;color:var(--muted);">Matrix Risk (%)</label>
+        <input id="hfMat" type="range" min="0" max="100" value="33" oninput="hfCalc()" style="width:100%;margin:.3rem 0;accent-color:var(--blue);">
+        <div id="hfMatVal" style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--blue);">33%</div>
+      </div>
+      <div>
+        <label style="font-family:'JetBrains Mono',monospace;font-size:.56rem;color:var(--muted);">Legal Score (0-1)</label>
+        <input id="hfLegal" type="range" min="0" max="100" value="82" oninput="hfCalc()" style="width:100%;margin:.3rem 0;accent-color:var(--yellow);">
+        <div id="hfLegalVal" style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--yellow);">0.82</div>
+      </div>
+      <div>
+        <label style="font-family:'JetBrains Mono',monospace;font-size:.56rem;color:var(--muted);">Uncertainty (0-1)</label>
+        <input id="hfUnc" type="range" min="0" max="100" value="15" oninput="hfCalc()" style="width:100%;margin:.3rem 0;accent-color:var(--orange);">
+        <div id="hfUncVal" style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--orange);">0.15</div>
+      </div>
+      <div>
+        <label style="font-family:'JetBrains Mono',monospace;font-size:.56rem;color:var(--muted);">Cascade Active?</label>
+        <div style="margin-top:.5rem;">
+          <label style="font-size:.6rem;color:var(--muted);cursor:pointer;">
+            <input id="hfCascade" type="checkbox" onchange="hfCalc()" style="accent-color:var(--green);"> Yes (+0.06)
+          </label>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;justify-content:center;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.56rem;color:var(--muted);margin-bottom:.3rem;">FINAL RISK</div>
+        <div id="hfResult" style="font-family:'JetBrains Mono',monospace;font-size:1.8rem;font-weight:700;color:var(--green);">—</div>
+        <div id="hfDecision" style="font-family:'JetBrains Mono',monospace;font-size:.7rem;margin-top:.2rem;">—</div>
+      </div>
+    </div>
+    <div id="hfExplain" style="font-size:.58rem;color:var(--muted);background:rgba(0,0,0,.2);padding:.5rem;border-radius:6px;font-family:'JetBrains Mono',monospace;"></div>
+  </div>
+
+  <!-- Parameter table -->
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:1.2rem;margin-bottom:1.2rem;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--cyan);margin-bottom:.8rem;">📋 FORMULA PARAMETERS — Year 2 BO Calibration</div>
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:.6rem;">
+        <thead>
+          <tr style="border-bottom:1px solid var(--border);">
+            <th style="text-align:left;padding:.4rem .6rem;color:var(--muted);font-weight:normal;">Parameter</th>
+            <th style="text-align:left;padding:.4rem .6rem;color:var(--muted);font-weight:normal;">Meaning</th>
+            <th style="text-align:right;padding:.4rem .6rem;color:var(--muted);font-weight:normal;">Year 1</th>
+            <th style="text-align:right;padding:.4rem .6rem;color:var(--muted);font-weight:normal;">Year 2 (BO)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid rgba(26,32,53,.6);">
+            <td style="padding:.4rem .6rem;font-family:'JetBrains Mono',monospace;color:var(--purple);">α (alpha)</td>
+            <td style="padding:.4rem .6rem;color:var(--muted);">SCM weight (domain-adaptive)</td>
+            <td style="padding:.4rem .6rem;text-align:right;color:var(--muted);">0.60 (fixed)</td>
+            <td style="padding:.4rem .6rem;text-align:right;color:var(--green);">0.50–0.80</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(26,32,53,.6);">
+            <td style="padding:.4rem .6rem;font-family:'JetBrains Mono',monospace;color:var(--yellow);">β (beta)</td>
+            <td style="padding:.4rem .6rem;color:var(--muted);">Legal score boost</td>
+            <td style="padding:.4rem .6rem;text-align:right;color:var(--muted);">0 (unused)</td>
+            <td style="padding:.4rem .6rem;text-align:right;color:var(--green);">0.08</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(26,32,53,.6);">
+            <td style="padding:.4rem .6rem;font-family:'JetBrains Mono',monospace;color:var(--green);">γ (gamma)</td>
+            <td style="padding:.4rem .6rem;color:var(--muted);">Cascade bonus (multi-row detection)</td>
+            <td style="padding:.4rem .6rem;text-align:right;color:var(--muted);">0 (unused)</td>
+            <td style="padding:.4rem .6rem;text-align:right;color:var(--green);">0.06</td>
+          </tr>
+          <tr>
+            <td style="padding:.4rem .6rem;font-family:'JetBrains Mono',monospace;color:var(--orange);">δ (delta)</td>
+            <td style="padding:.4rem .6rem;color:var(--muted);">Uncertainty penalty</td>
+            <td style="padding:.4rem .6rem;text-align:right;color:var(--muted);">0 (separate)</td>
+            <td style="padding:.4rem .6rem;text-align:right;color:var(--green);">0.10</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:.7rem;padding:.6rem;background:rgba(0,255,157,.03);border:1px solid rgba(0,255,157,.1);border-radius:6px;font-size:.58rem;color:var(--muted);">
+      <b style="color:var(--green)">Year 2 BO Calibration:</b> All 4 parameters (α per domain, β, γ, δ) optimised on AIAAIC 2,223 labeled incidents via scikit-optimize gp_minimize. Currently theoretical estimates → Year 2: data-driven optimal values.
+    </div>
+  </div>
+
+  <!-- Matrix expansion note -->
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:1.2rem;">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--cyan);margin-bottom:.8rem;">📊 17×5 MATRIX EXPANSION — Year 2 (20×5)</div>
+    <div style="font-size:.62rem;color:var(--muted);margin-bottom:.8rem;">3 missing rows identified via real-world incident analysis:</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7rem;">
+      <div style="background:rgba(255,69,96,.05);border:1px solid rgba(255,69,96,.2);border-radius:8px;padding:.8rem;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--red);margin-bottom:.3rem;">Row 18 — Child_Safety</div>
+        <div style="font-size:.58rem;color:var(--muted);line-height:1.6;">CSAM generation, minor grooming, child targeting<br><b style="color:var(--text)">Weight: [4,4,3,4,5] = 20</b><br>Always central node → always cascade</div>
+      </div>
+      <div style="background:rgba(255,229,102,.05);border:1px solid rgba(255,229,102,.2);border-radius:8px;padding:.8rem;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--yellow);margin-bottom:.3rem;">Row 19 — Wage_Exploitation</div>
+        <div style="font-size:.58rem;color:var(--muted);line-height:1.6;">Algorithmic wage suppression, gig economy AI<br><b style="color:var(--text)">Weight: [3,3,4,2,4] = 16</b><br>Cascade → Representation_Bias, Financial_Fraud</div>
+      </div>
+      <div style="background:rgba(56,182,255,.05);border:1px solid rgba(56,182,255,.2);border-radius:8px;padding:.8rem;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--blue);margin-bottom:.3rem;">Row 20 — Biosecurity</div>
+        <div style="font-size:.58rem;color:var(--muted);line-height:1.6;">Synthetic biology, pathogen enhancement<br><b style="color:var(--text)">Weight: [4,4,3,3,5] = 19</b><br>Cascade → Misuse_Safety, Physical_Violence</div>
+      </div>
+    </div>
+    <div style="margin-top:.7rem;font-size:.58rem;color:var(--muted);">Current: 17×5 = 85 cells | Year 2: 20×5 = 100 cells | Still sparse: 3–5 active per query</div>
+  </div>
+
+</div>
+</div>
+
+<script>
+// ── Hybrid Fusion interactive logic ─────────────────────────
+function hfUpdate(){
+  const alpha = parseFloat(document.getElementById('hfDomain').value);
+  document.getElementById('hfAlphaDisplay').textContent = alpha.toFixed(2);
+  const scmPct = Math.round(alpha*100);
+  const matPct = 100-scmPct;
+  document.getElementById('hfSCMBar').style.width = scmPct+'%';
+  document.getElementById('hfSCMBar').textContent  = 'SCM '+scmPct+'%';
+  document.getElementById('hfMatBar').style.width = matPct+'%';
+  document.getElementById('hfMatBar').textContent  = 'Matrix '+matPct+'%';
+  hfCalc();
+}
+
+function hfCalc(){
+  const alpha   = parseFloat(document.getElementById('hfDomain').value);
+  const scmR    = parseInt(document.getElementById('hfSCM').value)/100;
+  const matR    = parseInt(document.getElementById('hfMat').value)/100;
+  const legal   = parseInt(document.getElementById('hfLegal').value)/100;
+  const unc     = parseInt(document.getElementById('hfUnc').value)/100;
+  const cascade = document.getElementById('hfCascade').checked ? 0.06 : 0;
+
+  document.getElementById('hfSCMVal').textContent   = Math.round(scmR*100)+'%';
+  document.getElementById('hfMatVal').textContent   = Math.round(matR*100)+'%';
+  document.getElementById('hfLegalVal').textContent = legal.toFixed(2);
+  document.getElementById('hfUncVal').textContent   = unc.toFixed(2);
+
+  let risk = alpha*scmR + (1-alpha)*matR + 0.08*legal + cascade + 0.10*unc;
+  risk = Math.min(Math.max(risk, 0), 1);
+
+  const pct = (risk*100).toFixed(1)+'%';
+  let dec, col;
+  if(risk >= 0.72){ dec='🚫 BLOCK'; col='var(--red)'; }
+  else if(risk >= 0.55){ dec='👤 EXPERT REVIEW'; col='var(--orange)'; }
+  else if(risk >= 0.32){ dec='⚠️ WARN'; col='var(--yellow)'; }
+  else { dec='✅ ALLOW'; col='var(--green)'; }
+
+  document.getElementById('hfResult').style.color = col;
+  document.getElementById('hfResult').textContent = pct;
+  document.getElementById('hfDecision').style.color = col;
+  document.getElementById('hfDecision').textContent = dec;
+  document.getElementById('hfExplain').innerHTML =
+    `SCM(${alpha.toFixed(2)}) × ${(scmR*100).toFixed(0)}% `+
+    `+ Matrix(${(1-alpha).toFixed(2)}) × ${(matR*100).toFixed(0)}% `+
+    `+ Legal(0.08) × ${(legal*100).toFixed(0)}% `+
+    `${cascade?'+ Cascade(0.06) ':''}+ Unc(0.10) × ${(unc*100).toFixed(0)}%`+
+    ` = <b style="color:${col}">${pct}</b>`;
+}
+
+// init
+hfUpdate();
+hfCalc();
 </script>
 </body>
 </html>

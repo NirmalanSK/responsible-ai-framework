@@ -551,9 +551,148 @@ Papers:
     Obermeyer et al. (2019) — Healthcare racial bias (Science)
     Angwin et al. (2016) — COMPAS ProPublica
 
+---
 
+#### Phase 9: Hybrid Decision Fusion Engine (Months 12-15)
+Source: Grok AI + DeepSeek + Claude analysis (April 2026)
 
-#### Phase 1: Gradual Enforcement Rollout (Months 13-15)
+### Problem with Current Formula (Year 1)
+  Current Step 10:
+    combined = 0.60 × SCM_risk + 0.40 × Matrix_risk
+    BLOCK if combined ≥ 70%
+    WARN  if combined ≥ 30%
+
+  Weaknesses:
+    ❌ Legal score ignored in final formula
+    ❌ Fixed 60/40 regardless of domain
+    ❌ Uncertainty score separate, not integrated
+    ❌ Cascade bonus not rewarded explicitly
+
+### Hybrid Fusion Formula (Year 2 Target)
+
+  final_risk = (
+      alpha × SCM_risk +
+      (1 - alpha) × Matrix_risk +
+      0.08 × legal_score +          # Legal admissibility boost
+      0.06 × cascade_active +        # Multi-row detection bonus
+      0.10 × uncertainty_score       # Uncertainty penalty
+  )
+
+  final_risk = clip(final_risk, 0.0, 1.0)
+
+### Decision Thresholds (Updated)
+
+  final_risk ≥ 0.72             → BLOCK
+  0.55 ≤ risk < 0.72 + crisis  → EXPERT_REVIEW
+  0.32 ≤ risk < 0.72            → WARN
+  risk < 0.32                   → ALLOW
+
+### Domain-Adaptive Alpha (SCM Weight)
+
+  Domain              Alpha   Reason
+  healthcare          0.78    Life-or-death, maximum causal proof needed
+  criminal_justice    0.80    Court-admissible evidence (COMPAS cases)
+  financial_fraud     0.72    Regulatory compliance heavy
+  misuse_safety       0.75    High harm potential (weapons, drugs)
+  privacy_violation   0.70    Legal sensitivity
+  representation_bias 0.68    Bias detection important
+  disinformation      0.65    Speed vs accuracy balance
+  general             0.60    Default
+  education           0.55    Speed priority, false positive risk
+  entertainment       0.50    Matrix alone sufficient
+
+  Risk-level adjustment:
+    very_high: alpha += 0.10 (max 0.85)
+    high:      alpha += 0.05 (max 0.80)
+
+### Year 2 Implementation Plan
+
+  Phase 9A (Months 12-13): Replace Step 10 formula
+    hybrid_fusion() function in pipeline_v15.py
+    Domain detection from query → alpha selection
+    Legal score + uncertainty integrated
+
+  Phase 9B (Months 13-14): BO calibrate parameters
+    α, β(0.08), γ(0.06), δ(0.10) → BO-optimize on AIAAIC
+    Domain thresholds → calibrate per domain
+    
+  Phase 9C (Months 14-15): OOD Uncertainty Upgrade
+    Current: keyword-based confidence scoring
+    Upgrade: sentence-transformers/all-MiniLM-L6-v2 embeddings
+    Low cosine similarity vs safe reference set → high uncertainty
+    
+    from sentence_transformers import SentenceTransformer
+    model = SentenceTransformer('all-MiniLM-L6-v2')
+    uncertainty = 1.0 - max_cosine_sim(query, safe_references)
+
+### Mathematical Justification (from Analysis)
+
+  If matrix weights = DAG-derived (BO on AIAAIC):
+    Matrix_risk ≈ SCM_risk for KNOWN harm types
+    → Hybrid formula = unified mathematical language
+    → Legal admissibility extends to matrix component also
+  
+  For UNKNOWN harm types:
+    Matrix: forced fitting (precision loss)
+    SCM: discovers via DAG (better coverage)
+    → SCM higher alpha for edge cases correct
+
+### PhD Claim (Upgraded)
+
+  Year 1: "Fixed 60/40 SCM+Matrix — theoretically motivated"
+  Year 2: "BO-calibrated hybrid fusion — empirically optimal"
+           + legal score integrated
+           + domain-adaptive
+           + uncertainty-aware
+
+---
+
+#### Phase 10: 17×5 Matrix Expansion — 3 Missing Rows (Months 14-16)
+Source: DeepSeek + Claude analysis (April 2026)
+
+### Current 17 Rows — Coverage Gaps Found
+
+  MISSING ROWS (critical real-world harms):
+  
+  Row 18: Child_Safety
+    What: CSAM generation, minor grooming, child targeting
+    Why missing: High-severity, separate from Harassment
+    Cases: AI-generated CSAM, deepfake targeting minors
+    Weight: P1=4 P2=4 P3=3 P4=4 P5=5 = 20 (ALWAYS central node)
+    
+  Row 19: Wage_Exploitation  
+    What: Algorithmic wage suppression, gig economy exploitation
+    Why missing: Economic harm via AI pricing algorithms
+    Cases: Uber/delivery app price manipulation, salary suppression
+    Weight: P1=3 P2=3 P3=4 P4=2 P5=4 = 16 (central node)
+    
+  Row 20: Biosecurity
+    What: AI-generated pathogen enhancement, synthetic biology risk
+    Why missing: Distinct from Misuse_Safety (different mechanism)
+    Cases: Protein structure design for pathogen enhancement
+    Weight: P1=4 P2=4 P3=3 P4=3 P5=5 = 19 (always central node)
+
+### Cascade Links (New)
+
+  Child_Safety → Harassment (victims often harassed)
+  Child_Safety → Privacy_Violation (minor data)
+  Child_Safety → Identity_Forgery (deepfakes of minors)
+  
+  Wage_Exploitation → Representation_Bias (gig workers often minorities)
+  Wage_Exploitation → Financial_Fraud (price manipulation)
+  
+  Biosecurity → Misuse_Safety (dual-use risk)
+  Biosecurity → Physical_Violence (mass casualty potential)
+
+### Implementation Note
+
+  scm_engine_v2.py: Add 3 new DAGs for new domains
+  pipeline_v15.py: Add keyword patterns for new rows
+  test_v15.py: Add TestMatrixExpansion class (Year 2)
+  
+  Current: 17×5 = 85 cells
+  Updated: 20×5 = 100 cells
+  Still sparse: typically 3-5 active per query
 Source: Kimi (critical — "don't enforce immediately")
 
   Month 13: Simulation Mode → Warn Mode
