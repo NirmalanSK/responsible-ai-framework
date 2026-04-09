@@ -755,8 +755,9 @@ def compute_effect_decomposition(f: CausalFindings) -> EffectDecomposition:
                 "Harm is PRIMARILY DIRECT — AI decision itself causes harm "
                 "without systemic mediation. Strongest legal liability case.")
     elif pct_m >= 70:
+        _dag = DOMAIN_DAGS.get(f.domain, DOMAIN_DAGS["misuse_safety"])
         note = (f"NIE={nie*100:.1f}% >> NDE={nde*100:.1f}%. "
-                "Harm is PRIMARILY MEDIATED through {dag_mediator}. "
+                f"Harm is PRIMARILY MEDIATED through '{_dag.mediator}'. "
                 "Shared liability — AI + systemic pathway. "
                 "Mitigation should target the mediating mechanism.")
     else:

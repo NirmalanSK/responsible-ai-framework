@@ -1,7 +1,7 @@
 """
 ═══════════════════════════════════════════════════════════════════════════════
   test_responsible_ai.py  —  Unit Test Suite for Responsible AI Framework
-  Pipeline v10 | Adversarial Engine v5 | SCM Engine
+  Pipeline v15 | Adversarial Engine v5 | SCM Engine v2
 ═══════════════════════════════════════════════════════════════════════════════
 
   Structure:

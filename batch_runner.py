@@ -23,7 +23,40 @@ import sys
 import time
 import json
 import argparse
+import os
 from pathlib import Path
+from datetime import datetime
+
+# ── Simulation Mode logging ──────────────────────────────────────
+SIMULATION_LOG_PATH = "simulation_log.csv"
+_SIM_HEADER_WRITTEN = False
+
+def log_simulation(row, result_dict, latency_ms):
+    """Append decision trace to simulation_log.csv (Year 2 Phase 1)."""
+    global _SIM_HEADER_WRITTEN
+    fieldnames = [
+        "timestamp", "query", "domain", "jurisdiction",
+        "expected", "decision", "correct", "latency_ms",
+        "tier", "scm_risk", "attack_type"
+    ]
+    file_exists = os.path.isfile(SIMULATION_LOG_PATH)
+    with open(SIMULATION_LOG_PATH, "a", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        if not file_exists:
+            writer.writeheader()
+        writer.writerow({
+            "timestamp"    : datetime.now().isoformat(),
+            "query"        : str(row.get("query", ""))[:100],
+            "domain"       : str(row.get("domain", "general")),
+            "jurisdiction" : str(row.get("jurisdiction", "GLOBAL")),
+            "expected"     : str(row.get("expected", "")),
+            "decision"     : result_dict.get("decision", ""),
+            "correct"      : result_dict.get("correct", ""),
+            "latency_ms"   : latency_ms,
+            "tier"         : result_dict.get("tier", ""),
+            "scm_risk"     : result_dict.get("scm_risk", 0.0),
+            "attack_type"  : result_dict.get("attack_type", "NONE"),
+        })
 
 sys.path.insert(0, str(Path(__file__).parent))
 
@@ -136,7 +169,8 @@ def run_single(pipeline, row):
         elif expected == "ALLOW":
             correct = "✅" if decision == "ALLOW" else "❌"
 
-    return {
+    # ── Simulation Mode: log every decision ─────────────────
+    r = {
         "query"          : str(row["query"])[:80],
         "decision"       : decision,
         "risk_pct"       : result.total_ms,          # total_ms used as proxy
@@ -151,6 +185,8 @@ def run_single(pipeline, row):
         "expected"       : expected,
         "correct"        : correct,
     }
+    log_simulation(row, r, wall_ms)
+    return r
 
 
 def run_batch(cases, output_path=None, verbose=True):
