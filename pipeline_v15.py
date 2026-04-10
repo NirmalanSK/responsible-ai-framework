@@ -325,8 +325,15 @@ VAC_ABSOLUTE_BLOCKS = [
     r"(13|14|15|16|17)\s*(year.?old|yr.?old|y\.?o\.?).{0,30}"
     r"(sex|nude|naked|porn|explicit|abuse|groom)",
 
+    # FIX v15e: CSAM abbreviation + explicit creation instructions ──────
+    r"\bcsam\b",
+    r"(create|make|generate|produce|provide|instructions?\s+to|how\s+to\s+create).{0,30}(csam|child\s+sexual\s+abuse\s+material|child\s+pornography)",
+    r"(child\s+(porn|pornography|sexual\s+abuse\s+material|exploitation\s+material))",
+
     # ── Bioweapons ────────────────────────────────────────────────────────
     r"(bioweapon|bio.weapon|biological\s+weapon)",
+    r"\b(csam|child\s+sexual\s+abuse\s+material)\b",
+    r"(create|make|generate|produce|instructions?|provide).{0,30}(csam|child\s+porn|child\s+sexual\s+abuse)",
     r"(nerve\s+agent|sarin|vx\s+gas|novichok|tabun|soman)",
     r"(weaponize|militarize|aerosolize).{0,30}(anthrax|ricin|botulinum|plague|smallpox|ebola|pathogen|bacteria|virus)",
     r"(anthrax|ricin|botulinum|plague|smallpox).{0,30}(weapon|attack|release|spread|deploy|synthesize)",
@@ -1064,13 +1071,10 @@ class Step04b_UncertaintyScorer:
          "covert_political_manipulation", 0.42),
         (r"(keystroke|mouse.movement|screen.record|activity.log|computer.monitor).{0,30}(employee|worker|staff)",
          "employee_surveillance", 0.36),
-        # FIX v15c: Autonomous AI decision-making in high-stakes domains ─
-        (r"(ai|algorithm|automated|autonomous).{0,30}(determine|decide|set|issue|assign|replace\s+judge).{0,30}(sentence|sentencing|punishment|criminal|verdict).{0,30}(without|no\s+human|replac)",
-         "autonomous_ai_sentencing", 0.45),
-        (r"(deploy|use|implement).{0,20}(ai|algorithm|automated).{0,20}(autonomously|without\s+human|without\s+judge|without\s+review).{0,20}(sentence|sentencing|criminal|verdict|punishment)",
-         "autonomous_ai_sentencing", 0.45),
-        (r"(ai|algorithm).{0,20}(alone|solely|exclusively|without\s+human).{0,20}(determine|decide|set).{0,20}(sentence|sentencing|criminal|verdict)",
-         "autonomous_ai_sentencing", 0.45),
+        (r"(covert|secret|hidden|without.consent|without.knowing).{0,30}(monitor|track|surveill|scan|read).{0,20}(employee|worker|staff|slack|teams|message|chat)",
+         "covert_employee_monitoring", 0.40),
+        (r"(monitor|scan|analyze).{0,20}(sentiment|mood|emotion).{0,20}(slack|teams|chat|message|employee|worker)",
+         "sentiment_surveillance", 0.38),
     ]
 
     def __init__(self):
@@ -1570,6 +1574,9 @@ class Step07_AdversarialLayer:
         r"(extract|scrape|harvest|collect).{0,30}(personal\s+data|private\s+information|user\s+data|social\s+media\s+profile)",  # automatic scraping = privacy risk
         r"(track|locate|identify).{0,20}(specific\s+person|individual|target).{0,20}(city|area|location|movement|whereabouts)",
         r"(secret|hidden|covert|unauthorized).{0,20}(surveillance|monitoring|tracking|recording).{0,20}(system|tool|app|software)",
+            # FIX v15e: sentiment/emotion monitoring of employee messages
+            r"(monitor|track|analyze|scan).{0,20}(sentiment|mood|emotion|opinion).{0,20}(slack|teams|chat|message|employee|worker)",
+            r"(covert|secret|hidden|without\s+consent).{0,30}(monitor|track|survey|scan).{0,30}(employee|worker|staff|message|communication)",
         # v8 fix: find personal details from public profiles
         r"(find|get|locate|discover|identify).{0,20}(personal|private|home|real).{0,20}(details|information|address|name|number).{0,20}(person|someone|this|their|social.media|profile|online)",
     ]
@@ -1692,6 +1699,7 @@ class Step07_AdversarialLayer:
         r"(letter|speech|post|message|content).{0,20}(incit|promot|encourage).{0,20}(violence|harm|hatred|crime)",
         r"(script|code|program|software).{0,20}(steal|extract|scrape|harvest).{0,20}(sensitive|personal|private).{0,20}(information|data|credentials)",
         r"(hijack|take\s+over|control).{0,20}(self.driving|autonomous|vehicle|car|drone|system).{0,20}(crash|harm|damage|attack)",
+        r"(hijack|take\s+over|seize\s+control\s+of).{0,30}(self.driving|autonomous\s+vehicle|self.driving\s+car)",  # FIX v15e
         r"(disrupt|sabotage|attack|chaos).{0,20}(transportation|infrastructure|power\s+grid|water\s+supply|hospital)",
         r"(smuggle|traffic|sneak|bring).{0,20}(contraband|drug|weapon|illegal).{0,20}(prison|border|airport|school)",
         r"(exploit|abuse|take\s+advantage).{0,20}(vulnerabilit|weakness|flaw|bug).{0,20}(software|system|network|iot|device)",
@@ -1924,6 +1932,8 @@ class Step08_JurisdictionEngine:
             r"caste.{0,20}(background|basis|criteria|preference)",
             # FIX v7: reservation category discrimination
             r"(filter|exclude|remove|reject|out).{0,20}(reserved|sc|st|obc).{0,20}(category|candidate|quota)",
+            r"(downscor|penalis|filter|exclude|reject|screen\s+out).{0,25}(dalit|scheduled\s+caste|sc.st|lower\s+caste|backward\s+class)",  # FIX v15e
+            r"(dalit|scheduled\s+caste|lower\s+caste).{0,30}(downscor|penalis|filter|exclude|reject|not\s+hire|avoid)",  # FIX v15e
             r"(prefer|only|no).{0,15}(hindu|muslim|christian|sikh).{0,20}(candidate|hire|employ)",
             r"(religion|community|caste).{0,20}(preference|basis|criteria).{0,20}(hire|employ|select)",
         ],
@@ -1941,13 +1951,6 @@ class Step08_JurisdictionEngine:
             r"(white|black|asian|hispanic).{0,10}(patient|person|individual).{0,20}(over|priority|before|higher|better).{0,20}(black|white|asian|hispanic|other)",
             r"(race|racial|ethnicity|skin.color).{0,20}(basis|criteria|factor).{0,20}(healthcare|medical|treatment|resource|allocat)",
             r"(filter|rank|select|hire|screen|reject|exclude|prefer).{0,30}(age|older|younger|born\s+in)",
-            # FIX v15d: Autonomous AI sentencing + protected class
-            r"(use|using|apply|deploy|run|implement).{0,25}(ai|algorithm|system|tool|model).{0,40}(sentence|sentencing|prison|jail|punishment|verdict).{0,40}(black|hispanic|minority|race|racial|defendant|offender)",
-            r"(use|using|apply|deploy|run|implement).{0,25}(ai|algorithm|system|tool|model).{0,25}(determin|decide|assign|set|recommend).{0,25}(sentence|sentencing|prison|jail|punishment|verdict)",
-            r"(determin|decide|assign|set|deploy).{0,20}(prison|jail|sentence|punishment).{0,30}(black|hispanic|minority|racial|defendant|offender)",
-            r"(black|hispanic|minority).{0,20}(defendant|offender|criminal).{0,20}(sentence|prison|jail|recidivism|risk.score|punishment)",
-            r"(prison|jail|sentence|punishment).{0,30}(black|hispanic|minority|racial).{0,20}(defendant|offender|criminal)",
-            r"(ai|algorithm|system).{0,25}(sentence|sentencing|prison|punishment).{0,30}(defendant|offender|black|race|minority)",
             r"(over|above|under|below)\s+\d{2,3}\s*(year|yr)?.{0,20}(filter|reject|exclude|prefer|screen|hire)",
             r"(filter|exclude|reject|screen).{0,20}(over|above)\s+\d{2,3}",
             # FIX v7: disability + pregnancy discrimination
@@ -1958,11 +1961,6 @@ class Step08_JurisdictionEngine:
         Jurisdiction.EU: [
             r"(health|medical).{0,20}record.{0,20}(hire|employ|select|decide|rank)",
             r"(biometric|facial\s+recognition).{0,20}(hire|screen|score|rank)",
-            # EU AI Act Art.5 + Equality Directive: gender/age bias in hiring ← FIX v15c
-            r"(gender|female|male|sex|women|men).{0,30}(factor|bias|discriminat|downscor|lower|penalis).{0,30}(hire|hiring|recruit|candidate|applicant)",
-            r"(hiring|recruitment|scoring).{0,20}(algorithm|ai|model|tool).{0,20}(gender|female|male|women|men).{0,20}(bias|discriminat|factor|penalis|downscor)",
-            r"(downscor|penalis|bias|discriminat).{0,20}(female|male|women|men|gender).{0,20}(candidate|applicant|hire|job)",
-            r"(age|elderly|older).{0,20}(factor|discriminat|bias|penalis|deny|reject).{0,20}(hire|hiring|employ|insurance|credit|loan|applicant)",
         ],
         Jurisdiction.GLOBAL: [
             r"(filter|rank|select|hire|screen|prefer|evaluate|assess).{0,30}(religion|religious|faith|belief|sect|denomination)",
@@ -1979,6 +1977,10 @@ class Step08_JurisdictionEngine:
             r"(hiring|recruitment|scoring).{0,20}(tool|system|algorithm|ai).{0,20}(prefer|favour|prioritize).{0,20}(male|men|man)",
             r"(predict|score|rank|assess).{0,20}(ethnic|racial|race).{0,20}(group|background).{0,20}(reoffend|crime|risk|recidivism)",
             r"(design|build|create).{0,20}(hiring|recruitment).{0,20}(tool|system|algorithm).{0,20}(prefer|favour|bias).{0,20}(men|male|women|female)",
+            # FIX v15e: hate website creation ──────────────────────────
+            r"(create|build|make|design|launch).{0,20}(website|platform|page|site|forum).{0,30}(promot|spread|incit).{0,20}(racism|hate|violence|discrimination|white.supremacy)",
+        r"(create|build|make|design|set.up).{0,20}(website|platform|page|site|channel).{0,20}(promot|incit|spread).{0,20}(racism|hate|violence|discrimination)",
+        r"(website|platform|page|site).{0,20}(promot|spread).{0,20}(racism|hatred|hate.speech|supremacy)",
         ],
     }
 
