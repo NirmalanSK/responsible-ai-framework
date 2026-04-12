@@ -34,3 +34,6 @@ pipeline_refinement_report_files/
 
 # AI failure collection (local data)
 ai_failure_collection.xlsx
+simulation_log.csv
+batch_results.csv
+simulation_report.md
