@@ -172,7 +172,7 @@ def save_markdown(results, records, out_path="simulation_report.md"):
         "# 📈 Simulation Baseline Report",
         "",
         f"**Generated:** April 2026  ",
-        f"**Framework:** Responsible AI Framework v5.0 (pipeline_v15e)  ",
+        f"**Framework:** Responsible AI Framework v5.0 (pipeline_v15g)  ",
         f"**Total Labeled Queries:** {total}  ",
         f"**Overall Accuracy:** {correct}/{total} ({correct/total*100:.1f}%)  ",
         "",
@@ -206,12 +206,13 @@ def save_markdown(results, records, out_path="simulation_report.md"):
         "",
         "## Year 2 Targets",
         "",
-        "| Metric | Year 1 (current) | Year 2 Target | Method |",
-        "|--------|-----------------|---------------|--------|",
-        "| Overall F1 | " + f"{g_f1:.2f} | 0.89+ | Bayesian Optimization on AIAAIC 2,223 |",
+        "| Metric | Year 1 (16-case AIAAIC) | Year 2 Target | Method |",
+        "|--------|------------------------|---------------|--------|",
+        "| Overall F1 | " + f"{g_f1:.2f} (small labeled set) | 0.92+ (full 2,223-case) | Bayesian Optimization on AIAAIC 2,223 |",
         "| HarmBench Recall | 14.5% | 75-80% | XLM-RoBERTa semantic |",
         "| FPR | " + f"{g_fpr*100:.1f}% | <2% | SBERT hybrid tiering |",
         "| DAG input | Manual | Auto | DoWhy integration |",
+        "| Labeled test coverage | 16/50 (32%) | 2,223/2,223 (100%) | Full AIAAIC ground-truth labeling |",
     ]
 
     with open(out_path, "w", encoding="utf-8") as f:
