@@ -1534,6 +1534,10 @@ class Step07_AdversarialLayer:
         r"(deepfake|fake).{0,20}(politician|leader|official).{0,20}(spread|promote|incite|misinformation|disinformation|propaganda)",
         r"(script|voice|audio|video).{0,20}(politician|political.leader|president).{0,20}(incite|riot|unrest|violence|misinformation)",
         r"(spread|create|generate).{0,20}(misinformation|disinformation|propaganda).{0,20}(using|with|via).{0,20}(ai|deepfake|fake|synthetic)",
+        # ── v15g FIX: Direct fake news article generation → BLOCK ─────
+        # do(remove_target) → "create fake news article" remains → disinformation
+        r"(create|write|generate|produce|make|draft).{0,20}(fake.news|false.news|fabricated.news).{0,20}(article|post|story|blog|report)",
+        r"(create|write|generate|produce|make|draft).{0,20}(fake|false|fabricated|misleading).{0,20}(article|post|story|report).{0,30}(politician|celebrity|public.figure|company|organization)",
     ]
 
     # ── Harassment / Stalking / Threats ──────────────────────────────
@@ -1585,6 +1589,11 @@ class Step07_AdversarialLayer:
     PRIVACY_BLOCK_PATTERNS = [
         r"(read|intercept|access|monitor).{0,20}(private|personal|confidential).{0,20}(message|email|chat|communication).{0,20}(without|consent|unauthorized|illegally|covert)",
         r"(build|create|install|deploy).{0,20}(system|software|tool|app).{0,20}(read|intercept|spy).{0,20}(private|personal).{0,20}(message|email|communication|chat)",
+        # v15g: facial recognition + covert employee tracking → BLOCK (Case 14 fix)
+        # do(remove_tech) → "track employees secretly" remains → covert biometric surveillance
+        r"(facial\s+recognition|biometric|face\s+id|face\s+scan).{0,40}(track|monitor|identify|surveil).{0,20}(employee|staff|worker|person)",
+        r"(set\s+up|install|deploy|build|create).{0,30}(facial\s+recognition|biometric|face.{0,5}track).{0,30}(secretly|covertly|without\s+(their\s+)?(consent|knowledge|knowing|permission))",
+        r"(track|monitor|surveil).{0,20}(employee|staff|worker|person|people).{0,20}(secretly|covertly|without\s+(their\s+)?(knowledge|consent|knowing|permission))",
     ]
 
     # ── Medical Harm ──────────────────────────────────────────────────
@@ -1771,6 +1780,12 @@ class Step07_AdversarialLayer:
         r"(step.by.step|detailed|provide).{0,20}(instructions?|guide|how.to).{0,20}(hack|cyber\s+attack|penetrat).{0,20}(network|system|database|server)",
         r"(ecological\s+damage|crop\s+destruction|infect\s+(plant|animal|crop|ecosystem)).{0,20}(virus|pathogen|bacteria|toxin)",
         r"(drunk\s+driv|impaired\s+driv|drug.?impaired).{0,20}(encourage|promot|how.to|guide|post)",
+        # ── v15g FIX: AI autonomous sentencing with protected class → BLOCK ──
+        # AIAAIC Case 9 / test_v15 deployment gap — racial bias in criminal AI
+        # do(remove_system_framing) → "determine prison sentence for Black defendant" remains
+        r"(ai|algorithm|system|model|tool).{0,30}(determine|decide|assign|set|calculate|predict).{0,20}(prison|jail|sentence|sentencing|punishment).{0,20}(black|hispanic|minority|race|racial|ethnic)",
+        r"(determine|decide|assign|set|calculate).{0,20}(prison|jail|sentence|punishment).{0,20}(black|hispanic|white|minority|race|racial|ethnic|protected).{0,10}(defendant|convict|offender|person)",
+        r"(black|hispanic|minority|racial|ethnic).{0,10}(defendant|convict|offender|criminal).{0,20}(prison|sentence|jail|punishment).{0,20}(ai|algorithm|system|model|recidivism|risk)",
     ]
 
     def __init__(self):
@@ -1798,6 +1813,19 @@ class Step07_AdversarialLayer:
         _single = sum(1 for w in _words if len(w) == 1)
         q_nospace = _re.sub(r'\s+', '', q_clean) if (_words and _single/len(_words) > 0.50) else q_clean
         _variants = list(dict.fromkeys([q, q_leet, q_clean, q_nospace]))
+
+        # ── v15g FIX: Defensive intent early-exit ─────────────────────
+        # "prevent/detect/protect against ransomware" ≠ "create ransomware"
+        # do(remove_context) → dangerous keyword remains → BUT intent is defensive
+        # Run BEFORE checks loop so defensive queries exit before MALWARE/SYNTHESIS hit
+        DEFENSIVE_PREFIXES = [
+            r"(prevent|stop|block|mitigate|defend\s+against|protect\s+against|guard\s+against).{0,30}(ransomware|malware|virus|attack|hack|phish|exploit|deepfake|fake.news|disinform)",
+            r"(how\s+(to|do\s+i)\s+)?(detect|identify|recogni[sz]e|spot|find|discover).{0,30}(ransomware|malware|virus|fake.news|disinform|deepfake|phishing|scam|attack)",
+            r"(teach|explain|what\s+is|how\s+does|overview\s+of|understand).{0,30}(ransomware|malware|disinformation|fake.news|deepfake).{0,30}(work|protect|prevent|defend|awareness|education)",
+            r"(cybersecurity|security\s+awareness|defense|blue\s+team|incident\s+response).{0,40}(ransomware|malware|virus|attack|phish)",
+        ]
+        if any(_re.search(dp, q_clean, _re.IGNORECASE) for dp in DEFENSIVE_PREFIXES):
+            return 0.0, ""  # Defensive/educational framing — not harmful
 
         # Score bands:
         #   ≥ 0.65 → BLOCK   (clear harmful intent)
