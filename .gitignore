@@ -38,3 +38,8 @@ simulation_log.csv
 batch_results.csv
 report.pdf
 risk_hist.png
+# Gemini chatbot generated outputs
+chatbots/gemini/report.pdf
+chatbots/gemini/risk_hist.png
+chatbots/gemini/session_report.pdf
+chatbots/gemini/session_risk_hist.png

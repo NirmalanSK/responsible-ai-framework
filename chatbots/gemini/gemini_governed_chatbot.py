@@ -9,6 +9,7 @@ import csv
 import os
 import sys
 from datetime import datetime
+from pathlib import Path
 from typing import Dict, List, Optional
 
 import matplotlib
@@ -21,6 +22,9 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
 
 sys.path.insert(0, r"C:\responsible-ai-framework")
+
+# ── Output dir — always save next to this script ──────────────────────
+OUTPUT_DIR = Path(__file__).parent
 
 from google import genai
 
@@ -125,8 +129,9 @@ def run_batch(
 
 
 # ── 1. Risk Histogram ───────────────────────────────────────────────────
-def plot_risk_histogram(rows: List[dict], out: str = "risk_hist.png") -> None:
+def plot_risk_histogram(rows: List[dict], out: str = "") -> None:
     """Plot SCM risk score distribution across all queries."""
+    out = out or str(OUTPUT_DIR / "risk_hist.png")
     risks    = [r["risk"] for r in rows]
     blocked  = [r["risk"] for r in rows if r["decision"] == "BLOCK"]
     allowed  = [r["risk"] for r in rows if r["decision"] == "ALLOW"]
@@ -150,8 +155,9 @@ def plot_risk_histogram(rows: List[dict], out: str = "risk_hist.png") -> None:
 
 
 # ── 2. PDF Report ────────────────────────────────────────────────────────
-def generate_pdf(rows: List[dict], out: str = "report.pdf") -> None:
+def generate_pdf(rows: List[dict], out: str = "") -> None:
     """Generate a per-case evaluation report as PDF."""
+    out = out or str(OUTPUT_DIR / "report.pdf")
     doc     = SimpleDocTemplate(out)
     styles  = getSampleStyleSheet()
     content = []
@@ -370,9 +376,9 @@ def run_interactive(
     if session_rows:
         save = input("\nSave session report? (y/n): ").strip().lower()
         if save == "y":
-            plot_risk_histogram(session_rows, out="session_risk_hist.png")
-            generate_pdf(session_rows, out="session_report.pdf")
-            print("  Reports saved: session_risk_hist.png, session_report.pdf")
+            plot_risk_histogram(session_rows, out=str(OUTPUT_DIR / "session_risk_hist.png"))
+            generate_pdf(session_rows, out=str(OUTPUT_DIR / "session_report.pdf"))
+            print("  Reports saved in chatbots/gemini/ folder")
 
 
 # ── Main ─────────────────────────────────────────────────────────────────
@@ -409,7 +415,7 @@ if __name__ == "__main__":
         plot_risk_histogram(rows)
         generate_pdf(rows)
         failure_analysis(rows)
-        print("\n  Done. Outputs: risk_hist.png, report.pdf")
+        print(f"\n  Done. Outputs saved in: {OUTPUT_DIR}")
 
     elif args.mode == "benchmark":
         # ── Multi-model benchmark ──────────────────────────────────
