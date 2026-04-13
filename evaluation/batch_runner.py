@@ -58,7 +58,7 @@ def log_simulation(row, result_dict, latency_ms):
             "attack_type"  : result_dict.get("attack_type", "NONE"),
         })
 
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from pipeline_v15 import (
     ResponsibleAIPipeline, PipelineInput,
