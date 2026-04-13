@@ -310,31 +310,107 @@ def failure_analysis(rows: List[dict]) -> None:
         print()
 
 
+# ── 5. Interactive Chat Mode ─────────────────────────────────────────────
+def run_interactive(
+    jurisdiction: str = "GLOBAL",
+    model: str = "gemini-2.0-flash",
+) -> None:
+    """
+    Live terminal chat — type prompts, get governed responses.
+    Same as Groq chatbot interactive mode.
+    Type 'quit' to exit.
+    """
+    print("\n" + "=" * 60)
+    print("  RESPONSIBLE AI GOVERNED CHATBOT — GEMINI INTERACTIVE")
+    print(f"  Framework v15g  |  Model: {model}")
+    print(f"  Jurisdiction: {jurisdiction}")
+    print("  Type 'quit' to exit | 'switch <model>' to change model")
+    print("=" * 60 + "\n")
+
+    current_model = model
+    session_rows  = []
+
+    while True:
+        try:
+            query = input("You: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            break
+
+        if not query:
+            continue
+
+        if query.lower() in ("quit", "exit", "q"):
+            print("Goodbye!")
+            break
+
+        # Switch model mid-session
+        if query.lower().startswith("switch "):
+            current_model = query.split(" ", 1)[1].strip()
+            print(f"  ↩  Model switched → {current_model}\n")
+            continue
+
+        result = governed_chat(query, jurisdiction=jurisdiction, model=current_model)
+        dec    = result["decision"]
+
+        print(f"\n[{dec}] risk={result['risk']:.1f}% | {result['latency_ms']:.0f}ms | model={current_model}")
+
+        if dec == "BLOCK":
+            print(f"🚫 {result['response']}")
+        elif dec == "EXPERT_REVIEW":
+            print(f"👤 {result['response']}")
+        elif dec == "WARN":
+            print(f"⚠️  Sensitive topic — monitored\nAI: {result['response']}")
+        else:
+            print(f"AI: {result['response']}")
+
+        print()
+        session_rows.append({**result, "prompt": query, "expected": ""})
+
+    # End of session — offer report
+    if session_rows:
+        save = input("\nSave session report? (y/n): ").strip().lower()
+        if save == "y":
+            plot_risk_histogram(session_rows, out="session_risk_hist.png")
+            generate_pdf(session_rows, out="session_report.pdf")
+            print("  Reports saved: session_risk_hist.png, session_report.pdf")
+
+
 # ── Main ─────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    CSV  = "gemini_test_cases.csv"
-    MODELS = [
-        "gemini-2.0-flash",
-        # "gemini-1.5-pro",   # uncomment to benchmark multiple models
-    ]
+    import argparse
 
-    print("\n" + "=" * 55)
+    parser = argparse.ArgumentParser(
+        description="RAI Governed Chatbot — Gemini Edition (v15g)"
+    )
+    parser.add_argument(
+        "--mode", choices=["chat", "batch", "benchmark"],
+        default="chat",
+        help="chat = interactive terminal | batch = CSV run + report | benchmark = multi-model"
+    )
+    parser.add_argument("--csv",          default="gemini_test_cases.csv")
+    parser.add_argument("--jurisdiction", default="GLOBAL")
+    parser.add_argument("--model",        default="gemini-2.0-flash")
+    args = parser.parse_args()
+
+    MODELS = [args.model]  # add more models to benchmark here
+
+    print("\n" + "=" * 60)
     print("  RAI GOVERNED CHATBOT — GEMINI EDITION (v15g)")
-    print("=" * 55 + "\n")
+    print("=" * 60)
 
-    # 1. Batch run
-    rows = run_batch(CSV, jurisdiction="GLOBAL", model=MODELS[0])
+    if args.mode == "chat":
+        # ── Interactive terminal mode ──────────────────────────────
+        run_interactive(jurisdiction=args.jurisdiction, model=args.model)
 
-    # 2. Graphs
-    plot_risk_histogram(rows)
+    elif args.mode == "batch":
+        # ── CSV batch mode + report ────────────────────────────────
+        print(f"\n  Batch mode → {args.csv}\n")
+        rows = run_batch(args.csv, jurisdiction=args.jurisdiction, model=args.model)
+        plot_risk_histogram(rows)
+        generate_pdf(rows)
+        failure_analysis(rows)
+        print("\n  Done. Outputs: risk_hist.png, report.pdf")
 
-    # 3. PDF report
-    generate_pdf(rows)
-
-    # 4. Multi-model benchmark
-    benchmark_models(CSV, MODELS)
-
-    # 5. Failure analysis
-    failure_analysis(rows)
-
-    print("\n  Done. Outputs: risk_hist.png, report.pdf")
+    elif args.mode == "benchmark":
+        # ── Multi-model benchmark ──────────────────────────────────
+        benchmark_models(args.csv, MODELS, jurisdiction=args.jurisdiction)
