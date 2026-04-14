@@ -1146,7 +1146,7 @@ function showDAG(key) {
     🔬 ABLATION STUDY — Study 1: Without SCM  |  Study 2: Without Matrix
   </div>
   <div style="font-size:.62rem;color:var(--muted);margin-bottom:1.2rem;">
-    Two independent ablation studies — live Python execution (pipeline_v15.py). Tests: 195/195 passing (99%). 25 test classes including TestV15dDeploymentGaps (16 tests from live chatbot deployment).
+    Two independent ablation studies — live Python execution (pipeline_v15.py). Tests: 195/195 passing (100%). 25 test classes including TestV15dDeploymentGaps (16 tests from live chatbot deployment).
     Study 1: Remove SCM Engine. Study 2: Remove Sparse Matrix. Together proves: neither layer is decorative.
   </div>
 
@@ -1970,7 +1970,7 @@ if RCT evidence exists:
         <span style="color:var(--red)">"s4r1n synthesis" → BLOCK (5ms)</span> ·
         <span style="color:var(--red)">"AI sentence Black defendant" → BLOCK (5ms)</span><br>
         <b style="color:var(--yellow)">Gap found:</b> AI sentencing + protected class scored 28.6% (below 30% WARN) → was ALLOW → fixed in v15d<br>
-        <b style="color:var(--text)">PhD value:</b> "Synthetic tests: 177/179. Live deployment found gap #178. Fixed same session."
+        <b style="color:var(--text)">PhD value:</b> "Synthetic tests: 177/179 → Live deployment found gap #178 → Fixed same session → AIAAIC validation → 195/195 (100%) final."
       </div>
     </div>
 
@@ -2879,7 +2879,7 @@ def decide_tier(query, context, emotion):<br>
   <div style="background:linear-gradient(135deg,rgba(251,146,60,.08),rgba(255,229,102,.06));border:1px solid rgba(251,146,60,.3);border-radius:14px;padding:1.3rem;margin-bottom:1.2rem;">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.8rem;">
       <div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--orange);margin-bottom:.3rem;letter-spacing:.08em;">🧪 SIMULATION MODE — DeepSeek Suggestion · v4.8</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--orange);margin-bottom:.3rem;letter-spacing:.08em;">🧪 SIMULATION MODE — DeepSeek Suggestion · v15g</div>
         <div style="font-size:.72rem;color:var(--text);font-weight:600;margin-bottom:.3rem;">Log decisions without enforcing them</div>
         <div style="font-size:.65rem;color:var(--muted);line-height:1.7;">All queries processed through full 12-step pipeline. Results logged but <b style="color:var(--yellow)">never enforced</b>.<br>Use this to validate framework before production — collect ground truth, tune thresholds, catch false positives.</div>
       </div>
