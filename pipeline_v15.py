@@ -1,7 +1,7 @@
 """
 ╔══════════════════════════════════════════════════════════════════════════╗
-║   RESPONSIBLE AI FRAMEWORK — FULL 12-STEP PIPELINE  v2                  ║
-║   v4.8 — Living System                                                   ║
+║   RESPONSIBLE AI FRAMEWORK — FULL 12-STEP PIPELINE                      ║
+║   v15g — Production Build                                                ║
 ║   PhD Research · Nirmalan                                                ║
 ║                                                                          ║
 ║   v2 additions (Qwen recommendation):                                    ║
@@ -113,20 +113,7 @@ log = setup_logger()
 # TYPE HINTS FOR MODULE-LEVEL GLOBALS
 # ═══════════════════════════════════════════════════════════════════
 
-_step_fallbacks: Dict[int, Tuple[str, float]] = {
-    1: ("input_error", 0.3),
-    2: ("graph_error", 0.2),
-    3: ("tier_error", 0.15),
-    4: ("emotion_error", 0.1),
-    5: ("scm_error", 0.2),
-    6: ("adversarial_error", 0.25),
-    7: ("ai_error", 0.3),
-    8: ("matrix_error", 0.2),
-    9: ("jurisdiction_error", 0.15),
-    10: ("vac_error", 0.05),
-    11: ("societal_error", 0.1),
-    12: ("output_error", 0.3),
-}
+# _step_fallbacks is defined below after safe_run() — see "Default fallback return values per step"
 
 _step_execution_log: List[Dict[str, Any]] = []
 

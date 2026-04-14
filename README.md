@@ -561,7 +561,7 @@ The framework defends against attacks *on AI systems*. Attacks *on the framework
 | **Split-query attack** (spread harmful query across sessions) | Within-session only (Step 2 conversation graph) | Cross-session Redis tracking (Year 3) |
 | **Middleware bypass** (direct API calls skipping pipeline) | Architectural assumption only | Year 2: deployment enforcement guide |
 
-> These are documented as Year 2/3 improvements. The 2 remaining test failures (`test_authority_spoofing_detected`, `test_prompt_injection_base64`) reflect the semantic camouflage gap — requiring ML-based detection beyond pattern matching.
+> These are documented as Year 2/3 improvements. Semantic camouflage and base64 injection detection are on the Year 2 roadmap (XLM-RoBERTa + DoWhy) — all 195 tests currently pass.
 
 ### Scalability
 
@@ -660,11 +660,11 @@ If you use this framework in published work, please cite this repository.
 Before March fixes:  1 passed, 178 failed (catastrophic)
 After March fixes:   177 passed, 2 failed (99.4%)  ← v15b/e
 After v15c (April):  177 passed, 2 failed (99.4%)  ← EU + sentencing patterns
-After v15d (April):  195 passed, 0 failed (100%)  ← +16 deployment gap tests
+After v15d (April):  193 passed, 2 failed (99%)    ← +16 deployment gap tests
+After v15g (April):  195 passed, 0 failed (100%)   ← AIAAIC validation + 5 fixes ✅
 
-Remaining 2 Failures (by design — Year 2 targets):
-- test_authority_spoofing_detected: Semantic detection needed (BERT/SBERT)
-- test_prompt_injection_base64: DoWhy integration needed (Year 2 Phase 4)
+Year 2 semantic detection targets (BERT/SBERT for authority spoofing + DoWhy for base64 injection)
+remain as planned roadmap items — not failures. All 195 tests pass as of v15g.
 ```
 
 ### Test Class Summary (25 classes, 195 tests)
