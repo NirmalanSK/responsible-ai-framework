@@ -27,51 +27,74 @@ This framework solves all three problems in one pipeline:
 
 ## 🏗️ Architecture
 
-### Visual Pipeline Flow
+### Pipeline Architecture — 12-Step Flow
 
 ```
-graph TD
-    A[Query Input] --> B[S01: Input Sanitizer]
-    B --> C[S02: Conversation Graph]
-    C --> D[S03: Emotion Detector]
-    D --> E[S04: Tier Router]
-    E --> F[S04b: Uncertainty Scorer]
-    F --> G[S05: SCM Engine v2<br/>Pearl Causality]
-    G --> H[S06: SHAP Proxy]
-    H --> I[S07: Adversarial Defense<br/>4 Attack Types]
-    I --> J[S08: Jurisdiction]
-    J --> K[S09: VAC Check]
-    K --> L[S10: Decision Engine]
-    L --> M[S11: Societal Monitor]
-    M --> N[S12: Output Filter]
-    N --> O{Decision}
-    O -->|ALLOW| P[✅ Safe Output]
-    O -->|WARN| Q[⚠️ Monitor]
-    O -->|BLOCK| R[🚫 Rejected]
-    O -->|ESCALATE| S[👤 Human Review]
-
-    style G fill:#e1f5ff
-    style I fill:#ffe1e1
-    style O fill:#fff4e1
-```
-
-### Text-Based Architecture
-
-```
-Query → S01 Input Sanitizer
-      → S02 Conversation Graph
-      → S03 Emotion Detector
-      → S04 Tier Router (Tier 1/2/3)
-      → S04b Uncertainty Scorer (OOD Detection)
-      → S05 SCM Engine + Sparse Matrix      ← Pearl Causality
-      → S06 SHAP/LIME Proxy
-      → S07 Adversarial Defense Layer       ← 4 Attack Types
-      → S08 Jurisdiction Engine (US/EU/India/Global)
-      → S09 VAC Ethics Check
-      → S10 Decision Engine
-      → S11 Societal Monitor
-      → S12 Output Filter
-      → ALLOW / WARN / BLOCK / ESCALATE
+                    ┌──────────────────────┐
+                    │      Query Input      │
+                    └──────────┬───────────┘
+                               │
+              ┌────────────────▼─────────────────┐
+              │  S01: Input Sanitizer             │  Unicode normalise · multilingual
+              └────────────────┬─────────────────┘
+                               │
+              ┌────────────────▼─────────────────┐
+              │  S02: Conversation Graph          │  Session drift · escalation history
+              └────────────────┬─────────────────┘
+                               │
+              ┌────────────────▼─────────────────┐
+              │  S03: Emotion Detector            │  Crisis · distress · anger signals
+              └────────────────┬─────────────────┘
+                               │
+              ┌────────────────▼─────────────────┐
+              │  S04: Tier Router                 │  Tier 1 (safe) / 2 (grey) / 3 (risk)
+              └────────────────┬─────────────────┘
+                               │
+              ┌────────────────▼─────────────────┐
+              │  S04b: Uncertainty Scorer         │  OOD detection · confidence < 0.20 → ESCALATE
+              └────────────────┬─────────────────┘
+                               │
+              ┌────────────────▼─────────────────┐  ◄─ Pearl Causality (L1 + L2 + L3)
+              │  S05: SCM Engine v2               │     Backdoor · Frontdoor · NDE/NIE
+              │      + Sparse Causal Matrix 17×5  │     PNS / PN / PS Bounds · do-calculus
+              └────────────────┬─────────────────┘     Daubert Legal Admissibility Score
+                               │
+              ┌────────────────▼─────────────────┐
+              │  S06: SHAP / LIME Proxy           │  Feature attribution · explainability
+              └────────────────┬─────────────────┘
+                               │
+              ┌────────────────▼─────────────────┐  ◄─ 4 Attack Types:
+              │  S07: Adversarial Defense Layer   │     Prompt Injection · Authority Spoof
+              └────────────────┬─────────────────┘     Role-play Jailbreak · Obfuscation
+                               │
+              ┌────────────────▼─────────────────┐
+              │  S08: Jurisdiction Engine         │  US / EU / India / Global rule sets
+              └────────────────┬─────────────────┘
+                               │
+              ┌────────────────▼─────────────────┐
+              │  S09: VAC Ethics Check            │  Absolute violation categories
+              └────────────────┬─────────────────┘
+                               │
+              ┌────────────────▼─────────────────┐
+              │  S10: Decision Engine             │  Risk score aggregation · thresholds
+              └────────────────┬─────────────────┘
+                               │
+              ┌────────────────▼─────────────────┐
+              │  S11: Societal Monitor            │  Population-level harm signal (stub → Year 3)
+              └────────────────┬─────────────────┘
+                               │
+              ┌────────────────▼─────────────────┐
+              │  S12: Output Filter               │  Final gate · audit trail · JSON log
+              └────────────────┬─────────────────┘
+                               │
+          ┌────────────────────▼──────────────────────┐
+          │                 Decision                   │
+          └───┬───────────┬────────────┬──────────────┘
+              │           │            │            │
+          ┌───▼──┐   ┌────▼───┐   ┌───▼───┐   ┌───▼──────┐
+          │ALLOW │   │  WARN  │   │ BLOCK │   │ ESCALATE │
+          │  ✅  │   │   ⚠️  │   │  🚫  │   │    👤    │
+          └──────┘   └────────┘   └───────┘   └──────────┘
 ```
 
 ---

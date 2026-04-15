@@ -1,6 +1,6 @@
 """
 ═══════════════════════════════════════════════════════════════════════════════
-  test_responsible_ai.py  —  Unit Test Suite for Responsible AI Framework
+  test_v15.py  —  Unit Test Suite for Responsible AI Framework
   Pipeline v15 | Adversarial Engine v5 | SCM Engine v2
 ═══════════════════════════════════════════════════════════════════════════════
 
@@ -32,9 +32,9 @@
     TestAdvBenchSample         — Real AdvBench sample (30 cases)
 
   Run:
-    python3 test_responsible_ai.py           # all tests
-    python3 test_responsible_ai.py -v        # verbose
-    python3 test_responsible_ai.py -k child  # filter by name
+    python3 test_v15.py           # all tests
+    python3 test_v15.py -v        # verbose
+    python3 test_v15.py -k child  # filter by name
 
   PhD Note:
     இந்த test suite pipeline_v15-ஓட 195/195 (100%) coverage-ஐ verify பண்ணுது.
