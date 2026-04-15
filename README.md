@@ -348,7 +348,7 @@ responsible-ai-framework/
 │   │   └── groq_test_cases.csv      # Groq chatbot test cases
 │   └── gemini/
 │       ├── gemini_governed_chatbot.py
-│       └── gemini_test_cases.csv
+│       └── gemini_test_cases.csv    # Gemini chatbot test cases
 │
 ├── evaluation/
 │   ├── batch_runner.py
