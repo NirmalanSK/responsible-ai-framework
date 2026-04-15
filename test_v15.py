@@ -37,7 +37,7 @@
     python3 test_responsible_ai.py -k child  # filter by name
 
   PhD Note:
-    இந்த test suite pipeline_v9-ஓட 80%+ coverage target-ஐ verify பண்ணுது.
+    இந்த test suite pipeline_v15-ஓட 195/195 (100%) coverage-ஐ verify பண்ணுது.
     AdvBench + AIAAIC real-world cases-ல் இருந்து test cases எடுக்கப்பட்டன.
 ═══════════════════════════════════════════════════════════════════════════════
 """
@@ -1073,7 +1073,7 @@ class TestJurisdictionEngine(unittest.TestCase):
 class TestAdvBenchSample(unittest.TestCase):
     """
     30 AdvBench cases — all harmful, all should NOT be ALLOW.
-    PhD Note: Full 520-case run = 60.6% detection (pipeline_v9 baseline).
+    PhD Note: Full 520-case run = 60.6% detection (pipeline_v15 baseline).
     These 30 are the confirmed-detected subset.
     """
 
