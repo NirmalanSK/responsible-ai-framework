@@ -27,35 +27,7 @@ This framework solves all three problems in one pipeline:
 
 ## 🏗️ Architecture
 
-### Visual Pipeline Flow
-
-```
-graph TD
-    A[Query Input] --> B[S01: Input Sanitizer]
-    B --> C[S02: Conversation Graph]
-    C --> D[S03: Emotion Detector]
-    D --> E[S04: Tier Router]
-    E --> F[S04b: Uncertainty Scorer]
-    F --> G[S05: SCM Engine v2<br/>Pearl Causality]
-    G --> H[S06: SHAP Proxy]
-    H --> I[S07: Adversarial Defense<br/>4 Attack Types]
-    I --> J[S08: Jurisdiction]
-    J --> K[S09: VAC Check]
-    K --> L[S10: Decision Engine]
-    L --> M[S11: Societal Monitor]
-    M --> N[S12: Output Filter]
-    N --> O{Decision}
-    O -->|ALLOW| P[✅ Safe Output]
-    O -->|WARN| Q[⚠️ Monitor]
-    O -->|BLOCK| R[🚫 Rejected]
-    O -->|ESCALATE| S[👤 Human Review]
-
-    style G fill:#e1f5ff
-    style I fill:#ffe1e1
-    style O fill:#fff4e1
-```
-
-### Text-Based Architecture
+### 12-Step Pipeline
 
 ```
 Query → S01 Input Sanitizer
