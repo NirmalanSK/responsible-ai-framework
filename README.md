@@ -27,7 +27,77 @@ This framework solves all three problems in one pipeline:
 
 ## 🏗️ Architecture
 
-### 12-Step Pipeline
+### Visual Pipeline Flow
+
+```
+                    ┌──────────────────────┐
+                    │      Query Input      │
+                    └──────────┬───────────┘
+                               │
+              ┌────────────────▼─────────────────┐
+              │  S01: Input Sanitizer             │  Unicode normalise · multilingual
+              └────────────────┬─────────────────┘
+                               │
+              ┌────────────────▼─────────────────┐
+              │  S02: Conversation Graph          │  Session drift · escalation history
+              └────────────────┬─────────────────┘
+                               │
+              ┌────────────────▼─────────────────┐
+              │  S03: Emotion Detector            │  Crisis · distress · anger signals
+              └────────────────┬─────────────────┘
+                               │
+              ┌────────────────▼─────────────────┐
+              │  S04: Tier Router                 │  Tier 1 (safe) / 2 (grey) / 3 (risk)
+              └────────────────┬─────────────────┘
+                               │
+              ┌────────────────▼─────────────────┐
+              │  S04b: Uncertainty Scorer         │  OOD detection · confidence < 0.20 → ESCALATE
+              └────────────────┬─────────────────┘
+                               │
+              ┌────────────────▼─────────────────┐  ◄─ Pearl Causality (L1 + L2 + L3)
+              │  S05: SCM Engine v2               │     Backdoor · Frontdoor · NDE/NIE
+              │      + Sparse Causal Matrix 17×5  │     PNS / PN / PS Bounds · do-calculus
+              └────────────────┬─────────────────┘     Daubert Legal Admissibility Score
+                               │
+              ┌────────────────▼─────────────────┐
+              │  S06: SHAP / LIME Proxy           │  Feature attribution · explainability
+              └────────────────┬─────────────────┘
+                               │
+              ┌────────────────▼─────────────────┐  ◄─ 4 Attack Types:
+              │  S07: Adversarial Defense Layer   │     Prompt Injection · Authority Spoof
+              └────────────────┬─────────────────┘     Role-play Jailbreak · Obfuscation
+                               │
+              ┌────────────────▼─────────────────┐
+              │  S08: Jurisdiction Engine         │  US / EU / India / Global rule sets
+              └────────────────┬─────────────────┘
+                               │
+              ┌────────────────▼─────────────────┐
+              │  S09: VAC Ethics Check            │  Absolute violation categories
+              └────────────────┬─────────────────┘
+                               │
+              ┌────────────────▼─────────────────┐
+              │  S10: Decision Engine             │  Risk score aggregation · thresholds
+              └────────────────┬─────────────────┘
+                               │
+              ┌────────────────▼─────────────────┐
+              │  S11: Societal Monitor            │  Population-level harm signal (stub → Year 3)
+              └────────────────┬─────────────────┘
+                               │
+              ┌────────────────▼─────────────────┐
+              │  S12: Output Filter               │  Final gate · audit trail · JSON log
+              └────────────────┬─────────────────┘
+                               │
+          ┌────────────────────▼──────────────────────┐
+          │                 Decision                   │
+          └───┬───────────┬────────────┬──────────────┘
+              │           │            │            │
+          ┌───▼──┐   ┌────▼───┐   ┌───▼───┐   ┌───▼──────┐
+          │ALLOW │   │  WARN  │   │ BLOCK │   │ ESCALATE │
+          │  ✅  │   │   ⚠️  │   │  🚫  │   │    👤    │
+          └──────┘   └────────┘   └───────┘   └──────────┘
+```
+
+### Text-Based Architecture
 
 ```
 Query → S01 Input Sanitizer
@@ -348,7 +418,7 @@ responsible-ai-framework/
 │   │   └── groq_test_cases.csv      # Groq chatbot test cases
 │   └── gemini/
 │       ├── gemini_governed_chatbot.py
-│       └── gemini_test_cases.csv    # Gemini chatbot test cases
+│       └── gemini_test_cases.csv
 │
 ├── evaluation/
 │   ├── batch_runner.py
