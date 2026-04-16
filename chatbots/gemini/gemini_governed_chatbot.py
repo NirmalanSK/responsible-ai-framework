@@ -1,7 +1,13 @@
-# Gemini Governed Chatbot v5 — Research Edition
-# RAI Framework v15g + Gemini API
+# Gemini Governed Chatbot v5 — Research Edition (+ ContextEngine)
+# RAI Framework v15g + Gemini API + Contextual Memory
 # Features: Batch testing, Risk histogram, PDF report,
-#           Multi-model benchmark, Failure analysis
+#           Multi-model benchmark, Failure analysis,
+#           Multi-turn attack detection via ContextEngine
+#
+# ContextEngine integration (indirect pipeline connection):
+#   Same SQLite DB (rai_context.db) used by Groq chatbot.
+#   source = "gemini" so turns from both chatbots are distinguishable.
+#   No changes to pipeline_v15.py required.
 
 from __future__ import annotations
 
@@ -23,7 +29,6 @@ from reportlab.lib import colors
 
 sys.path.insert(0, r"C:\responsible-ai-framework")
 
-# ── Output dir — always save next to this script ──────────────────────
 OUTPUT_DIR = Path(__file__).parent
 
 from google import genai
@@ -34,10 +39,17 @@ from pipeline_v15 import (
     FinalDecision,
     Jurisdiction,
 )
+from context_engine import ContextEngine          # ← NEW
 
 # ── Setup ──────────────────────────────────────────────────────────────
-pipeline = ResponsibleAIPipeline()
-client   = genai.Client(api_key=os.getenv("GEMINI_API_KEY", ""))
+pipeline       = ResponsibleAIPipeline()
+client         = genai.Client(api_key=os.getenv("GEMINI_API_KEY", ""))
+context_engine = ContextEngine()                  # ← shared SQLite DB
+
+# Clean up stale sessions on startup
+_cleaned = context_engine.cleanup_old_sessions()
+if _cleaned:
+    print(f"  [ContextEngine] Cleaned {_cleaned} old session rows from DB.")
 
 JURISDICTION_MAP = {
     "US":     Jurisdiction.US,
@@ -45,6 +57,10 @@ JURISDICTION_MAP = {
     "INDIA":  Jurisdiction.INDIA,
     "GLOBAL": Jurisdiction.GLOBAL,
 }
+
+CUMULATIVE_BLOCK_THRESHOLD = 0.60
+CUMULATIVE_WARN_THRESHOLD  = 0.45
+
 
 # ── LLM Call ───────────────────────────────────────────────────────────
 def call_llm(query: str, model: str = "gemini-2.0-flash") -> str:
@@ -55,20 +71,29 @@ def call_llm(query: str, model: str = "gemini-2.0-flash") -> str:
     except Exception as e:
         return f"[LLM Error: {e}]"
 
+
 # ── Governed Chat ───────────────────────────────────────────────────────
 def governed_chat(
-    query: str,
+    query:        str,
+    session_id:   str,                              # ← NEW: required
     jurisdiction: str = "GLOBAL",
-    model: str = "gemini-2.0-flash",
+    model:        str = "gemini-2.0-flash",
 ) -> dict:
     """
-    YOUR FRAMEWORK as gatekeeper.
-    Only ALLOW/WARN queries reach the LLM.
-    BLOCK → no LLM call at all.
+    Pipeline + ContextEngine as gatekeeper.
+
+    Flow:
+        1. pipeline.run()  → decision + SCM risk score
+        2. ContextEngine   → cumulative session risk check
+        3. Override BLOCK  if cumulative risk ≥ 0.60
+        4. ContextEngine   → store turn (always, including BLOCKs)
+        5. LLM call        → only if ALLOW / WARN
     """
-    jur = JURISDICTION_MAP.get(jurisdiction.upper(), Jurisdiction.GLOBAL)
+    jur    = JURISDICTION_MAP.get(jurisdiction.upper(), Jurisdiction.GLOBAL)
     result = pipeline.run(PipelineInput(query=query, jurisdiction=jur))
     dec    = result.final_decision
+
+    risk_norm = round(result.scm_risk_pct / 100.0, 4)
 
     base = {
         "decision"   : dec.name,
@@ -77,30 +102,65 @@ def governed_chat(
         "model"      : model,
     }
 
-    if dec == FinalDecision.BLOCK:
-        return {**base, "response": "🚫 BLOCKED by RAI governance"}
+    # ── Cumulative Risk Check ─────────────────────────────────────────
+    cum_risky, cum_score, cum_reason = context_engine.detect_cumulative_risk(
+        session_id, risk_norm
+    )
 
-    if dec == FinalDecision.EXPERT_REVIEW:
+    cumulative_override = False
+    if cum_risky and dec != FinalDecision.BLOCK:
+        if cum_score >= CUMULATIVE_BLOCK_THRESHOLD:
+            dec               = FinalDecision.BLOCK
+            base["decision"]  = "BLOCK"
+            cumulative_override = True
+            base["cum_reason"]  = f"Cumulative block — {cum_reason}"
+        elif cum_score >= CUMULATIVE_WARN_THRESHOLD:
+            base["cum_reason"] = f"Cumulative warning — {cum_reason}"
+
+    # ── Store turn ────────────────────────────────────────────────────
+    context_engine.add_turn(
+        session_id   = session_id,
+        prompt       = query,
+        risk_score   = risk_norm,
+        decision     = base["decision"],
+        source       = "gemini",
+        jurisdiction = jurisdiction.upper(),
+        llm_model    = model,
+        attack_type  = getattr(result, "attack_type", None) and result.attack_type.value,
+        latency_ms   = result.total_ms,
+    )
+
+    # ── Build Response ────────────────────────────────────────────────
+    if base["decision"] == "BLOCK":
+        reason_msg = f" ({cum_reason})" if cumulative_override else ""
+        return {**base, "response": f"🚫 BLOCKED by RAI governance{reason_msg}"}
+
+    if base["decision"] == "EXPERT_REVIEW":
         return {**base, "response": "👤 Escalated for human review"}
 
-    # ALLOW or WARN → call LLM
     llm_response = call_llm(query, model=model)
     notice = "\n⚠️  Sensitive topic — response monitored." if dec == FinalDecision.WARN else ""
+    if "cum_reason" in base and dec != FinalDecision.BLOCK:
+        notice += f"\n⚠️  {base['cum_reason']}"
+
     return {**base, "response": llm_response + notice}
 
 
 # ── Batch Run ───────────────────────────────────────────────────────────
 def run_batch(
-    csv_path: str,
+    csv_path:     str,
     jurisdiction: str = "GLOBAL",
-    model: str = "gemini-2.0-flash",
+    model:        str = "gemini-2.0-flash",
 ) -> List[dict]:
     """Run all prompts in CSV through governed pipeline."""
+    session_id = context_engine.new_session(source="gemini_batch")
+
     rows = []
     with open(csv_path, encoding="utf-8") as f:
         for row in csv.DictReader(f):
             res = governed_chat(
                 query        = row["prompt"],
+                session_id   = session_id,
                 jurisdiction = row.get("jurisdiction", jurisdiction),
                 model        = model,
             )
@@ -108,7 +168,6 @@ def run_batch(
             res["prompt"]   = row["prompt"]
             res["expected"] = row.get("expected", "").strip().upper()
 
-            # Correctness check
             got = res["decision"].upper()
             exp = res["expected"]
             if exp:
@@ -125,14 +184,19 @@ def run_batch(
                 f"  {res.get('correct','  ')} [{res['decision']:<14}] "
                 f"risk={res['risk']:>5.1f}%  {row['prompt'][:55]}"
             )
+
+    # Auto-save context memory CSV
+    ts      = datetime.now().strftime("%Y%m%d_%H%M%S")
+    mem_csv = str(OUTPUT_DIR / f"context_memory_batch_{ts}.csv")
+    n       = context_engine.export_session_csv(session_id, mem_csv)
+    print(f"\n  🧠 Context memory saved ({n} turns) → {mem_csv}")
+
     return rows
 
 
-# ── 1. Risk Histogram ───────────────────────────────────────────────────
+# ── Risk Histogram ──────────────────────────────────────────────────────
 def plot_risk_histogram(rows: List[dict], out: str = "") -> None:
-    """Plot SCM risk score distribution across all queries."""
-    out = out or str(OUTPUT_DIR / "risk_hist.png")
-    risks    = [r["risk"] for r in rows]
+    out      = out or str(OUTPUT_DIR / "risk_hist.png")
     blocked  = [r["risk"] for r in rows if r["decision"] == "BLOCK"]
     allowed  = [r["risk"] for r in rows if r["decision"] == "ALLOW"]
     warned   = [r["risk"] for r in rows if r["decision"] == "WARN"]
@@ -154,15 +218,13 @@ def plot_risk_histogram(rows: List[dict], out: str = "") -> None:
     print(f"\n  📊 Risk histogram saved → {out}")
 
 
-# ── 2. PDF Report ────────────────────────────────────────────────────────
+# ── PDF Report ────────────────────────────────────────────────────────────
 def generate_pdf(rows: List[dict], out: str = "") -> None:
-    """Generate a per-case evaluation report as PDF."""
-    out = out or str(OUTPUT_DIR / "report.pdf")
+    out     = out or str(OUTPUT_DIR / "report.pdf")
     doc     = SimpleDocTemplate(out)
     styles  = getSampleStyleSheet()
     content = []
 
-    # Title
     content.append(Paragraph("RAI Governed Chatbot — Evaluation Report", styles["Title"]))
     content.append(Paragraph(
         f"Framework: Responsible AI Framework v5.0 (pipeline_v15g)  |  "
@@ -171,7 +233,6 @@ def generate_pdf(rows: List[dict], out: str = "") -> None:
     ))
     content.append(Spacer(1, 12))
 
-    # Summary stats
     total   = len(rows)
     blocked = sum(1 for r in rows if r["decision"] == "BLOCK")
     warned  = sum(1 for r in rows if r["decision"] == "WARN")
@@ -187,7 +248,8 @@ def generate_pdf(rows: List[dict], out: str = "") -> None:
         ["WARN",            str(warned)],
         ["ALLOW",           str(allowed)],
         ["Labeled cases",   str(len(labeled))],
-        ["Correct",         f"{correct}/{len(labeled)} ({correct/len(labeled)*100:.0f}%)" if labeled else "N/A"],
+        ["Correct",         f"{correct}/{len(labeled)} ({correct/len(labeled)*100:.0f}%)"
+                            if labeled else "N/A"],
     ]
     t = Table(summary_data, colWidths=[200, 200])
     t.setStyle(TableStyle([
@@ -201,7 +263,6 @@ def generate_pdf(rows: List[dict], out: str = "") -> None:
     content.append(t)
     content.append(Spacer(1, 16))
 
-    # Per-case table
     content.append(Paragraph("Per-Case Results", styles["Heading2"]))
     case_data = [["#", "Prompt", "Expected", "Got", "Risk%", "✓"]]
     for r in rows:
@@ -226,7 +287,6 @@ def generate_pdf(rows: List[dict], out: str = "") -> None:
     content.append(ct)
     content.append(Spacer(1, 16))
 
-    # Failure analysis
     failures = [r for r in rows if r.get("correct") == "❌"]
     if failures:
         content.append(Paragraph("Failure Analysis", styles["Heading2"]))
@@ -245,18 +305,13 @@ def generate_pdf(rows: List[dict], out: str = "") -> None:
     print(f"  📄 PDF report saved → {out}")
 
 
-# ── 3. Multi-model Benchmark ─────────────────────────────────────────────
+# ── Multi-model Benchmark ─────────────────────────────────────────────────
 def benchmark_models(
-    csv_path: str,
-    models: List[str],
+    csv_path:     str,
+    models:       List[str],
     jurisdiction: str = "GLOBAL",
 ) -> None:
-    """
-    Compare governance accuracy across multiple Gemini models.
-    Note: governance decision is pipeline-driven (same for all models).
-    LLM model affects RESPONSE QUALITY, not BLOCK/ALLOW decision.
-    This benchmark shows pipeline accuracy per model context.
-    """
+    """Compare governance accuracy across multiple Gemini models."""
     print("\n" + "=" * 55)
     print("  MULTI-MODEL BENCHMARK")
     print("=" * 55)
@@ -271,13 +326,16 @@ def benchmark_models(
 
     results = {}
     for model in models:
-        correct = 0
+        # Each model gets its own session in benchmark mode
+        session_id = context_engine.new_session(source=f"gemini_bench")
+        correct    = 0
         print(f"\n  Model: {model}")
         for row in labeled:
             res = governed_chat(
                 query        = row["prompt"],
+                session_id   = session_id,
                 jurisdiction = row.get("jurisdiction", jurisdiction),
-                model        = model,           # ← correctly passed now
+                model        = model,
             )
             exp = row["expected"].strip().upper()
             got = res["decision"].upper()
@@ -300,9 +358,8 @@ def benchmark_models(
     print("=" * 55)
 
 
-# ── 4. Failure Analysis ──────────────────────────────────────────────────
+# ── Failure Analysis ──────────────────────────────────────────────────────
 def failure_analysis(rows: List[dict]) -> None:
-    """Print misclassified cases with details."""
     failures = [r for r in rows if r.get("correct") == "❌"]
     print(f"\n{'='*55}")
     print(f"  FAILURE ANALYSIS — {len(failures)} failures / {len(rows)} cases")
@@ -316,20 +373,21 @@ def failure_analysis(rows: List[dict]) -> None:
         print()
 
 
-# ── 5. Interactive Chat Mode ─────────────────────────────────────────────
+# ── Interactive Chat Mode ─────────────────────────────────────────────────
 def run_interactive(
     jurisdiction: str = "GLOBAL",
-    model: str = "gemini-2.0-flash",
+    model:        str = "gemini-2.0-flash",
 ) -> None:
     """
-    Live terminal chat — type prompts, get governed responses.
-    Same as Groq chatbot interactive mode.
-    Type 'quit' to exit.
+    Live terminal chat with Gemini.
+    Session memory auto-saved to CSV on exit.
     """
+    session_id = context_engine.new_session(source="gemini")
+
     print("\n" + "=" * 60)
     print("  RESPONSIBLE AI GOVERNED CHATBOT — GEMINI INTERACTIVE")
-    print(f"  Framework v15g  |  Model: {model}")
-    print(f"  Jurisdiction: {jurisdiction}")
+    print(f"  Framework v15g + ContextEngine  |  Model: {model}")
+    print(f"  Jurisdiction: {jurisdiction}  |  Session: {session_id}")
     print("  Type 'quit' to exit | 'switch <model>' to change model")
     print("=" * 60 + "\n")
 
@@ -344,19 +402,22 @@ def run_interactive(
 
         if not query:
             continue
-
         if query.lower() in ("quit", "exit", "q"):
             print("Goodbye!")
             break
 
-        # Switch model mid-session
         if query.lower().startswith("switch "):
             current_model = query.split(" ", 1)[1].strip()
             print(f"  ↩  Model switched → {current_model}\n")
             continue
 
-        result = governed_chat(query, jurisdiction=jurisdiction, model=current_model)
-        dec    = result["decision"]
+        result = governed_chat(
+            query        = query,
+            session_id   = session_id,
+            jurisdiction = jurisdiction,
+            model        = current_model,
+        )
+        dec = result["decision"]
 
         print(f"\n[{dec}] risk={result['risk']:.1f}% | {result['latency_ms']:.0f}ms | model={current_model}")
 
@@ -372,12 +433,20 @@ def run_interactive(
         print()
         session_rows.append({**result, "prompt": query, "expected": ""})
 
-    # End of session — offer report
+    # ── Auto-save context memory ──────────────────────────────────────
     if session_rows:
-        save = input("\nSave session report? (y/n): ").strip().lower()
+        ts      = datetime.now().strftime("%Y%m%d_%H%M%S")
+        mem_csv = str(OUTPUT_DIR / f"context_memory_{ts}.csv")
+        n       = context_engine.export_session_csv(session_id, mem_csv)
+        print(f"\n  🧠 Context memory auto-saved ({n} turns) → {mem_csv}")
+
+        summary = context_engine.session_summary(session_id)
+        print(f"  📊 Session summary: {summary}")
+
+        save = input("\nSave full session report (PDF + histogram)? (y/n): ").strip().lower()
         if save == "y":
-            plot_risk_histogram(session_rows, out=str(OUTPUT_DIR / "session_risk_hist.png"))
-            generate_pdf(session_rows, out=str(OUTPUT_DIR / "session_report.pdf"))
+            plot_risk_histogram(session_rows, out=str(OUTPUT_DIR / f"session_risk_hist_{ts}.png"))
+            generate_pdf(session_rows, out=str(OUTPUT_DIR / f"session_report_{ts}.pdf"))
             print("  Reports saved in chatbots/gemini/ folder")
 
 
@@ -386,7 +455,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="RAI Governed Chatbot — Gemini Edition (v15g)"
+        description="RAI Governed Chatbot — Gemini Edition (v15g + ContextEngine)"
     )
     parser.add_argument(
         "--mode", choices=["chat", "batch", "benchmark"],
@@ -398,18 +467,16 @@ if __name__ == "__main__":
     parser.add_argument("--model",        default="gemini-2.0-flash")
     args = parser.parse_args()
 
-    MODELS = [args.model]  # add more models to benchmark here
+    MODELS = [args.model]
 
     print("\n" + "=" * 60)
-    print("  RAI GOVERNED CHATBOT — GEMINI EDITION (v15g)")
+    print("  RAI GOVERNED CHATBOT — GEMINI EDITION (v15g + ContextEngine)")
     print("=" * 60)
 
     if args.mode == "chat":
-        # ── Interactive terminal mode ──────────────────────────────
         run_interactive(jurisdiction=args.jurisdiction, model=args.model)
 
     elif args.mode == "batch":
-        # ── CSV batch mode + report ────────────────────────────────
         print(f"\n  Batch mode → {args.csv}\n")
         rows = run_batch(args.csv, jurisdiction=args.jurisdiction, model=args.model)
         plot_risk_histogram(rows)
@@ -418,5 +485,4 @@ if __name__ == "__main__":
         print(f"\n  Done. Outputs saved in: {OUTPUT_DIR}")
 
     elif args.mode == "benchmark":
-        # ── Multi-model benchmark ──────────────────────────────────
         benchmark_models(args.csv, MODELS, jurisdiction=args.jurisdiction)

@@ -1,6 +1,12 @@
-# Governed AI Chatbot — Groq Edition (v15g)
-# RAI Framework v15g + Groq (Llama 3.3 70B)
+# Governed AI Chatbot — Groq Edition (v15g + ContextEngine)
+# RAI Framework v15g + Groq (Llama 3.3 70B) + Contextual Memory
 # Modes: chat (interactive terminal) | batch (CSV → PDF + PNG)
+#
+# ContextEngine integration (indirect pipeline connection):
+#   User → governed_chat() → ContextEngine check → Pipeline → LLM
+#                                     ↑
+#                          Same SQLite DB that pipeline will use in Year 2.
+#   No changes to pipeline_v15.py required.
 
 from __future__ import annotations
 
@@ -28,12 +34,19 @@ from pipeline_v15 import (
     ResponsibleAIPipeline, PipelineInput,
     FinalDecision, Jurisdiction
 )
+from context_engine import ContextEngine          # ← NEW
 
 # ── Setup ──────────────────────────────────────────────────────────────
-pipeline = ResponsibleAIPipeline()
-client   = Groq(api_key=os.environ.get("GROQ_API_KEY", ""))
+pipeline       = ResponsibleAIPipeline()
+client         = Groq(api_key=os.environ.get("GROQ_API_KEY", ""))
+context_engine = ContextEngine()                  # ← shared SQLite DB
 
-# Output files always save next to this script (chatbots/groq/)
+# Clean up stale sessions on startup (older than 24 h)
+_cleaned = context_engine.cleanup_old_sessions()
+if _cleaned:
+    print(f"  [ContextEngine] Cleaned {_cleaned} old session rows from DB.")
+
+# Output files always save next to this script
 OUTPUT_DIR = Path(__file__).parent
 
 JURISDICTION_MAP = {
@@ -42,6 +55,11 @@ JURISDICTION_MAP = {
     "INDIA":  Jurisdiction.INDIA,
     "GLOBAL": Jurisdiction.GLOBAL,
 }
+
+# Cumulative risk threshold — avg session risk above this triggers block
+CUMULATIVE_BLOCK_THRESHOLD = 0.60   # 60% → hard block
+CUMULATIVE_WARN_THRESHOLD  = 0.45   # 45% → flag in response
+
 
 # ── LLM Call ───────────────────────────────────────────────────────────
 def call_llm(query: str, model: str = "llama-3.3-70b-versatile") -> str:
@@ -69,17 +87,31 @@ def call_llm(query: str, model: str = "llama-3.3-70b-versatile") -> str:
 
 # ── Governed Chat ───────────────────────────────────────────────────────
 def governed_chat(
-    query: str,
+    query:        str,
+    session_id:   str,                              # ← NEW: required
     jurisdiction: str = "GLOBAL",
-    model: str = "llama-3.3-70b-versatile",
+    model:        str = "llama-3.3-70b-versatile",
 ) -> dict:
     """
-    Pipeline as gatekeeper — only ALLOW/WARN reach the LLM.
-    BLOCK → no LLM call at all.
+    Pipeline + ContextEngine as gatekeeper.
+
+    Flow:
+        1. pipeline.run()  → get decision + SCM risk score
+        2. ContextEngine   → check cumulative session risk
+        3. Override to BLOCK if cumulative risk exceeds threshold
+        4. ContextEngine   → store this turn
+        5. LLM call        → only if final decision is ALLOW / WARN
+
+    The ContextEngine sits OUTSIDE pipeline (no pipeline changes).
+    Same SQLite DB will be reused when ContextEngine moves inside
+    pipeline in Year 2.
     """
     jur    = JURISDICTION_MAP.get(jurisdiction.upper(), Jurisdiction.GLOBAL)
     result = pipeline.run(PipelineInput(query=query, jurisdiction=jur))
     dec    = result.final_decision
+
+    # ── Normalise risk score ─────────────────────────────────────────
+    risk_norm = round(result.scm_risk_pct / 100.0, 4)   # 0.0 – 1.0
 
     base = {
         "decision"   : dec.name,
@@ -88,29 +120,80 @@ def governed_chat(
         "model"      : model,
     }
 
-    if dec == FinalDecision.BLOCK:
-        return {**base, "response": "🚫 BLOCKED by RAI governance"}
+    # ── Cumulative Risk Check ─────────────────────────────────────────
+    # Uses REAL SCM score (not keyword heuristic) — more accurate.
+    cum_risky, cum_score, cum_reason = context_engine.detect_cumulative_risk(
+        session_id, risk_norm
+    )
 
-    if dec == FinalDecision.EXPERT_REVIEW:
+    cumulative_override = False
+    if cum_risky and dec != FinalDecision.BLOCK:
+        if cum_score >= CUMULATIVE_BLOCK_THRESHOLD:
+            # Override decision to BLOCK
+            dec               = FinalDecision.BLOCK
+            base["decision"]  = "BLOCK"
+            cumulative_override = True
+            base["cum_reason"]  = f"Cumulative block — {cum_reason}"
+        elif cum_score >= CUMULATIVE_WARN_THRESHOLD:
+            base["cum_reason"] = f"Cumulative warning — {cum_reason}"
+
+    # ── Store this turn in ContextEngine ─────────────────────────────
+    # Stored BEFORE LLM call so BLOCK turns are also recorded.
+    context_engine.add_turn(
+        session_id   = session_id,
+        prompt       = query,
+        risk_score   = risk_norm,
+        decision     = base["decision"],
+        source       = "groq",
+        jurisdiction = jurisdiction.upper(),
+        llm_model    = model,
+        attack_type  = getattr(result, "attack_type", None) and result.attack_type.value,
+        latency_ms   = result.total_ms,
+        # Year 2: fill these from pipeline internals
+        # scm_risk_raw  = ...,
+        # matrix_score  = ...,
+        # legal_score   = ...,
+    )
+
+    # ── Build Response ────────────────────────────────────────────────
+    if base["decision"] == "BLOCK":
+        reason_msg = (
+            f" ({cum_reason})" if cumulative_override else ""
+        )
+        return {**base, "response": f"🚫 BLOCKED by RAI governance{reason_msg}"}
+
+    if base["decision"] == "EXPERT_REVIEW":
         return {**base, "response": "👤 Escalated for human review"}
 
+    # ALLOW or WARN → call LLM
     llm_response = call_llm(query, model=model)
+
+    # Update stored row with LLM response (best-effort)
+    # (SQLite UPDATE by session+turn would work here; skip for simplicity)
+
     notice = "\n⚠️  Sensitive topic — response monitored." if dec == FinalDecision.WARN else ""
+    if "cum_reason" in base and dec != FinalDecision.BLOCK:
+        notice += f"\n⚠️  {base['cum_reason']}"
+
     return {**base, "response": llm_response + notice}
 
 
 # ── Batch Run ───────────────────────────────────────────────────────────
 def run_batch(
-    csv_path: str,
+    csv_path:     str,
     jurisdiction: str = "GLOBAL",
-    model: str = "llama-3.3-70b-versatile",
+    model:        str = "llama-3.3-70b-versatile",
 ) -> List[dict]:
     """Run all prompts in CSV through governed pipeline."""
+    # Each batch gets its own session
+    session_id = context_engine.new_session(source="groq_batch")
+
     rows = []
     with open(csv_path, encoding="utf-8") as f:
         for row in csv.DictReader(f):
             res = governed_chat(
                 query        = row["prompt"],
+                session_id   = session_id,
                 jurisdiction = row.get("jurisdiction", jurisdiction),
                 model        = model,
             )
@@ -118,7 +201,6 @@ def run_batch(
             res["prompt"]   = row["prompt"]
             res["expected"] = row.get("expected", "").strip().upper()
 
-            # Correctness check
             got = res["decision"].upper()
             exp = res["expected"]
             if exp:
@@ -135,12 +217,17 @@ def run_batch(
                 f"  {res.get('correct','  ')} [{res['decision']:<14}] "
                 f"risk={res['risk']:>5.1f}%  {row['prompt'][:55]}"
             )
+
+    # ── Auto-save context memory for this batch session ───────────────
+    mem_csv = str(OUTPUT_DIR / f"context_memory_batch_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv")
+    n = context_engine.export_session_csv(session_id, mem_csv)
+    print(f"\n  🧠 Context memory saved ({n} turns) → {mem_csv}")
+
     return rows
 
 
 # ── Risk Histogram ──────────────────────────────────────────────────────
 def plot_risk_histogram(rows: List[dict], out: str = "") -> None:
-    """Plot SCM risk score distribution — ALLOW/WARN/BLOCK color split."""
     out     = out or str(OUTPUT_DIR / "risk_hist.png")
     blocked = [r["risk"] for r in rows if r["decision"] == "BLOCK"]
     warned  = [r["risk"] for r in rows if r["decision"] == "WARN"]
@@ -165,13 +252,11 @@ def plot_risk_histogram(rows: List[dict], out: str = "") -> None:
 
 # ── PDF Report ───────────────────────────────────────────────────────────
 def generate_pdf(rows: List[dict], out: str = "") -> None:
-    """Generate per-case evaluation report as PDF."""
     out     = out or str(OUTPUT_DIR / "report.pdf")
     doc     = SimpleDocTemplate(out)
     styles  = getSampleStyleSheet()
     content = []
 
-    # Title
     content.append(Paragraph(
         "RAI Governed Chatbot — Evaluation Report (Groq)", styles["Title"]
     ))
@@ -183,7 +268,6 @@ def generate_pdf(rows: List[dict], out: str = "") -> None:
     ))
     content.append(Spacer(1, 12))
 
-    # Summary stats
     total   = len(rows)
     blocked = sum(1 for r in rows if r["decision"] == "BLOCK")
     warned  = sum(1 for r in rows if r["decision"] == "WARN")
@@ -199,7 +283,8 @@ def generate_pdf(rows: List[dict], out: str = "") -> None:
         ["WARN",          str(warned)],
         ["ALLOW",         str(allowed)],
         ["Labeled cases", str(len(labeled))],
-        ["Correct",       f"{correct}/{len(labeled)} ({correct/len(labeled)*100:.0f}%)" if labeled else "N/A"],
+        ["Correct",       f"{correct}/{len(labeled)} ({correct/len(labeled)*100:.0f}%)"
+                          if labeled else "N/A"],
     ]
     t = Table(summary_data, colWidths=[200, 200])
     t.setStyle(TableStyle([
@@ -213,7 +298,6 @@ def generate_pdf(rows: List[dict], out: str = "") -> None:
     content.append(t)
     content.append(Spacer(1, 16))
 
-    # Per-case table
     content.append(Paragraph("Per-Case Results", styles["Heading2"]))
     case_data = [["#", "Prompt", "Expected", "Got", "Risk%", "✓"]]
     for r in rows:
@@ -238,7 +322,6 @@ def generate_pdf(rows: List[dict], out: str = "") -> None:
     content.append(ct)
     content.append(Spacer(1, 16))
 
-    # Failure analysis
     failures = [r for r in rows if r.get("correct") == "❌"]
     if failures:
         content.append(Paragraph("Failure Analysis", styles["Heading2"]))
@@ -277,13 +360,19 @@ def failure_analysis(rows: List[dict]) -> None:
 # ── Interactive Chat ─────────────────────────────────────────────────────
 def run_interactive(
     jurisdiction: str = "GLOBAL",
-    model: str = "llama-3.3-70b-versatile",
+    model:        str = "llama-3.3-70b-versatile",
 ) -> None:
-    """Live terminal chat — type prompts, get governed responses."""
+    """
+    Live terminal chat — type prompts, get governed responses.
+    Session memory auto-saved to CSV on exit.
+    """
+    # One session per interactive run — persists across the full conversation
+    session_id = context_engine.new_session(source="groq")
+
     print("\n" + "=" * 60)
     print("  RESPONSIBLE AI GOVERNED CHATBOT — GROQ INTERACTIVE")
-    print(f"  Framework v15g  |  Model: {model}")
-    print(f"  Jurisdiction: {jurisdiction}")
+    print(f"  Framework v15g + ContextEngine  |  Model: {model}")
+    print(f"  Jurisdiction: {jurisdiction}  |  Session: {session_id}")
     print("  Type 'quit' to exit | session report saved on exit")
     print("=" * 60 + "\n")
 
@@ -301,8 +390,13 @@ def run_interactive(
             print("Goodbye!")
             break
 
-        result = governed_chat(query, jurisdiction=jurisdiction, model=model)
-        dec    = result["decision"]
+        result = governed_chat(
+            query        = query,
+            session_id   = session_id,
+            jurisdiction = jurisdiction,
+            model        = model,
+        )
+        dec = result["decision"]
 
         print(f"\n[{dec}] risk={result['risk']:.1f}% | {result['latency_ms']:.0f}ms")
         if dec == "BLOCK":
@@ -317,12 +411,23 @@ def run_interactive(
 
         session_rows.append({**result, "prompt": query, "expected": ""})
 
-    # End of session — auto save report
+    # ── End of session: auto-save ─────────────────────────────────────
     if session_rows:
-        save = input("\nSave session report? (y/n): ").strip().lower()
+        # Always auto-export context memory CSV
+        ts      = datetime.now().strftime("%Y%m%d_%H%M%S")
+        mem_csv = str(OUTPUT_DIR / f"context_memory_{ts}.csv")
+        n       = context_engine.export_session_csv(session_id, mem_csv)
+        print(f"\n  🧠 Context memory auto-saved ({n} turns) → {mem_csv}")
+
+        # Session summary
+        summary = context_engine.session_summary(session_id)
+        print(f"  📊 Session summary: {summary}")
+
+        # Optional: full report
+        save = input("\nSave full session report (PDF + histogram)? (y/n): ").strip().lower()
         if save == "y":
-            plot_risk_histogram(session_rows, out=str(OUTPUT_DIR / "session_risk_hist.png"))
-            generate_pdf(session_rows, out=str(OUTPUT_DIR / "session_report.pdf"))
+            plot_risk_histogram(session_rows, out=str(OUTPUT_DIR / f"session_risk_hist_{ts}.png"))
+            generate_pdf(session_rows, out=str(OUTPUT_DIR / f"session_report_{ts}.pdf"))
             print(f"  Reports saved in: {OUTPUT_DIR}")
 
 
@@ -331,7 +436,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="RAI Governed Chatbot — Groq Edition (v15g)"
+        description="RAI Governed Chatbot — Groq Edition (v15g + ContextEngine)"
     )
     parser.add_argument(
         "--mode", choices=["chat", "batch"],
@@ -344,7 +449,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     print("\n" + "=" * 60)
-    print("  RAI GOVERNED CHATBOT — GROQ EDITION (v15g)")
+    print("  RAI GOVERNED CHATBOT — GROQ EDITION (v15g + ContextEngine)")
     print("=" * 60)
 
     if args.mode == "chat":
