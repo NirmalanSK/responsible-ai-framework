@@ -1,3 +1,6 @@
 docs/*.pdf
 docs/*.aux
 docs/*.log
+docs/*.pdf
+docs/*.aux
+docs/*.log
