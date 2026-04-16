@@ -996,9 +996,41 @@ Source: Gemini (HTML dashboard suggestion)
 
 ---
 
-## 💡 IDEA: ContextEngine — Multi-Turn Jailbreak Detection
+## 💡 IDEA → ✅ IMPLEMENTED: ContextEngine — Multi-Turn Jailbreak Detection
 Date: April 2026
-Source: Original implementation (chatbot layer integration)
+Status: **IMPLEMENTED** — chatbot layer (Groq + Gemini). Pipeline integration: Year 2.
+Files: `context_engine.py` (framework root), both chatbots updated.
+
+### What Was Implemented (April 2026)
+
+  context_engine.py:
+    - ContextEngine class (SQLite backend, rai_context.db)
+    - new_session(source) → UUID session ID per chatbot run
+    - add_turn() → stores prompt, risk_score, decision, llm_model, etc.
+    - get_history() → retrieves last N turns for session
+    - detect_cumulative_risk() → 3-signal detection (slope/spike/avg)
+    - export_session_csv() → auto-export on every session end
+    - cleanup_old_sessions() → TTL-based cleanup (24h default)
+    - session_summary() → dict with turns, avg_risk, max_risk, block/warn/allow counts
+
+  governed_chatbot.py (Groq) — updated:
+    - Imports ContextEngine, creates session_id per run
+    - governed_chat() now takes session_id parameter
+    - Calls detect_cumulative_risk() with REAL SCM score (not keyword heuristic)
+    - Overrides to BLOCK if cum_score ≥ 0.60
+    - Stores every turn (including BLOCKs) via add_turn()
+    - Auto-exports context_memory_<timestamp>.csv on session end
+
+  gemini_governed_chatbot.py (Gemini) — updated:
+    - Same pattern as Groq chatbot
+    - source="gemini" so turns distinguishable in shared DB
+
+  Key design decision: _quick_risk_estimate NOT used.
+    Old plan: keyword estimate before pipeline runs.
+    Actual: pipeline runs first → use real SCM score → more accurate.
+    This also means detect_cumulative_risk() is called AFTER pipeline,
+    not before. Trade-off: can't skip expensive SCM for obvious cumulative risks.
+    Year 2 option: add lightweight pre-check before SCM for known escalation patterns.
 
 ### What It Does
   Single-turn pipeline-ல ஒரு query-ஐ மட்டும் பார்க்குது.
@@ -1030,15 +1062,41 @@ Source: Original implementation (chatbot layer integration)
   Design principle: "Schema once, populate incrementally"
   = No ALTER TABLE ever needed
 
-### Year 2 Integration Plan
-  New Step S00 in pipeline_v15.py:
-    Before S01 (Input Sanitizer):
-      - detect_cumulative_risk() → if risky → early BLOCK
-      - Saves expensive SCM + Adversarial computation
-    After S12 (Output Filter):
-      - add_turn() with real scm_risk_raw, matrix_score, legal_score
+### Year 2 Integration Plan (Pipeline Layer)
 
-  PipelineInput will add: session_id field
+  STATUS: Chatbot layer done ✅. Pipeline layer = Year 2.
+
+  Step 1 — Add session_id to PipelineInput:
+    @dataclass
+    class PipelineInput:
+        query: str
+        jurisdiction: Jurisdiction = Jurisdiction.GLOBAL
+        session_id: Optional[str] = None   # ← new field
+
+  Step 2 — Add Step S00 at pipeline start (before S01):
+    if inp.session_id:
+        quick_risk = lightweight_estimate(inp.query)  # keyword pre-check
+        is_risky, cum_score, reason = context_engine.detect_cumulative_risk(
+            inp.session_id, quick_risk
+        )
+        if is_risky and cum_score >= 0.60:
+            return early_exit(BLOCK, reason)   # saves SCM + adversarial cost
+
+  Step 3 — Add add_turn() at pipeline end (after S12):
+    if inp.session_id:
+        context_engine.add_turn(
+            session_id    = inp.session_id,
+            prompt        = inp.query,
+            risk_score    = result.scm_risk_pct / 100.0,
+            decision      = result.final_decision.value,
+            source        = "pipeline",
+            scm_risk_raw  = result.scm_risk_raw,    # real value now
+            matrix_score  = result.matrix_score,    # real value now
+            legal_score   = result.legal_score,     # real value now
+        )
+
+  DB migration: ZERO — all Year 2 columns already in schema as NULL.
+  Estimated effort: 1-2 hours to implement + test.
 
 ### PhD Contribution Value
   Novel claim: "First RAI middleware with persistent conversational memory
@@ -1052,10 +1110,16 @@ Source: Original implementation (chatbot layer integration)
     "Turn 1 was borderline, Turn 3 was clearly escalating"
     = Intent progression evidence (court-admissible audit)
 
-### Limitations (honest)
-  - SQLite: single-threaded → Year 3: PostgreSQL/Redis
-  - No user_id: session_id only → Year 3: JWT/OAuth
-  - quick_risk_estimate: not needed now (chatbot uses real SCM score)
-    Year 2: lightweight keyword estimate before SCM runs
+### Limitations (honest, current state)
+  - SQLite: single-threaded, file-locked → Year 3: PostgreSQL/Redis for concurrent users
+  - No cross-session persistence: session_id is per-run UUID. Restart = new session.
+    Attacker who closes tab and reopens bypasses cumulative detection.
+    Year 3 mitigation: JWT/OAuth user_id for persistent cross-session tracking.
+  - detect_cumulative_risk() called AFTER pipeline.run():
+    Can't short-circuit expensive SCM computation for escalating sessions.
+    Year 2 option: lightweight keyword pre-check before SCM for known patterns.
+  - No semantic similarity: "What chemicals explode" vs "Volatile reactions?" =
+    treated as different topics. SQLite risk score tracking only.
+    Year 2: ChromaDB embedding similarity for topic drift detection.
 
 ---
