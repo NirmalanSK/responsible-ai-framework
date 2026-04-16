@@ -35,6 +35,10 @@ This framework solves all three problems in one pipeline:
                     └──────────┬───────────┘
                                │
               ┌────────────────▼─────────────────┐
+              │  S00: Context Memory Engine       │  Multi-turn · session risk · slow-boil detection
+              └────────────────┬─────────────────┘
+                               │
+              ┌────────────────▼─────────────────┐
               │  S01: Input Sanitizer             │  Unicode normalise · multilingual
               └────────────────┬─────────────────┘
                                │
@@ -100,7 +104,8 @@ This framework solves all three problems in one pipeline:
 ### Text-Based Architecture
 
 ```
-Query → S01 Input Sanitizer
+Query → S00 Context Memory Engine
+      → S01 Input Sanitizer
       → S02 Conversation Graph
       → S03 Emotion Detector
       → S04 Tier Router (Tier 1/2/3)
@@ -489,7 +494,7 @@ python evaluation/analyze_simulation.py
 | --- | --- | --- |
 | **Threshold probing** | Partial — rate limiter (30 req/min) | SBERT semantic tiering removes fixed keyword threshold |
 | **Semantic camouflage** | Weak — pattern-based Tier router | XLM-RoBERTa (Phase 6) — intent over surface form |
-| **Split-query attack** | Within-session only (Step 2 conversation graph) | Cross-session Redis tracking (Year 3) |
+| **Split-query attack** | ✅ ContextEngine — session-level cumulative risk tracking (3 signals: slope/spike/avg) | Cross-session Redis tracking (Year 3) |
 | **Middleware bypass** | Architectural assumption only | Year 2: deployment enforcement guide |
 
 > The 2 adversarial robustness gaps (`test_authority_spoofing_detected`, `test_prompt_injection_base64`) require semantic-level ML detection — documented as Year 2 targets. Pattern-based workarounds applied in v15g; full robustness is the Year 2 upgrade path.
