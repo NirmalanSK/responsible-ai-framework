@@ -155,6 +155,16 @@ Query → S00 Context Memory Engine
 * Education queries: ×2.0
 * General: ×1.0
 
+### 5. ContextEngine — Multi-Turn Attack Detection
+
+* SQLite-backed persistent session memory across conversation turns
+* Detects "slow-boil" gradual escalation attacks invisible to single-turn analysis
+* 3 detection signals: linear regression slope, sudden spike, sustained average
+* Cumulative risk override: avg session risk ≥ 0.60 → force BLOCK regardless of individual turn score
+* Schema pre-designed for Year 2 pipeline integration — NULL columns already present, zero migration needed
+* Tamper-evident conversation audit trail (turn-by-turn risk progression = court-admissible intent evidence)
+* Auto-exports session CSV on every run (chatbot layer) → future AIAAIC multi-turn validation dataset
+
 ---
 
 ## 📊 Benchmark Results
@@ -233,6 +243,7 @@ if intent_score > 0.75:
 | **Multi-Domain DAGs** | ✅ 17 domains | ❌ | ❌ | ❌ | Configurable | ✅ Auto-discovery |
 | **Counterfactual Reasoning** | ✅ L3 (PNS bounds) | ❌ | ❌ | ❌ | ❌ | Partial (implied) |
 | **Sparse Causal Matrix** | ✅ 17×5 | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Multi-Turn Detection** | ✅ ContextEngine (3 signals) | ❌ | ❌ | ❌ | ❌ | ❌ |
 | **Working Code + Tests** | ✅ 195/195 tests | ✅ | ✅ | ✅ | ✅ | ❌ Theory only |
 | **Open Source** | ✅ MIT | ✅ | ✅ | ✅ | ✅ | ✅ |
 
@@ -413,6 +424,7 @@ responsible-ai-framework/
 ├── pipeline_v15.py              # 12-step pipeline orchestrator (v15g)
 ├── scm_engine_v2.py             # Full Pearl Theory engine (L1+L2+L3)
 ├── adversarial_engine_v5.py     # 4 attack type detection
+├── context_engine.py            # Multi-turn attack detection (SQLite session memory)
 ├── test_v15.py                  # 195 unit tests (195/195 passing — 100%)
 ├── requirements.txt             # Dependencies
 ├── README.md
@@ -566,6 +578,15 @@ After v15c (April):  177 passed, 2 failed (99.4%)   ← EU + sentencing patterns
 After v15d (April):  193 passed, 2 failed (99.0%)   ← +16 deployment gap tests
 After v15g (April):  195 passed, 0 failed (100%)    ← AIAAIC + 5 edge case fixes ✅
 ```
+
+### What Changed — v15g → ContextEngine Integration (April 2026)
+
+* **`context_engine.py` created:** SQLite-backed multi-turn attack detection layer
+* **Both chatbots updated** (`governed_chatbot.py` + `gemini_governed_chatbot.py`): ContextEngine integrated at chatbot layer
+* **Detection logic:** 3 signals (slope, spike, avg) using real SCM score — no keyword heuristic
+* **Auto CSV export:** Every session auto-saves `context_memory_<timestamp>.csv` to output folder
+* **Future-proof schema:** `scm_risk_raw, matrix_score, legal_score` columns pre-added as NULL → Year 2 pipeline integration requires zero DB migration
+* **Note:** `pipeline_v15.py` not modified — ContextEngine sits cleanly at chatbot layer. Year 2: move to Step S00 inside pipeline
 
 ### What Changed — v15d → v15g
 
