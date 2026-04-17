@@ -445,7 +445,8 @@ responsible-ai-framework/
 │   └── AIAAIC_50Case_TestReport.md
 │
 └── docs/
-    └── responsible_ai_v5_0.html
+    ├── responsible_ai_v5_0.html    # Interactive dashboard
+    └── phd_math_proofs.tex         # Formal mathematical proofs (LaTeX)
 ```
 
 ### Run Commands
