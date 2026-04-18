@@ -1,6 +1,10 @@
 # Responsible AI Framework v5.0
 
-**A unified middleware combining real-time AI safety + causal bias detection + legal admissibility scoring — the first system to address all three layers in a single pipeline.**
+[![Tests](https://github.com/NirmalanSK/responsible-ai-framework/actions/workflows/ci.yml/badge.svg)](https://github.com/NirmalanSK/responsible-ai-framework/actions/workflows/ci.yml)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+**A unified middleware combining real-time AI safety + causal bias detection + legal admissibility scoring — to our knowledge, the first system to address all three layers in a single deployment-stage pipeline.**
 
 > *PhD Research — Nirmalan | NYU Application 2026*
 
@@ -16,7 +20,7 @@ This framework solves all three problems in one pipeline:
 | --- | --- | --- |
 | **Safety** | Harmful content, adversarial attacks, jailbreaks | Any AI deployment |
 | **Responsible AI** | Causal bias proof, protected group discrimination | Hiring, healthcare, criminal justice AI |
-| **Legal** | Daubert-admissible evidence, audit trail | Courts, regulators, EU AI Act compliance |
+| **Legal** | Daubert-aligned audit trail, causal evidence output | Courts, regulators, EU AI Act compliance |
 
 **Example:** COMPAS criminal risk scoring tool
 
@@ -140,7 +144,7 @@ Query → S00 Context Memory Engine
 * NDE + NIE (Natural Direct/Indirect Effects)
 * Tian-Pearl PNS/PN/PS Bounds
 * do-calculus 3-Rule verification
-* Legal Admissibility Score (Daubert standard + EU AI Act Art.13)
+* Legal Admissibility Score (Daubert-aligned standard + EU AI Act Art.13)
 
 ### 3. Uncertainty Scorer (Step 04b)
 
@@ -264,7 +268,7 @@ if intent_score > 0.75:
 **3. Legal Admissibility**
 
 * **Other frameworks:** Fairness metrics (correlation-based)
-* **This framework:** Causal proof with PNS bounds (court-admissible evidence via Daubert standard)
+* **This framework:** Causal proof with PNS bounds (Daubert-aligned audit trail — domain expert validation required for court use)
 
 ---
 
@@ -277,7 +281,7 @@ This framework operates at the **technical implementation layer** — complement
 | **Level** | Technical middleware | Org governance | Mgmt system standard | Design-time process | Principles |
 | **Causal proof** | ✅ Pearl L1-L3 | ❌ | ❌ | ❌ | ❌ |
 | **Real-time enforcement** | ✅ 12-step pipeline | ❌ | ❌ | ❌ | ❌ |
-| **Legal evidence output** | ✅ Daubert-aligned | ❌ | ❌ | ❌ | ❌ |
+| **Legal evidence output** | ✅ Daubert-aligned audit trail | ❌ | ❌ | ❌ | ❌ |
 | **Risk quantification** | ✅ TCE/PNS scores | Qualitative only | Qualitative only | Qualitative only | Qualitative only |
 | **Adversarial defense** | ✅ 4 attack types | ❌ | ❌ | ❌ | ❌ |
 | **Fairness** | ✅ Causal (deployment) | Recommended | Mandated | Value-based | Principle |
@@ -409,10 +413,10 @@ Literature acknowledges: *"Responsible, Fair, and Explainable AI has several wea
 
 * ✅ Training (via VirnyFlow compatibility)
 * ✅ Deployment (real-time causal governance)
-* ✅ Legal (Daubert-admissible evidence)
+* ✅ Legal (Daubert-aligned audit trail)
 * ✅ Adversarial robustness (4 attack types)
 
-**Novel Contribution:** First unified middleware for complete responsible AI lifecycle.
+**Novel Contribution:** To our knowledge, the first unified middleware for complete responsible AI lifecycle — combining deployment-stage safety, causal bias proof, and legal audit trail.
 
 ---
 
@@ -495,7 +499,7 @@ python evaluation/analyze_simulation.py
 ### Known Technical Limitations
 
 * **Matrix weights:** Currently logical estimates → Year 2: data-driven calibration (Bayesian Optimization on AIAAIC 2,223 incidents)
-* **Legal claims:** Daubert-aligned evidence, **not court-decisive** (domain expert validation required)
+* **Legal claims:** Daubert-aligned audit trail output, **not court-decisive** — domain expert validation required before use in legal proceedings
 * **HarmBench 14.5%:** Pattern ceiling — semantic understanding needs Year 2 ML (XLM-RoBERTa target: 75-80%)
 * **Societal Monitor (Step 11):** Stub — Redis + differential privacy needed Year 3
 * **DAG validation:** 17 domain DAGs are expert-defined. Year 2 plan: DoWhy sensitivity analysis (Phase 4)
@@ -510,7 +514,7 @@ python evaluation/analyze_simulation.py
 | **Split-query attack** | ✅ ContextEngine — session-level cumulative risk tracking (3 signals: slope/spike/avg) | Cross-session Redis tracking (Year 3) |
 | **Middleware bypass** | Architectural assumption only | Year 2: deployment enforcement guide |
 
-> The 2 adversarial robustness gaps (`test_authority_spoofing_detected`, `test_prompt_injection_base64`) require semantic-level ML detection — documented as Year 2 targets. Pattern-based workarounds applied in v15g; full robustness is the Year 2 upgrade path.
+> **Note on adversarial robustness:** `test_authority_spoofing_detected` and `test_prompt_injection_base64` both pass in v15g via pattern-based workarounds. Full semantic robustness (BERT/SBERT-level intent detection) is a Year 2 upgrade target — the current tests validate the workarounds are effective, not that the underlying semantic problem is solved.
 
 ### Scalability
 
@@ -579,6 +583,8 @@ After v15c (April):  177 passed, 2 failed (99.4%)   ← EU + sentencing patterns
 After v15d (April):  193 passed, 2 failed (99.0%)   ← +16 deployment gap tests
 After v15g (April):  195 passed, 0 failed (100%)    ← AIAAIC + 5 edge case fixes ✅
 ```
+
+> ✅ **Independently verified:** All 195 tests confirmed passing via fresh clone + run on external environment (April 2026). Translation API warnings during testing are expected in network-restricted environments — tests correctly apply fallback logic and pass regardless.
 
 ### What Changed — v15g → ContextEngine Integration (April 2026)
 
