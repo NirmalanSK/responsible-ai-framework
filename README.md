@@ -206,7 +206,7 @@ HarmBench requires **semantic understanding** to distinguish intent:
 | This Framework | **14.5%** | Keyword + regex patterns | Current |
 | Keyword Baselines | ~10-20% | Rule-based systems | Typical |
 | **ML-Based (Year 2 Target)** | | | |
-| This Framework + XLM-RoBERTa | **75-80%** *(target)* | Semantic embeddings | Planned |
+| This Framework + Hybrid Semantic Router | **75-80%** *(target)* | XLM-R zero-shot + threshold + keyword fallback | Planned |
 | SOTA Fine-tuned Models | 85-95% | Large-scale supervised | Research |
 
 ### Year 2 Upgrade Path
@@ -219,14 +219,30 @@ if "synthesize" in query and "drug" in query:
     return BLOCK  # Catches obvious cases, misses semantic variations
 ```
 
-**Year 2 Solution (XLM-RoBERTa Phase 5):**
+**Year 2 Solution — Hybrid Semantic Router (empirically grounded):**
+
+> Two models were tested in April 2026 (`xlm-roberta-base` + centroid: 2/6 correct;
+> `xlm-roberta-large-xnli` zero-shot: 5/6 correct, confidence 0.02–0.10).
+> Neither alone is sufficient. The hybrid pattern below is the practical Year 2 target.
 
 ```python
-# Semantic Understanding
-embedding = xlm_roberta(query)
-intent_score = classifier(embedding)  # Understands context + intent
-if intent_score > 0.75:
-    return BLOCK  # 75-80% recall on HarmBench
+# Step 1: XLM-R zero-shot top-k domain scoring
+scores = xlm_roberta_xnli(query, candidate_labels=DOMAIN_LABELS)
+top1, top2 = scores[0], scores[1]
+margin = top1.score - top2.score
+
+# Step 2: Confidence + margin threshold
+if top1.score >= 0.15 and margin >= 0.05:
+    domain = top1.label          # High-confidence → use model prediction
+
+# Step 3: Low-confidence → fallback keyword rules or ESCALATE
+elif top1.score < 0.15 or margin < 0.05:
+    domain = keyword_fallback(query)   # Current Year 1 heuristic
+    if domain is None:
+        return ESCALATE          # Unknown domain → human review
+
+# Step 4 (Year 3): Replace zero-shot with fine-tuned classifier
+#   trained on AI harm taxonomy labels (AIAAIC 2,223 incidents)
 ```
 
 **This is an intentional design choice:** Year 1 establishes causal governance architecture with pattern-based safety. Year 2 upgrades semantic layer while preserving Pearl causality core.
@@ -559,7 +575,7 @@ python evaluation/analyze_simulation.py
 | Attack Vector | Current Status | Year 2 Mitigation |
 | --- | --- | --- |
 | **Threshold probing** | Partial — rate limiter (30 req/min) | SBERT semantic tiering removes fixed keyword threshold |
-| **Semantic camouflage** | Weak — pattern-based Tier router | XLM-RoBERTa (Phase 6) — intent over surface form |
+| **Semantic camouflage** | Weak — pattern-based Tier router | Hybrid: XLM-R zero-shot + confidence threshold + keyword fallback (Phase 6) |
 | **Split-query attack** | ✅ ContextEngine — session-level cumulative risk tracking (3 signals: slope/spike/avg) | Cross-session Redis tracking (Year 3) |
 | **Middleware bypass** | Architectural assumption only | Year 2: deployment enforcement guide |
 
