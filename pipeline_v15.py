@@ -1218,21 +1218,26 @@ class Step05_SCMEngine:
             matrix_detail = ""
             if MATRIX_AVAILABLE:
                 try:
-                    q_lower = query.lower()
-                    if any(w in q_lower for w in ["race","racial","gender","female","hire","bias","compas","recidivism"]):
-                        dk = "representation_bias" if "gender" in q_lower or "hire" in q_lower or "female" in q_lower else "criminal_justice_bias"
-                    elif any(w in q_lower for w in ["sarin","nerve agent","vx","synthesize","synthesis","weapon","bomb","explosive"]):
-                        dk = "misuse_safety"
-                    elif any(w in q_lower for w in ["patient","hospital","healthcare","medical","doctor"]):
-                        dk = "medical_harm"
-                    elif any(w in q_lower for w in ["hack","exploit","malware","phish","inject","zero-day"]):
-                        dk = "cyberattack"
-                    elif any(w in q_lower for w in ["privacy","personal data","dox","surveillance","track"]):
-                        dk = "privacy_violation"
-                    elif any(w in q_lower for w in ["deepfake","fake news","disinform","propaganda"]):
-                        dk = "disinformation"
+                    # FIX v15-patch3: use causal_data.domain first (Year 1)
+                    # Year 2: replace entire keyword block with XLM-RoBERTa classifier
+                    if causal_data is not None and getattr(causal_data, "domain", None):
+                        dk = causal_data.domain
                     else:
-                        dk = None  # no domain signal — skip matrix
+                        q_lower = query.lower()
+                        if any(w in q_lower for w in ["race","racial","gender","female","hire","bias","compas","recidivism"]):
+                            dk = "representation_bias" if "gender" in q_lower or "hire" in q_lower or "female" in q_lower else "criminal_justice_bias"
+                        elif any(w in q_lower for w in ["sarin","nerve agent","vx","synthesize","synthesis","weapon","bomb","explosive"]):
+                            dk = "misuse_safety"
+                        elif any(w in q_lower for w in ["patient","hospital","healthcare","medical","doctor"]):
+                            dk = "medical_harm"
+                        elif any(w in q_lower for w in ["hack","exploit","malware","phish","inject","zero-day"]):
+                            dk = "cyberattack"
+                        elif any(w in q_lower for w in ["privacy","personal data","dox","surveillance","track"]):
+                            dk = "privacy_violation"
+                        elif any(w in q_lower for w in ["deepfake","fake news","disinform","propaganda"]):
+                            dk = "disinformation"
+                        else:
+                            dk = None  # no domain signal — skip matrix
 
                     if dk:
                         activation = activate_matrix(dk, 7.0, Severity.MEDIUM)
