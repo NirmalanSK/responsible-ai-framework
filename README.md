@@ -231,6 +231,55 @@ if intent_score > 0.75:
 
 **This is an intentional design choice:** Year 1 establishes causal governance architecture with pattern-based safety. Year 2 upgrades semantic layer while preserving Pearl causality core.
 
+### Empirical Evaluation — Domain Inference with XLM-RoBERTa (April 2026)
+
+Two prototype experiments were conducted to assess whether XLM-RoBERTa could replace the current keyword heuristic for domain routing (Step 04b / Step 05), using 6 Amazon hiring prompt variants as the test set.
+
+**Experiment 1 — `xlm-roberta-base` + centroid similarity**
+
+| Query variant | top-1 prediction | Correct? |
+| --- | --- | --- |
+| "…recommend hiring decision" | `privacy_violation` | ❌ |
+| "…recommend hire decision" | `privacy_violation` | ❌ |
+| "…recommend whether to proceed" | `privacy_violation` | ❌ |
+| "…move to the next stage" | `privacy_violation` | ❌ |
+| "…gender discrimination" | `representation_bias` | ✅ |
+| "Should we hire this candidate?" | `representation_bias` | ✅ |
+
+**Result: 2/6 correct.** Failure pattern: `"candidate profile"` clusters near `privacy_violation`; `"recommend"` clusters near `audit_accountability`. Only explicit bias/discrimination keywords yield correct routing.
+
+**Root cause:** Base XLM-R embedding space has no harm-taxonomy signal — `"candidate profile" ≈ personal data`, `"recommend" ≈ decision making`. Plain centroid matching insufficient without task-specific fine-tuning.
+
+**Experiment 2 — `joeddav/xlm-roberta-large-xnli` zero-shot classification (18 labels)**
+
+| Query variant | top-1 prediction | Correct? |
+| --- | --- | --- |
+| "…recommend hiring decision" | `hiring or representation bias` | ✅ |
+| "…recommend hire decision" | `hiring or representation bias` | ✅ |
+| "…move to the next stage" | `hiring or representation bias` | ✅ |
+| "…possible discrimination risk" | `hiring or representation bias` | ✅ |
+| "…gender discrimination" | `hiring or representation bias` | ✅ |
+| "…recommend whether to proceed" | `decision transparency or explainability` | ❌ (top-2 correct) |
+
+**Result: 5/6 correct.** Substantially better than keyword heuristic and base centroid. However, confidence scores on generic hiring prompts ranged 0.02–0.10 — low margin means top-1 alone is unreliable without a threshold gate.
+
+**Practical conclusion for Year 2 integration:**
+
+```
+Plain zero-shot alone → better than keywords, not sufficient for production
+
+Recommended hybrid pattern for Step 04b / Step 05:
+  1. XLM-R zero-shot  →  top-k domain scores + confidence margin
+  2. if margin > threshold  →  use top-1 domain
+  3. if margin < threshold  →  fallback to keyword rules or ESCALATE
+  4. Year 3: fine-tuned classifier on AI harm taxonomy labels
+
+Note: causal_data.domain (caller-provided) always takes precedence
+over model inference — inference only applies to query-only path.
+```
+
+> These experiments confirm XLM-RoBERTa is a meaningful Year 2 upgrade, but neither `base + centroid` nor `zero-shot alone` guarantees wording-invariant routing. Task-tuned integration with confidence thresholding is required.
+
 ---
 
 ## 🔍 Framework Comparison — Position in the Landscape
@@ -500,7 +549,7 @@ python evaluation/analyze_simulation.py
 
 * **Matrix weights:** Currently logical estimates → Year 2: data-driven calibration (Bayesian Optimization on AIAAIC 2,223 incidents)
 * **Legal claims:** Daubert-aligned audit trail output, **not court-decisive** — domain expert validation required before use in legal proceedings
-* **HarmBench 14.5%:** Pattern ceiling — semantic understanding needs Year 2 ML (XLM-RoBERTa target: 75-80%)
+* **HarmBench 14.5%:** Pattern ceiling — semantic understanding needs Year 2 ML. Empirical test (April 2026): `xlm-roberta-base` + centroid = 2/6 correct; `xlm-roberta-large-xnli` zero-shot = 5/6 correct but confidence 0.02–0.10. Hybrid zero-shot + threshold + keyword fallback required (see Year 2 Upgrade Path above)
 * **Societal Monitor (Step 11):** Stub — Redis + differential privacy needed Year 3
 * **DAG validation:** 17 domain DAGs are expert-defined. Year 2 plan: DoWhy sensitivity analysis (Phase 4)
 * **Bias source attribution:** Current system detects overall TCE. Year 2: decompose into confounding / selection / measurement / interaction bias sources
