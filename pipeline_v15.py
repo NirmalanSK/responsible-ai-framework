@@ -2817,7 +2817,7 @@ def run_demo():
             jurisdiction=Jurisdiction.EU,
             causal_data=CausalFindings(
                 tce=12.4, med=71, flip=23,
-                intv=45.0,  # FIX v15-patch2: intv was missing → TypeError
+                intv=15.0,  # FIX v15-patch2: intv was missing → TypeError; 15.0 = amazon_hiring_2018 value (scm_engine_v2.py:1213)
                 domain="representation_bias", rct=False
             ),
         ),
