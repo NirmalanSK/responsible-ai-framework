@@ -1280,9 +1280,11 @@ class Step05_SCMEngine:
         dom_tag2 = ""
         if MATRIX_AVAILABLE:
             try:
-                domain_key = getattr(findings, "domain_key", None)
+                # FIX v15-patch1: use findings.domain (correct field name)
+                # findings.domain_key does not exist — was silently returning None
+                domain_key = getattr(findings, "domain", None) or None
                 if not domain_key:
-                    # infer domain from query keywords
+                    # fallback: infer domain from query keywords
                     q_lower = query.lower()
                     if any(w in q_lower for w in ["race","racial","gender","female","hire","bias",
                                                           "scholarship","dropout","zip code","parental income",
@@ -2810,6 +2812,7 @@ def run_demo():
             jurisdiction=Jurisdiction.EU,
             causal_data=CausalFindings(
                 tce=12.4, med=71, flip=23,
+                intv=45.0,  # FIX v15-patch2: intv was missing → TypeError
                 domain="representation_bias", rct=False
             ),
         ),
