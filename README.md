@@ -1,4 +1,5 @@
 # Responsible AI Framework v5.0
+[🌐 Open Interactive Dashboard](https://nirmalansk.github.io/responsible-ai-framework/responsible_ai_v5_0.html)
 
 [![Tests](https://github.com/NirmalanSK/responsible-ai-framework/actions/workflows/ci.yml/badge.svg)](https://github.com/NirmalanSK/responsible-ai-framework/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
