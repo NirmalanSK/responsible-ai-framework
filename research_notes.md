@@ -15,7 +15,7 @@ LAYER 1 — SAFETY (Steps 01, 04b, 07, 09):
   What: Harmful content detection, adversarial attack defense
   Who does this: Claude, GPT (built-in)
   Our addition: Adversarial engine (4 attack types + academic/fictional/symbolic wrappers)
-  Evidence: 173/174 tests, 0/10 harmful output
+  Evidence: 195/195 tests passing (100%), 0/10 harmful output
 
 LAYER 2 — RESPONSIBLE AI (Steps 05, 06, 08, 11):
   What: Causal bias detection, protected group discrimination proof
@@ -36,14 +36,6 @@ LAYER 3 — LEGAL PROOF (Step 05 SCM output):
   COMPAS = Biased system (no audit)
 
   Our framework = All 3 layers, real-time, deployed system
-
-### PhD Defense Answer to "Why not just use Claude?":
-  "Claude addresses harmful content (Layer 1).
-   Our framework additionally proves causal bias in AI DECISIONS (Layer 2)
-   and generates legally-admissible evidence (Layer 3).
-   These are fundamentally different problems.
-   A Claude-powered hiring system can be perfectly safe (no harmful content)
-   while systematically discriminating by race — our framework catches this."
 
 ---
 
@@ -301,18 +293,6 @@ Source: Gemini (SBERT + Confidence), backed by Kimi (pattern maintenance)
     
     Note: causal_data.domain (caller-provided) always takes priority.
     Hybrid routing ONLY applies to query-only path (no causal_data).
-    
-    PhD framing for examiner:
-      "We empirically validated two XLM-RoBERTa configurations before
-       committing to the Year 2 implementation. Base + centroid failed
-       (2/6) due to lack of harm-taxonomy signal. Zero-shot XNLI
-       succeeded (5/6) but with low confidence (0.02-0.10), indicating
-       semantic ambiguity in generic hiring queries. This empirical
-       finding directly motivated our hybrid approach: zero-shot for
-       high-confidence cases, keyword fallback for ambiguous ones.
-       Year 3 replaces zero-shot with a fine-tuned classifier trained
-       on AIAAIC labels — at which point keyword fallback becomes
-       unnecessary."
 
 #### Phase 3: Bayesian Optimization (Months 4-7)
 Source: DeepSeek (BO calibration) + research_notes (our own idea)
@@ -348,9 +328,7 @@ Extended: Full technical plan added April 2026
     L3 PNS/PN/PS         → STRUCTURAL SIMULATION (exact point estimates) ✅
 
   Defense answer when asked "Year 1 TCE values source?":
-    "Published literature — Amazon Reuters 2018, ProPublica COMPAS 2016.
-     Year 2: DoWhy auto-computes from AIAAIC 2223 cases.
-     HarmDAGs are already built — DoWhy integration is the bridge."
+    → See phd_defence_qa.md Q15
 
 ---
 
@@ -527,10 +505,9 @@ Extended: Full technical plan added April 2026
     PNS = 0.27  ← structural simulation, exact point estimate
     "Amazon: 27% of rejections were causally necessary AND sufficient"
 
-  L3 honest gap (for defense):
-    "Current Tian-Pearl bounds = mathematically valid (peer-reviewed 2000).
-     Full structural counterfactual requires individual-level data
-     + structural equations per DAG edge. Year 2: dowhy.gcm module."
+  Note: Year 1 PNS = observational bounds (Tian-Pearl 2000).
+        Year 2 = structural simulation via dowhy.gcm.
+        See phd_defence_qa.md Q10 for full answer.
 
   ```python
   def compute_structural_counterfactual(dag, data):
@@ -725,38 +702,6 @@ Extended: Full technical plan added April 2026
                 Year 1 → Year 2 upgrade documented
 
 ---
-
-### DEFENSE FRAMING — DoWhy Q&A
-
-  Q: "Year 2 DoWhy plan technically feasible?"
-  A: "Yes — three specific reasons:
-      1. HarmDAGs already exist. 17 domain-specific DAGs defined in
-         scm_engine_v2.py. DoWhy needs GML graph — harmdag_to_dowhy()
-         conversion is straightforward. Structure already built.
-      2. DoWhy API exact match. CausalModel(data, treatment, outcome, graph)
-         maps directly to CausalFindings fields.
-         tce = model.estimate_effect().value × 100.
-      3. dowhy.gcm structural counterfactual. Year 1 Tian-Pearl bounds
-         = valid, conservative, peer-reviewed. Year 2 counterfactual_samples()
-         → PNS exact. Same pipeline, same matrix — values only become
-         data-driven.
-      Main challenge: AIAAIC = narrative format → structuring effort Month 5-6.
-      Prof. Stoyanovich's group expertise in fairness measurement
-      directly applicable here."
-
-  Q: "Why Tian-Pearl bounds in Year 1 — isn't that weaker?"
-  A: "No — bounds without RCT data = honest representation of
-      epistemic uncertainty. Tian-Pearl 2000 is peer-reviewed UAI paper.
-      Claiming exact values without data would be LESS rigorous.
-      Year 2 simulation requires individual-level data we don't have yet.
-      This is not a limitation — it is scientific honesty."
-
-  Q: "Matrix cascade = L3 proxy?"
-  A: "No — different things. Cascade = risk amplification mechanism
-      when central nodes (total weight ≥ 12) activate adjacent rows.
-      Conceptual analogy to L3 propagation — but NOT formal counterfactual.
-      L3 = structural simulation through DAG equations holding U fixed.
-      Cascade = pattern-based weight amplification. Clearly distinct."
 
 ---
 
@@ -970,7 +915,7 @@ Papers:
       4. If variance > threshold → ESCALATE (DAG unreliable)
       5. Report: "Verdict stable across 8/9 candidate DAGs ✅"
   
-  PhD value:
+  Implementation value:
     Direct response to "DAG validity" examiner question
     "Our system self-reports when causal graph is uncertain"
     No existing governance system does this
@@ -1007,7 +952,7 @@ Papers:
             "expected_tce_reduction": "12.4% → 2.1%"
         }
   
-  PhD framing: "Detect → Block → Remediate"
+  Year 3 framing: "Detect → Block → Remediate"
     = From governance to repair (Year 3 novelty)
 
 ### Updated Key Papers to Cite (Full List)
@@ -1323,7 +1268,7 @@ Source: Gemini (HTML dashboard suggestion)
     2. set up/install/deploy + facial recognition + secretly/covertly/without consent
     3. track/monitor/surveil + employee + secretly/covertly/without consent
   
-  PhD note: Same class of gap as Amazon bias (WARN vs BLOCK threshold).
+  Year 2 note: Same class of gap as Amazon bias (WARN vs BLOCK threshold).
             SCM adds risk but not always enough to cross BLOCK threshold.
             Year 2: SBERT semantic "covert intent" detection.
 
@@ -1347,7 +1292,7 @@ Source: Gemini (HTML dashboard suggestion)
     Logic: if has_direct_override → force injection_score = max(raw, 0.90) → BLOCK
            elif low confidence + educational → skip (Year 1 FP fix preserved)
   
-  PhD note: This is the surgical fix pattern from v15_SURGICAL.py applied to injection.
+  Year 2 note: This is the surgical fix pattern from v15_SURGICAL.py applied to injection.
             DIRECT_OVERRIDE_PHRASES = semantic rules without ML.
             Year 2: Replace with SBERT cosine similarity to known injection templates.
 
@@ -1371,7 +1316,7 @@ Source: Gemini (HTML dashboard suggestion)
       "cybersecurity/blue team X"
     Logic: if any DEFENSIVE_PREFIX matches → return 0.0, "" (skip all harm checks)
   
-  PhD note: Intent classifier problem. Pattern-based "ransomware" = always bad.
+  Year 2 note: Intent classifier problem. Pattern-based "ransomware" = always bad.
             This is the Year 1 ceiling.
             Year 2: XLM-RoBERTa intent → "prevent ransomware" ≠ "create ransomware".
             do(remove_defensive_context) → "ransomware" remains → harmful score.
@@ -1390,7 +1335,7 @@ Source: Gemini (HTML dashboard suggestion)
     1. create/write/generate + fake news/false news/fabricated news + article/post/story
     2. create/write/generate + fake/false/fabricated + article/post/story + politician/celebrity
   
-  PhD note: Disinformation domain is nuanced — "detect fake news" = ALLOW,
+  Year 2 note: Disinformation domain is nuanced — "detect fake news" = ALLOW,
             "create fake news article" = BLOCK. Same surface keywords, opposite intent.
             This is exactly the semantic detection gap Year 2 targets.
 
@@ -3039,59 +2984,6 @@ YEAR 3: AUTO-UPDATE
 
 ---
 
-## PHD DEFENSE: EXACT ANSWERS FOR EXPECTED QUESTIONS
-
-```
-Q: "Why these specific matrix weights? [3,2,3,2,3]"
-A (Year 1): "Initial estimates based on domain literature.
-             The specific values are Year 2 Bayesian Optimization targets —
-             our Year 2 research question is: what weights does AIAAIC data
-             suggest? We have the full BO implementation plan."
-
-A (Year 2): "These are BO-calibrated on 2223 AIAAIC incidents.
-             Manual weights gave F1=0.72. BO calibration on 800 training
-             cases found optimal weights giving F1=0.89 on held-out
-             200 test cases. All weights are data-driven, not heuristic."
-
-─────────────────────────────────────────────────────────────
-
-Q: "How do you validate your causal DAGs?"
-A (Year 2): "We run full edge-flip sensitivity analysis on all 17 domain DAGs.
-             For each edge, we test 3 variants: removal, reversal, and latent
-             confounder addition. An edge is flagged CRITICAL if any variant
-             changes more than 50% of verdicts — the Binkytė threshold.
-             Our DAG Sensitivity Analyzer reports stability per edge and
-             blocks BO calibration until all critical edges are reviewed.
-             This is the first RAI framework to validate its own causal
-             graphs at this granularity."
-
-─────────────────────────────────────────────────────────────
-
-Q: "What happens when new AI harms emerge that your training data doesn't cover?"
-A (Year 3): "Three-tier adaptation. Tier 1: Context Engine detects new patterns
-             within a session using cumulative risk signals. Tier 2: Human
-             experts flag wrong decisions into a feedback buffer; every 100
-             feedbacks, SGD micro-updates nudge the relevant domain weights
-             by 1% per update — conservative, bounded, logged. Tier 3:
-             Full BO re-calibration every 6 months on accumulated production
-             cases. Every weight change is logged as an immutable audit event
-             with SHA-256 tamper detection. The framework self-improves without
-             human intervention on individual weights."
-
-─────────────────────────────────────────────────────────────
-
-Q: "Binkytė showed causal DAGs are unstable. How do you address this?"
-A: "Binkytė's finding is precisely why we built the DAG Sensitivity Analyzer.
-    Rather than arguing our DAGs are correct by construction, we empirically
-    verify stability. We agree with Binkytė: a single edge flip can change
-    50%+ of verdicts. Our response is: (1) test every edge, (2) flag any
-    that breach this threshold, (3) require expert review before production use.
-    This transforms Binkytė's critique from a weakness into a validation
-    methodology — one that no existing RAI framework implements."
-```
-
----
-
 ## MATH CONNECTION TO EXISTING PROOFS (LINK TO FORMAL DOCUMENT)
 
 ```
@@ -3116,3 +3008,61 @@ Theorem 6.4 (Risk Accumulation Convergence) → Auto-Update stability (Phase 3)
 ```
 
 ---
+
+## COMPLETE YEAR 2 SEQUENCE (ALL PHASES ORDERED)
+
+```
+Month 1-2:   DAG Validation (Phase 1)
+               Edge-flip sensitivity on all 17 DAGs
+               Binkytė threshold: 50% verdict change → CRITICAL
+               Expert review of unstable edges
+
+Month 2-6:   Bayesian Optimization (Phase 2 / Phase 3)
+               AIAAIC 2223 incidents annotated
+               800 train, 200 test
+               gp_minimize 100 iterations
+               Manual F1=0.72 → BO F1=0.89 (target)
+
+Month 2-5:   SBERT Tier Router (Phase 2)
+               sentence-transformers/all-MiniLM-L6-v2
+               Hybrid: XLM-R zero-shot + keyword fallback
+               Novel attack detection +40%
+
+Month 5-9:   DoWhy Integration (Phase 4) ← DETAILED PLAN IN FILE
+               Step 1: AIAAIC data structuring
+               Step 2: harmdag_to_dowhy() conversion
+               Step 3: L2 TCE/ATE auto-computation
+               Step 4: NIE/NDE mediation auto-computation
+               Step 5: L3 structural counterfactual (exact PNS)
+               Step 6: auto_compute_findings() entry point
+               Step 7: Validation against known cases
+
+Month 6-10:  Causal-Neural Feedback Loop (Phase 5)
+               SCM risk > 25% overrides BERT < 95% confidence
+               Pearl > Neural: causal proof > statistical confidence
+
+Month 9-12:  Publication (Phase 6)
+               FAccT 2027 or AIES 2027
+               "Uncertainty-Aware Tiered Causal-Neural Governance Middleware"
+
+Month 10-12: SafeNudge Integration + Fairness Audit (Phase 7)
+               Audit SafeNudge for demographic disparities
+               do(race=X) → measure nudge rate
+               First framework to audit a safety mechanism for fairness
+
+Month 11-14: Binkytė SCM Enhancements (Phase 8)
+               S05b DAG Sensitivity Checker
+               S05c Bias Source Attribution (confounding/selection/measurement)
+               Year 3: Fairness Repair Engine (detect → block → remediate)
+
+Month 12-15: Hybrid Decision Fusion Engine (Phase 9)
+               Domain-adaptive alpha (healthcare=0.78, general=0.60)
+               Legal score + cascade + uncertainty in final formula
+               BO-calibrate alpha per domain
+
+Year 3:      Auto-Adaptive Weights (Phase 3 Matrix section)
+               SGD micro-updates per 100 human feedbacks
+               Scheduled BO re-calibration every 6 months
+               SHA-256 tamper detection on weight history
+```
+
