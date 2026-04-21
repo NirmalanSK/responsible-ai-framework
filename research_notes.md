@@ -246,6 +246,74 @@ Source: Gemini (SBERT + Confidence), backed by Kimi (pattern maintenance)
       
     Expected: keyword accuracy ~72% → BERT ~89-91%
 
+  Step 4: Domain Inference — XLM-R Empirical Evaluation (April 2026)
+    IMPORTANT: Two models were tested before committing to Year 2 plan.
+    Tested on: 6 Amazon hiring prompt variants (same causal_data, wording differs)
+    
+    Experiment A — xlm-roberta-base + centroid similarity:
+      Result: 2/6 correct
+      Failure: "candidate profile" → privacy_violation cluster
+               "recommend"        → audit_accountability cluster
+      Root cause: Base model has NO harm-taxonomy signal in embedding space
+                  "hiring" ≠ "gender bias" without fine-tuning
+      Verdict: INSUFFICIENT — plain base + centroid is not viable
+    
+    Experiment B — joeddav/xlm-roberta-large-xnli (zero-shot, 18 labels):
+      Result: 5/6 correct
+      Slip: "recommend whether to proceed" → decision_transparency (top-1)
+             representation_bias was top-2 only
+      Confidence range: 0.02–0.10 (generic hiring prompts = very low margin)
+      Verdict: BETTER than keywords, NOT production-ready alone
+    
+    Key finding:
+      "XLM-R add panna problem kuraiyum" — YES (5/6 vs 2/6)
+      "XLM-R alone potta full fix" — NO (low confidence, 1 slip)
+    
+    Required: HYBRID pattern (4-step)
+    
+    FINAL Year 2 plan for domain inference (Step 04b / Step 05):
+    ─────────────────────────────────────────────────────────────
+    
+      Step 1: XLM-R zero-shot → top-k domain scores + margin
+        scores = xlm_roberta_xnli(query, candidate_labels=DOMAIN_LABELS)
+        top1, top2 = scores[0], scores[1]
+        margin = top1.score - top2.score
+      
+      Step 2: Confidence + margin threshold
+        if top1.score >= 0.15 and margin >= 0.05:
+            domain = top1.label    ← high confidence → use model
+      
+      Step 3: Low-confidence → fallback keyword rules or ESCALATE
+        elif top1.score < 0.15 or margin < 0.05:
+            domain = keyword_fallback(query)   ← current Year 1 heuristic
+            if domain is None:
+                return ESCALATE    ← human review
+      
+      Step 4 (Year 3): Replace zero-shot with fine-tuned classifier
+        Train on AIAAIC 2223 incidents with domain labels
+        Expected: zero-shot 5/6 → fine-tuned 6/6 (robust)
+    
+    Why not just zero-shot?
+      "whether to proceed" slip = semantically ambiguous → both
+      decision_transparency AND representation_bias are plausible.
+      Low confidence (0.02-0.10) correctly signals this ambiguity.
+      Hybrid catches it: low margin → keyword fallback → correct domain.
+    
+    Note: causal_data.domain (caller-provided) always takes priority.
+    Hybrid routing ONLY applies to query-only path (no causal_data).
+    
+    PhD framing for examiner:
+      "We empirically validated two XLM-RoBERTa configurations before
+       committing to the Year 2 implementation. Base + centroid failed
+       (2/6) due to lack of harm-taxonomy signal. Zero-shot XNLI
+       succeeded (5/6) but with low confidence (0.02-0.10), indicating
+       semantic ambiguity in generic hiring queries. This empirical
+       finding directly motivated our hybrid approach: zero-shot for
+       high-confidence cases, keyword fallback for ambiguous ones.
+       Year 3 replaces zero-shot with a fine-tuned classifier trained
+       on AIAAIC labels — at which point keyword fallback becomes
+       unnecessary."
+
 #### Phase 3: Bayesian Optimization (Months 4-7)
 Source: DeepSeek (BO calibration) + research_notes (our own idea)
 
@@ -263,24 +331,438 @@ Source: DeepSeek (BO calibration) + research_notes (our own idea)
 
 #### Phase 4: DoWhy Integration (Months 5-9)
 Source: DeepSeek (highest priority technical upgrade)
+Extended: Full technical plan added April 2026
 
-  Current: Manual TCE input
-  Upgrade: DoWhy auto-compute from AIAAIC data
-  
-  Implementation:
-    pip install dowhy
-    For each AIAAIC incident:
-      Build causal graph
-      DoWhy estimates TCE, NIE, NDE
-      Auto-feed to SCMEngineV2
-      
-  DAG validation:
-    Sensitivity analysis on each domain DAG
-    "Is representation_bias DAG correct?"
-    Expert domain review (hiring expert, healthcare expert)
-    
-  Output: "Auto-computed causal inputs"
-  = Manual dependency removed ✅
+---
+
+### WHY DoWhy IS NEEDED — Honest Gap Statement
+
+  Year 1 SCM status:
+    Pearl equations      → IMPLEMENTED ✅
+    Input values (TCE)   → MANUAL, from published literature ⚠️
+    L3 PNS/PN/PS         → Tian-Pearl BOUNDS (not exact simulation) ⚠️
+
+  Year 2 goal:
+    Same Pearl equations → SAME ✅
+    Input values (TCE)   → AUTO-COMPUTED from AIAAIC data ✅
+    L3 PNS/PN/PS         → STRUCTURAL SIMULATION (exact point estimates) ✅
+
+  Defense answer when asked "Year 1 TCE values source?":
+    "Published literature — Amazon Reuters 2018, ProPublica COMPAS 2016.
+     Year 2: DoWhy auto-computes from AIAAIC 2223 cases.
+     HarmDAGs are already built — DoWhy integration is the bridge."
+
+---
+
+### STEP 1 — Data Preparation (Month 5-6)
+
+  Challenge: AIAAIC = narrative incident descriptions, not tabular data.
+  Month 5-6 first task = structure the data.
+
+  Target schema:
+  ```python
+  aiaaic_df = pd.DataFrame({
+      # Treatment variable X
+      "used_protected_attr":  [1, 0, 1, 0, ...],   # 1=yes, 0=no
+
+      # Outcome variable Y
+      "harmful_outcome":      [1, 0, 1, 1, ...],   # 1=harm occurred
+
+      # Observed confounders Z
+      "historical_data_bias": [0.7, 0.3, ...],     # 0-1 scale
+      "domain":               ["hiring","criminal",...],
+
+      # Proxy for latent U
+      "jurisdiction":         ["US","EU",...],
+      "deployment_year":      [2018, 2019, ...],
+
+      # Mediator M
+      "biased_score":         [0.8, 0.4, ...],     # intermediate output
+  })
+  ```
+
+  Extraction method:
+    Option A: Manual coding of 1000 cases (Month 5 only)
+    Option B: NLP extraction with manual validation
+    Minimum: 50 cases per domain × 17 domains = 850 cases
+    Target: 1000 structured cases for BO + DoWhy training
+
+---
+
+### STEP 2 — HarmDAG → DoWhy CausalModel (Month 6)
+
+  HarmDAG objects already exist in scm_engine_v2.py.
+  Need: convert to DoWhy GML graph format.
+
+  ```python
+  def harmdag_to_dowhy(dag: HarmDAG, data: pd.DataFrame):
+      from dowhy import CausalModel
+
+      # Build GML graph from HarmDAG edges
+      def build_gml(dag):
+          gml_lines = ["graph[", "directed 1"]
+          for node in dag.nodes:
+              gml_lines.append(
+                  f'node[id "{node.name}" label "{node.name}"]'
+              )
+          for edge in dag.edges:
+              gml_lines.append(
+                  f'edge[source "{edge.source}" target "{edge.target}"]'
+              )
+          gml_lines.append("]")
+          return "\n".join(gml_lines)
+
+      gml_graph = build_gml(dag)
+
+      model = CausalModel(
+          data      = data,
+          treatment = dag.treatment,
+          outcome   = dag.outcome,
+          graph     = gml_graph,
+      )
+      return model
+  ```
+
+  Note: HarmDAG.latent nodes included as unobserved.
+  DoWhy handles latent confounders → decides backdoor vs frontdoor
+  automatically — matches our has_backdoor_set() / has_frontdoor_set() logic.
+
+---
+
+### STEP 3 — L2 Auto-Computation: TCE / ATE (Month 6-7)
+
+  Year 1: tce = 12.4 (static, manual)
+  Year 2: tce = model.estimate_effect().value × 100 (dynamic, data-driven)
+
+  ```python
+  def compute_tce_dowhy(model, dag):
+      """
+      Estimation methods:
+        backdoor.linear_regression : fast, interpretable
+        frontdoor.two_stage        : for Amazon/COMPAS (latent U)
+        iv.instrumental_variable   : when proxy IV available
+      """
+      identified_estimand = model.identify_effect(
+          proceed_when_unidentifiable=True
+      )
+      # DoWhy auto-selects backdoor vs frontdoor
+      # Matches our dag.has_backdoor_set() check
+
+      if dag.has_backdoor_set():
+          estimate = model.estimate_effect(
+              identified_estimand,
+              method_name    = "backdoor.linear_regression",
+              control_value  = 0,
+              treatment_value= 1,
+          )
+      else:
+          # Frontdoor — Amazon/COMPAS (latent societal_bias)
+          estimate = model.estimate_effect(
+              identified_estimand,
+              method_name="frontdoor.two_stage_regression",
+          )
+
+      tce_computed = estimate.value * 100   # → percentage
+
+      # Refutation test — validate robustness
+      refutation = model.refute_estimate(
+          identified_estimand,
+          estimate,
+          method_name="random_common_cause",
+      )
+      # If estimate holds after adding random confounder → robust
+      # If collapses → confounded → flag for expert review
+
+      return tce_computed, estimate, refutation
+  ```
+
+---
+
+### STEP 4 — L2 Mediation: NIE / NDE Auto-Compute (Month 7)
+
+  Year 1: med=68% manually from literature
+  Year 2: DoWhy mediation analysis → exact NDE/NIE split
+
+  ```python
+  def compute_mediation_dowhy(model, dag, data):
+      """
+      TE = NDE + NIE — Pearl Mediation Formula 2001
+      Maps to compute_effect_decomposition() in scm_engine_v2.py
+      """
+      from dowhy.causal_estimators.mediation_analysis import MediationAnalysis
+
+      mediation = MediationAnalysis(
+          model    = model,
+          mediator = dag.mediator,   # e.g. "biased_ranking_score"
+      )
+      result = mediation.estimate_effects(
+          data      = data,
+          treatment = dag.treatment,
+          outcome   = dag.outcome,
+      )
+
+      nde_computed = result.direct_effect    # NDE %
+      nie_computed = result.indirect_effect  # NIE %
+      te_computed  = nde_computed + nie_computed
+
+      # Feed into CausalFindings — same pipeline, data-driven values
+      return {
+          "tce"    : te_computed * 100,
+          "med_pct": (nie_computed / te_computed) * 100,
+          "nde_raw": nde_computed * 100,
+      }
+  ```
+
+---
+
+### STEP 5 — L3 True Structural Counterfactual (Month 7-8)
+
+  THIS IS THE KEY UPGRADE — Year 1 bounds → Year 2 exact simulation.
+
+  Year 1:
+    PNS ∈ [0.12, 0.41]  ← Tian-Pearl observational bounds
+    "Amazon: somewhere between 12% and 41% — honest uncertainty"
+
+  Year 2:
+    PNS = 0.27  ← structural simulation, exact point estimate
+    "Amazon: 27% of rejections were causally necessary AND sufficient"
+
+  L3 honest gap (for defense):
+    "Current Tian-Pearl bounds = mathematically valid (peer-reviewed 2000).
+     Full structural counterfactual requires individual-level data
+     + structural equations per DAG edge. Year 2: dowhy.gcm module."
+
+  ```python
+  def compute_structural_counterfactual(dag, data):
+      """
+      Uses dowhy.gcm (Graphical Causal Models module).
+      Each edge gets a structural equation: Y = f(X, U_noise).
+      Noise U estimated from factual data.
+      do(X=0) propagated through DAG → counterfactual Y.
+      """
+      import networkx as nx
+      from dowhy.gcm import (
+          StructuralCausalModel,
+          AdditiveNoiseModel,
+          fit,
+          counterfactual_samples,
+      )
+      from dowhy.gcm.ml import create_linear_regressor
+
+      # Step 5a: Convert HarmDAG to networkx DiGraph
+      G = nx.DiGraph()
+      for edge in dag.edges:
+          G.add_edge(edge.source, edge.target)
+
+      # Step 5b: Build SCM with additive noise models
+      scm = StructuralCausalModel(G)
+      for node in dag.nodes:
+          scm.set_causal_mechanism(
+              node.name,
+              AdditiveNoiseModel(
+                  prediction_model=create_linear_regressor()
+              )
+          )
+
+      # Step 5c: Fit structural equations on AIAAIC data
+      fit(scm, data)
+
+      # Step 5d: Counterfactual — do(use_protected_attr = 0)
+      # "What if AI had NOT used race/gender in the decision?"
+      cf_samples = counterfactual_samples(
+          scm,
+          interventions = {dag.treatment: lambda x: 0},
+          observed_data = data,
+      )
+
+      # Step 5e: Compute PNS from simulation
+      # PNS = fraction where: factual Y=1 AND counterfactual Y=0
+      # = "harm occurred WITH treatment, would NOT have without"
+      factual_y    = data[dag.outcome].values
+      counterfac_y = cf_samples[dag.outcome].values
+
+      pns_exact = float(
+          ((factual_y == 1) & (counterfac_y == 0)).mean()
+      )
+
+      # PN = "but-for" causation (among those harmed)
+      harmed_mask = factual_y == 1
+      pn_exact = float(
+          ((factual_y[harmed_mask] == 1) &
+           (counterfac_y[harmed_mask] == 0)).mean()
+      ) if harmed_mask.sum() > 0 else 0.0
+
+      return {
+          "pns_exact": pns_exact,
+          "pn_exact" : pn_exact,
+          "cf_data"  : cf_samples,
+      }
+  ```
+
+---
+
+### STEP 6 — CausalFindings Auto-Population (Month 8)
+
+  Year 1 (manual):
+    findings = CausalFindings(tce=12.4, med=68, flip=43, ...)
+
+  Year 2 (data-driven):
+    findings = auto_compute_findings(aiaaic_df, "representation_bias")
+    → same pipeline, same rules, same matrix
+    → values are now computed, not assumed
+
+  ```python
+  def auto_compute_findings(
+      incident_data: pd.DataFrame,
+      domain: str
+  ) -> CausalFindings:
+      """
+      Single entry point — replaces all manual CausalFindings.
+      Input:  Structured AIAAIC incident data
+      Output: Fully computed CausalFindings for SCMEngineV2
+      """
+      dag   = DOMAIN_DAGS[domain]
+      model = harmdag_to_dowhy(dag, incident_data)
+
+      # L2
+      tce, est, ref    = compute_tce_dowhy(model, dag)
+      med_result       = compute_mediation_dowhy(model, dag, incident_data)
+
+      # L3
+      cf_result        = compute_structural_counterfactual(dag, incident_data)
+
+      # P(Y|X) directly from data
+      p_y_x = incident_data.groupby(dag.treatment)[dag.outcome].mean()
+
+      return CausalFindings(
+          tce            = tce,
+          med            = med_result["med_pct"],
+          flip           = cf_result["pns_exact"] * 100,
+          intv           = est.value * 100,
+          rct            = False,
+          p_y_given_x    = float(p_y_x.get(1, 0.0)),
+          p_y_given_notx = float(p_y_x.get(0, 0.0)),
+          nde_raw        = med_result["nde_raw"],
+          domain         = domain,
+      )
+  ```
+
+---
+
+### STEP 7 — Validation Tests (Month 8-9)
+
+  Known cases-ஓட் Year 2 results ↔ literature values compare.
+  If match → DoWhy integration validated.
+
+  ```python
+  KNOWN_TOLERANCES = {
+      "amazon_hiring_2018": {
+          "tce_literature" : 12.4,
+          "flip_literature": 43.0,
+          "tce_tolerance"  : 3.0,   # ±3% acceptable
+          "flip_tolerance" : 5.0,
+      },
+      "compas_2016": {
+          "tce_literature" : 18.3,
+          "flip_literature": 61.0,
+          "tce_tolerance"  : 3.0,
+          "flip_tolerance" : 5.0,
+      },
+  }
+
+  def validate_year2_scm():
+      for case_name, expected in KNOWN_TOLERANCES.items():
+          findings_auto = auto_compute_findings(
+              aiaaic_df[aiaaic_df.case == case_name],
+              domain_map[case_name]
+          )
+          tce_error  = abs(findings_auto.tce  - expected["tce_literature"])
+          flip_error = abs(findings_auto.flip - expected["flip_literature"])
+
+          assert tce_error  <= expected["tce_tolerance"], \
+              f"TCE off by {tce_error:.1f}% for {case_name}"
+          assert flip_error <= expected["flip_tolerance"], \
+              f"Flip off by {flip_error:.1f}% for {case_name}"
+
+      print("Year 2 DoWhy integration validated ✅")
+      print("Known cases match literature within tolerance.")
+  ```
+
+---
+
+### FULL YEAR 2 DoWhy TIMELINE
+
+  Month 5-6:  Data Preparation
+                AIAAIC narrative → structured DataFrame
+                50 cases × 17 domains = 850 minimum
+                NLP extraction or manual coding
+
+  Month 6:    HarmDAG → DoWhy CausalModel
+                harmdag_to_dowhy() implement + unit test
+                GML graph conversion verified
+
+  Month 6-7:  L2 Auto-Computation
+                TCE/ATE via backdoor/frontdoor
+                NIE/NDE mediation analysis
+                Refutation tests run on all domains
+
+  Month 7-8:  L3 Structural Counterfactual
+                dowhy.gcm AdditiveNoiseModel
+                PNS exact (not bounds)
+                PN "but-for" causation exact
+
+  Month 8:    CausalFindings Auto-Population
+                auto_compute_findings() live
+                Pipeline fully data-driven end-to-end
+
+  Month 8-9:  Validation
+                Amazon TCE ± 3% tolerance check
+                COMPAS flip rate ± 5% tolerance check
+                test_v15.py: verify 177/179 still passing
+
+  Month 9:    FAccT/AIES paper draft begin
+                "Data-Driven SCM for Real-Time AI Safety"
+                Year 1 → Year 2 upgrade documented
+
+---
+
+### DEFENSE FRAMING — DoWhy Q&A
+
+  Q: "Year 2 DoWhy plan technically feasible?"
+  A: "Yes — three specific reasons:
+      1. HarmDAGs already exist. 17 domain-specific DAGs defined in
+         scm_engine_v2.py. DoWhy needs GML graph — harmdag_to_dowhy()
+         conversion is straightforward. Structure already built.
+      2. DoWhy API exact match. CausalModel(data, treatment, outcome, graph)
+         maps directly to CausalFindings fields.
+         tce = model.estimate_effect().value × 100.
+      3. dowhy.gcm structural counterfactual. Year 1 Tian-Pearl bounds
+         = valid, conservative, peer-reviewed. Year 2 counterfactual_samples()
+         → PNS exact. Same pipeline, same matrix — values only become
+         data-driven.
+      Main challenge: AIAAIC = narrative format → structuring effort Month 5-6.
+      Prof. Stoyanovich's group expertise in fairness measurement
+      directly applicable here."
+
+  Q: "Why Tian-Pearl bounds in Year 1 — isn't that weaker?"
+  A: "No — bounds without RCT data = honest representation of
+      epistemic uncertainty. Tian-Pearl 2000 is peer-reviewed UAI paper.
+      Claiming exact values without data would be LESS rigorous.
+      Year 2 simulation requires individual-level data we don't have yet.
+      This is not a limitation — it is scientific honesty."
+
+  Q: "Matrix cascade = L3 proxy?"
+  A: "No — different things. Cascade = risk amplification mechanism
+      when central nodes (total weight ≥ 12) activate adjacent rows.
+      Conceptual analogy to L3 propagation — but NOT formal counterfactual.
+      L3 = structural simulation through DAG equations holding U fixed.
+      Cascade = pattern-based weight amplification. Clearly distinct."
+
+---
+
+  Output (Month 9): "Auto-computed causal inputs — manual dependency removed ✅"
+  PhD claim upgrade: "First RAI middleware with data-driven causal inputs
+                      from real AI incident database (AIAAIC 2223 cases)"
 
 #### Phase 5: Causal-Neural Feedback Loop (Months 6-10)
 Source: Gemini (unique idea — not in DeepSeek/Kimi)
