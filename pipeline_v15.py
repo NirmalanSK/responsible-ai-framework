@@ -1546,10 +1546,17 @@ class Step07_AdversarialLayer:
         r"(threaten|intimidate|harass|bully).{0,20}(activist|journalist|person|individual|woman|man)",
         r"(violent|sexual|rape).{0,20}(threat|message|content).{0,20}(send|generate|write|create)",
         r"(dox|doxx|expose).{0,20}(personal|private|address|location|identity|details)",
+        # v15h FIX Case 29: dox + any person type → BLOCK
+        r"(dox|doxx).{0,30}(journalist|activist|person|someone|celebrity|politician|individual|her|him|them)",
+        r"find.{0,20}(home\s+address|real\s+address|personal\s+address).{0,20}(publish|post|share|expose|release|leak)",
         r"(harass|stalk|intimidate).{0,20}(campaign|coordinate|organize|plan)",
         # v8 fix: sexual threats, journalist/activist targeting
         r"(violent|sexual|rape|kill|hurt).{0,15}(threat|threats).{0,20}(send|generate|write|create|against)",
         r"(generate|write|create).{0,20}(violent|sexual|rape|death).{0,15}(threat|message|content).{0,20}(journalist|activist|woman|person)",
+        # v15h FIX Case 45: NCII — fake/deepfake nude images of real people → BLOCK
+        r"(fake|ai.generated|deepfake|synthetic|create|generate|make).{0,25}(nude|naked|explicit|sexual).{0,20}(image|photo|picture|video|content).{0,20}(celebrity|person|woman|man|someone|named|specific)",
+        r"(nude|naked|explicit|sexual).{0,20}(image|photo|picture|video).{0,20}(of\s+(a\s+)?(specific|named|real|celebrity|person|woman|man))",
+        r"(create|generate|make|produce).{0,20}(fake\s+nude|nude\s+image|naked\s+image|explicit\s+image).{0,30}(celebrity|person|woman|man|someone)",
     ]
 
     # ── Cyberattack / Phishing ────────────────────────────────────────
@@ -1590,6 +1597,10 @@ class Step07_AdversarialLayer:
         r"(facial\s+recognition|biometric|face\s+id|face\s+scan).{0,40}(track|monitor|identify|surveil).{0,20}(employee|staff|worker|person)",
         r"(set\s+up|install|deploy|build|create).{0,30}(facial\s+recognition|biometric|face.{0,5}track).{0,30}(secretly|covertly|without\s+(their\s+)?(consent|knowledge|knowing|permission))",
         r"(track|monitor|surveil).{0,20}(employee|staff|worker|person|people).{0,20}(secretly|covertly|without\s+(their\s+)?(knowledge|consent|knowing|permission))",
+        # v15h FIX Case 49: mental health records → deny insurance → BLOCK
+        r"(screen|use|access|mine|query).{0,25}(mental\s+health|psychiatric|psychological|therapy|counseling).{0,20}(record|history|data|file).{0,30}(deny|reject|refuse|decide|insurance|loan|hire|employ|disqualify)",
+        r"(mental\s+health|psychiatric|psychological).{0,20}(record|history|data|file).{0,20}(deny|reject|refuse|screen|filter|basis|decide).{0,20}(insurance|life\s+insurance|loan|hire|employ|benefit|claim)",
+        r"(build|create|design|develop).{0,25}(system|tool|algorithm|ai).{0,25}(screen|use|mine).{0,20}(mental\s+health|health\s+record|medical\s+record).{0,20}(deny|reject|insurance|employ)",
     ]
 
     # ── Medical Harm ──────────────────────────────────────────────────
@@ -1687,6 +1698,12 @@ class Step07_AdversarialLayer:
         r"(sell|distribute|traffic|deal|move).{0,20}(drugs?|narcotics?|controlled\s+substance).{0,20}(avoid|detection|police|law)",
         r"(dark\s+web|darknet).{0,20}(buy|purchase|obtain|order).{0,20}(drug|narcotic|fentanyl|heroin|cocaine)",
         r"(evade|avoid|bypass).{0,20}(drug\s+test|urine\s+test|screening).{0,20}(employer|probation|court)",
+        # v15h FIX Case 57: authority spoof — synthesis route for fentanyl → BLOCK
+        r"(synthesis\s+route|synthesis\s+steps?|synthesis\s+method|how\s+to\s+synthesize|how\s+to\s+manufacture).{0,40}(fentanyl|opioid|heroin|morphine|codeine|methadone|oxycodone)",
+        r"(pharmacist|physician|doctor|nurse|clinician|chemist|researcher|professor|student).{0,35}(synthesis|manufacture|produce|make|prepare|extract).{0,30}(fentanyl|opioid|heroin|morphine|codeine|narcotic|controlled)",
+        # v15h FIX Case 58: academic framing — opioid precursor ratios → BLOCK
+        r"(precursor\s+chemical|chemical\s+precursor|precursor\s+ratio|precursor\s+compound|precursor\s+material).{0,35}(opioid|fentanyl|heroin|meth|narcotic|controlled\s+substance|illegal\s+drug)",
+        r"(research|project|study|thesis|paper|academic|experiment).{0,30}(precursor|synthesis\s+step|manufacture|produce|lab\s+setup|chemical\s+ratio).{0,25}(opioid|fentanyl|heroin|drug|narcotic|controlled)",
     ]
 
     GENERAL_HARM_PATTERNS = [
@@ -1782,6 +1799,10 @@ class Step07_AdversarialLayer:
         r"(ai|algorithm|system|model|tool).{0,30}(determine|decide|assign|set|calculate|predict).{0,20}(prison|jail|sentence|sentencing|punishment).{0,20}(black|hispanic|minority|race|racial|ethnic)",
         r"(determine|decide|assign|set|calculate).{0,20}(prison|jail|sentence|punishment).{0,20}(black|hispanic|white|minority|race|racial|ethnic|protected).{0,10}(defendant|convict|offender|person)",
         r"(black|hispanic|minority|racial|ethnic).{0,10}(defendant|convict|offender|criminal).{0,20}(prison|sentence|jail|punishment).{0,20}(ai|algorithm|system|model|recidivism|risk)",
+        # v15h FIX Case 59: session consolidation — drug lab setup guide → BLOCK
+        r"(drug\s+lab|clandestine\s+lab|home\s+lab|cook\s+lab).{0,20}(setup|set\s+up|guide|instruction|complete|how.to|establish|build)",
+        r"(combine|consolidate|compile|summarize|put\s+together|pull\s+together).{0,35}(drug|synthesis|manufacture|lab|chemical|cook).{0,20}(guide|setup|instruction|complete|steps?|plan)",
+        r"(complete|full|comprehensive|detailed|step.by.step).{0,20}(drug\s+lab|synthesis\s+lab|cook\s+lab|home\s+lab|meth\s+lab|clandestine).{0,20}(setup|guide|instruction|plan|build)",
     ]
 
     def __init__(self):
@@ -1875,9 +1896,28 @@ class Step07_AdversarialLayer:
 
         return 0.0, ""
 
+    # v15h FIX: Legal/policy education safe queries — bypass adversarial engine
+    LEGAL_EDUCATION_SAFE = [
+        r"(which|what|list|explain|describe|define|overview).{0,30}(protected\s+(characteristics?|class|group|attribute|categor)).{0,50}(gdpr|eu\s+ai\s+act|cover|include|protect|under|recogni[sz]e)",
+        r"(gdpr|eu\s+ai\s+act|echr|directive|regulation|convention).{0,30}(cover|include|protect|list|define|recogni[sz]e|what\s+are|overview)",
+        r"(what\s+(is|are)|explain|describe|define|overview\s+of).{0,30}(gdpr|eu\s+ai\s+act|nist|daubert|hipaa|ccpa|pdpb)",
+        r"(what\s+does.{0,10}(gdpr|eu\s+ai\s+act|hipaa|ccpa).{0,10}(require|say|mean|cover|define|protect))",
+    ]
+
     def run(self, tier: int, conversation: list[str],
             query: str) -> tuple[AttackType, float, StepResult]:
         t0 = time.perf_counter()
+
+        # v15h: Legal education early-exit BEFORE adversarial engine
+        _q = query.lower().strip()
+        if any(re.search(p, _q, re.IGNORECASE) for p in self.LEGAL_EDUCATION_SAFE):
+            ms = (time.perf_counter() - t0) * 1000
+            return AttackType.NONE, 0.0, StepResult(
+                step_num=7, step_name="Adversarial Defense Layer",
+                passed=True, signal="CLEAR",
+                detail="Legal/policy education query — adversarial check skipped",
+                latency_ms=round(ms, 2),
+            )
 
         # ── Main adversarial engine (4 attack types) ─────────────────
         # v15: pass full conversation for slow-boiling drift detection
@@ -1981,10 +2021,21 @@ class Step08_JurisdictionEngine:
             r"(exclude|reject|filter|screen.out|avoid).{0,30}(disability|disabled|mental.health|depression|anxiety|disorder)",
             r"(ask|question|inquire).{0,30}(pregnant|pregnancy|plan.{0,15}(pregnant|baby|child|family|kids))",
             r"(disability|mental.health|health.history).{0,20}(exclude|reject|filter|screen|decide|basis)",
+            # v15h FIX Case 25 (US): NLRA — union prediction + fire → BLOCK
+            r"(predict|identify|flag|detect|find|list).{0,25}(employee|worker|staff|people).{0,20}(union|unionis|unionize|organis|organize|collective\s+bargain).{0,25}(fire|dismiss|terminat|let.go|retaliat|punish)",
+            r"(algorithm|ai|system|tool|model).{0,25}(identify|predict|flag|detect).{0,25}(union|unionis|organis).{0,25}(fire|dismiss|terminat|retaliat|punish|action)",
         ],
         Jurisdiction.EU: [
             r"(health|medical).{0,20}record.{0,20}(hire|employ|select|decide|rank)",
             r"(biometric|facial\s+recognition).{0,20}(hire|screen|score|rank)",
+            # v15h FIX Case 21: EU age discrimination sole factor → BLOCK
+            r"(deny|reject|refuse|disqualify).{0,25}(insurance|claim|benefit|loan|credit).{0,25}(age|over|above|under)\s*\d{2,3}",
+            r"using\s+age\s+as.{0,20}(sole|only|primary|the)\s+(factor|basis|criteria|reason).{0,30}(deny|reject|refuse|decide|disqualify|claim|insurance|benefit)",
+            # v15h FIX Case 25 (EU): union prediction → BLOCK (also added to US below)
+            r"(predict|identify|flag|detect|find|list).{0,25}(employee|worker|staff|people).{0,20}(union|unionis|unionize|organis|organize|collective\s+bargain).{0,25}(fire|dismiss|terminat|let.go|retaliat|punish)",
+            # v15h FIX Case 43: Emotion AI hiring denial → BLOCK (EU AI Act Art.5)
+            r"(emotion|sentiment|feeling|mood|affect).{0,20}(ai|recognition|analysis|detection|system|tool|model).{0,25}(deny|reject|screen|decide|hire|interview|candidate|applicant|job)",
+            r"(deny|reject|screen\s+out|disqualify).{0,25}(candidate|applicant|person).{0,25}(appear|look|seem|express).{0,20}(nervous|anxious|stressed|afraid|scared|uncomfortable|emotion)",
         ],
         Jurisdiction.GLOBAL: [
             r"(filter|rank|select|hire|screen|prefer|evaluate|assess).{0,30}(religion|religious|faith|belief|sect|denomination)",
@@ -2028,6 +2079,9 @@ class Step08_JurisdictionEngine:
         Jurisdiction.EU: [
             r"(gdpr|ai\s+act|equal\s+treatment|directive).{0,20}(compliance|audit|check|regulation)",
             r"(positive\s+action|diversity\s+target|inclusion\s+goal).{0,20}(hire|employ|recruit)",
+            # v15h FIX Case 12: GDPR education FP — "which protected characteristics does GDPR cover?" → ALLOW
+            r"(which|what).{0,20}(protected\s+characteristics?|protected\s+class|protected\s+attribute).{0,30}(gdpr|eu\s+ai\s+act|cover|include|list|protect|under)",
+            r"(gdpr|eu\s+ai\s+act|directive|regulation).{0,25}(cover|include|protect|list|define|recogni[sz]e).{0,25}(characteristics?|class|group|category|attribute)",
         ],
         Jurisdiction.GLOBAL: [
             r"(detect|measure|audit|test|check|identify|reduce).{0,25}(bias|discrimination|unfair|disparit)",

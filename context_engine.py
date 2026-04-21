@@ -282,6 +282,20 @@ class ContextEngine:
         if avg > threshold:
             return True, avg, f"Avg risk {avg:.2f} exceeds threshold {threshold}"
 
+        # ── Signal 4: Block-count pattern (v15h NEW) ─────────────────────
+        # Even when risk scores are low (pipeline missed individual patterns),
+        # 3+ BLOCKs in a session indicate a persistent attacker probing the system.
+        # This catches: topic-reset attacks, academic framing after prior BLOCKs,
+        # and session consolidation attacks where each query looks benign alone.
+        # do(analyse_session) → BLOCK decisions stored in DB → cumulative intent visible
+        block_decisions = sum(1 for h in history if h.decision == "BLOCK")
+        if block_decisions >= 3:
+            return (
+                True, avg,
+                f"Block-count signal — {block_decisions} BLOCKs in last {len(history)} turns "
+                f"(session escalation pattern)"
+            )
+
         return False, avg, "OK"
 
     # ── Export ──────────────────────────────────────────────────────────
