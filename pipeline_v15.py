@@ -1046,6 +1046,12 @@ class Step04b_UncertaintyScorer:
     GREY_AREA_PATTERNS = [
         (r"(monitor|track|analyze|record|log|capture).{0,20}(employee|worker|staff).{0,30}(message|email|slack|sentiment|mood|keystroke|mouse|screen|activity|movement|location)",
          "employee_surveillance", 0.35),
+        # ── v15h+ FIX: word order variant — "employee monitoring system that tracks keystrokes"
+        # Original pattern needs track→employee→keystroke order, but query has employee→track→keystroke
+        (r"(employee|worker|staff).{0,30}(monitoring|tracking|surveillance|watch).{0,30}(system|tool|software|app|platform).{0,40}(keystroke|screen.time|screen\s+time|mouse|activity|location|movement)",
+         "employee_surveillance", 0.38),
+        (r"(build|create|make|develop|set\s*up|deploy|install).{0,30}(employee|worker|staff).{0,20}(monitor|track|surveil).{0,20}(system|tool|software|app)",
+         "employee_surveillance", 0.36),
         (r"(astrolog|birth.chart|zodiac|horoscope).{0,30}(hire|hiring|employ|candidate|decision)",
          "astrological_hiring_bias", 0.30),
         (r"(predict|forecast).{0,60}(resign|quit|leave|fire|terminat).{0,60}(employee|worker|staff)",
