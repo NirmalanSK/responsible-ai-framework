@@ -1,6 +1,12 @@
-docs/*.pdf
-docs/*.aux
-docs/*.log
-docs/*.pdf
-docs/*.aux
-docs/*.log
+# LaTeX build artifacts (do NOT commit these)
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.bbl
+*.blg
+*.lof
+*.lot
