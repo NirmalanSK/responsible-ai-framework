@@ -61,22 +61,161 @@ CUMULATIVE_BLOCK_THRESHOLD = 0.60   # 60% → hard block
 CUMULATIVE_WARN_THRESHOLD  = 0.45   # 45% → flag in response
 
 
+# ── RAI Context Extractor ───────────────────────────────────────────────
+def build_rai_context(result, decision_name: str,
+                      cum_override: bool = False,
+                      cum_reason: str = "") -> dict:
+    """
+    Extract key findings from PipelineResult for LLM context.
+    Pulls SCM risk, attack type, VAC flag, and flagged step details.
+    """
+    flagged_steps = {}
+    for step in getattr(result, "steps", []):
+        if step.signal in ("BLOCK", "WARN", "ESCALATE"):
+            flagged_steps[step.step_name] = step.detail
+
+    return {
+        "decision"          : decision_name,
+        "risk_pct"          : round(result.scm_risk_pct, 1),
+        "attack_type"       : result.attack_type.value,
+        "emotion_flag"      : result.emotion_flag.value,
+        "vac_triggered"     : result.vac_triggered,
+        "jurisdiction"      : result.jurisdiction.value,
+        "flagged_steps"     : flagged_steps,
+        "cumulative_override": cum_override,
+        "cumulative_reason" : cum_reason,
+    }
+
+
+def build_system_prompt(query: str, ctx: dict) -> tuple[str, str]:
+    """
+    Build (system_prompt, user_message) for LLM based on RAI decision.
+
+    BLOCK       → LLM explains why — does NOT answer harmful query
+    WARN        → LLM gives careful response with sensitivity note
+    EXPERT_REVIEW → LLM explains why human review needed
+    ALLOW       → Normal response; bias-aware if SCM flagged risk
+    """
+    decision   = ctx["decision"]
+    risk       = ctx["risk_pct"]
+    attack     = ctx["attack_type"]
+    vac        = ctx["vac_triggered"]
+    jur        = ctx["jurisdiction"]
+    flagged    = ctx["flagged_steps"]
+    cum        = ctx["cumulative_override"]
+    cum_reason = ctx["cumulative_reason"]
+
+    findings = "\n".join(
+        f"  - {name}: {detail}" for name, detail in flagged.items()
+    ) or "  - Pattern-based harm detection triggered"
+
+    # ── BLOCK ─────────────────────────────────────────────────────────
+    if decision == "BLOCK":
+        system = f"""You are the explanation layer of a Responsible AI governance framework.
+
+A user query was BLOCKED by the RAI pipeline. Your job:
+1. Explain WHY it was blocked using the findings below — be clear and respectful
+2. Do NOT answer or hint at the harmful content
+3. Briefly suggest what the user CAN ask instead (if safe alternative exists)
+
+RAI Findings:
+  - Risk Score      : {risk}%
+  - Attack Detected : {attack}
+  - VAC Triggered   : {"YES — absolute ethical violation" if vac else "No"}
+  - Jurisdiction    : {jur}
+  - Flagged steps:
+{findings}
+{"  - CUMULATIVE SESSION RISK: " + cum_reason if cum else ""}
+
+Reply in 2–3 sentences. Begin with: "This query was blocked because..."
+"""
+        user_msg = f"Explain why this query was blocked: \"{query}\""
+
+    # ── WARN ──────────────────────────────────────────────────────────
+    elif decision == "WARN":
+        system = f"""You are a Responsible AI governed assistant with causal reasoning.
+
+This query is SENSITIVE (WARN level). You must:
+1. Open with one sentence noting why this topic is sensitive
+2. Give a balanced, factual, unbiased response
+3. Avoid reinforcing stereotypes or bias toward any protected group
+4. Where relevant, distinguish correlation from causation (Pearl causal reasoning)
+5. Note ethical considerations if the query touches protected groups or high-stakes decisions
+
+RAI Findings:
+  - Risk Score   : {risk}% (WARN zone — between {risk-5:.0f}% and 70%)
+  - Jurisdiction : {jur}
+  - Flagged by:
+{findings}
+"""
+        user_msg = query
+
+    # ── EXPERT_REVIEW / ESCALATE ──────────────────────────────────────
+    elif decision in ("EXPERT_REVIEW", "ESCALATE"):
+        system = f"""You are the explanation layer of a Responsible AI governance framework.
+
+This query falls in a GREY AREA — the automated system cannot confidently
+decide allow or block. It requires human expert review.
+
+RAI Findings:
+  - Risk Score      : {risk}% (uncertainty zone — between 20% and 70%)
+  - Jurisdiction    : {jur}
+  - Uncertainty reason:
+{findings}
+
+Explain to the user:
+1. Why this specific query needs human review (1–2 sentences)
+2. What type of expert should review it (e.g. legal, medical, ethics board)
+3. What they can do in the meantime
+
+Begin with: "Your query has been flagged for human expert review because..."
+"""
+        user_msg = f"Explain why this query needs human expert review: \"{query}\""
+
+    # ── ALLOW ─────────────────────────────────────────────────────────
+    else:
+        bias_context = any(
+            any(kw in k.lower() for kw in ["scm", "bias", "causal", "fairness", "discriminat"])
+            for k in flagged.keys()
+        )
+
+        if bias_context or risk > 20:
+            system = f"""You are a Responsible AI governed assistant with causal fairness reasoning.
+
+The RAI framework allowed this query but detected bias-sensitive context (risk: {risk}%).
+
+Instructions:
+1. Answer accurately and helpfully
+2. Do not perpetuate bias about protected groups (race, gender, age, religion, disability)
+3. Distinguish between correlation and causation where relevant
+4. If the query involves AI decisions about people, note the importance of causal fairness
+5. Jurisdiction: {jur}
+
+Provide a clear, unbiased, factual response with appropriate reasoning.
+"""
+        else:
+            system = (
+                "You are a helpful, harmless, and honest AI assistant. "
+                "You have been screened by a Responsible AI governance system. "
+                "Answer clearly and accurately."
+            )
+        user_msg = query
+
+    return system, user_msg
+
+
 # ── LLM Call ───────────────────────────────────────────────────────────
-def call_llm(query: str, model: str = "llama-3.3-70b-versatile") -> str:
-    """Send approved query to Llama 3 via Groq."""
+def call_llm(user_msg: str,
+             model:       str = "llama-3.3-70b-versatile",
+             system_prompt: str = "") -> str:
+    """Send query to Llama 3 via Groq with a custom system prompt."""
     try:
         response = client.chat.completions.create(
             model    = model,
             messages = [
-                {
-                    "role"   : "system",
-                    "content": (
-                        "You are a helpful, harmless, and honest AI assistant. "
-                        "You have already been screened by a responsible AI "
-                        "governance system. Answer clearly and accurately."
-                    )
-                },
-                {"role": "user", "content": query}
+                {"role": "system", "content": system_prompt or
+                    "You are a helpful, harmless, and honest AI assistant."},
+                {"role": "user", "content": user_msg},
             ],
             max_tokens = 1024,
         )
@@ -156,26 +295,35 @@ def governed_chat(
     )
 
     # ── Build Response ────────────────────────────────────────────────
+    # Extract full pipeline analysis for LLM context
+    rai_ctx = build_rai_context(
+        result,
+        decision_name = base["decision"],
+        cum_override  = cumulative_override,
+        cum_reason    = base.get("cum_reason", ""),
+    )
+
+    # Build decision-specific system prompt + user message
+    system_prompt, user_msg = build_system_prompt(query, rai_ctx)
+
+    # ── BLOCK: LLM explains why — never answers harmful query ─────────
     if base["decision"] == "BLOCK":
-        reason_msg = (
-            f" ({cum_reason})" if cumulative_override else ""
-        )
-        return {**base, "response": f"🚫 BLOCKED by RAI governance{reason_msg}"}
+        explanation = call_llm(user_msg, model=model, system_prompt=system_prompt)
+        return {**base, "response": f"🚫 BLOCKED\n\n{explanation}"}
 
+    # ── EXPERT_REVIEW: LLM explains uncertainty ───────────────────────
     if base["decision"] == "EXPERT_REVIEW":
-        return {**base, "response": "👤 Escalated for human review"}
+        explanation = call_llm(user_msg, model=model, system_prompt=system_prompt)
+        return {**base, "response": f"👤 EXPERT REVIEW NEEDED\n\n{explanation}"}
 
-    # ALLOW or WARN → call LLM
-    llm_response = call_llm(query, model=model)
+    # ── ALLOW / WARN: LLM responds with RAI-aware system prompt ──────
+    llm_response = call_llm(user_msg, model=model, system_prompt=system_prompt)
 
-    # Update stored row with LLM response (best-effort)
-    # (SQLite UPDATE by session+turn would work here; skip for simplicity)
+    if dec == FinalDecision.WARN:
+        header = f"⚠️  Risk {base['risk']:.1f}% — Sensitive topic (governed response)\n\n"
+        return {**base, "response": header + llm_response}
 
-    notice = "\n⚠️  Sensitive topic — response monitored." if dec == FinalDecision.WARN else ""
-    if "cum_reason" in base and dec != FinalDecision.BLOCK:
-        notice += f"\n⚠️  {base['cum_reason']}"
-
-    return {**base, "response": llm_response + notice}
+    return {**base, "response": llm_response}
 
 
 # ── Batch Run ───────────────────────────────────────────────────────────
@@ -399,14 +547,7 @@ def run_interactive(
         dec = result["decision"]
 
         print(f"\n[{dec}] risk={result['risk']:.1f}% | {result['latency_ms']:.0f}ms")
-        if dec == "BLOCK":
-            print(f"🚫 {result['response']}")
-        elif dec == "EXPERT_REVIEW":
-            print(f"👤 {result['response']}")
-        elif dec == "WARN":
-            print(f"⚠️  Sensitive topic — monitored\nAI: {result['response']}")
-        else:
-            print(f"AI: {result['response']}")
+        print(result["response"])
         print()
 
         session_rows.append({**result, "prompt": query, "expected": ""})
