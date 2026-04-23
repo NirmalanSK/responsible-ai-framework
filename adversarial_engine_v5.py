@@ -1,7 +1,7 @@
 """
 ╔══════════════════════════════════════════════════════════════════════╗
-║   ADVERSARIAL DEFENSE ENGINE  v3                                     ║
-║   Responsible AI Framework v4.8 — Living System                      ║
+║   ADVERSARIAL DEFENSE ENGINE  v5                                     ║
+║   Responsible AI Framework v5.0 — Living System                      ║
 ║   PhD Research · Nirmalan · Chapter 5 — Adversarial Evaluation       ║
 ║                                                                      ║
 ║   Attack Types Implemented:                                          ║
@@ -965,7 +965,7 @@ class PromptInjectionDetector:
 
 class AdversarialDefenseEngine:
     """
-    Main Adversarial Defense Engine — Step 2 + Adversarial Layer of v4.7.
+    Main Adversarial Defense Engine — Step 7 + Adversarial Layer of v15h.
 
     Combines:
         - SlowBoilingDetector  (conversation-level)
@@ -1115,7 +1115,7 @@ class AdversarialDefenseEngine:
             injection_score = max(injection_score_raw, 0.90)
         elif inj_signal and inj_signal.confidence <= 0.70:
             # Low-confidence + educational context → skip (Year 1 FP fix)
-            edu_keywords = ["what", "how", "explain", "teach", "learn", "murder",
+            edu_keywords = ["what", "how", "explain", "teach", "learn",
                             "detective", "cybersecurity", "discrimination", "drug",
                             "mental health", "story", "fiction", "career"]
             if any(kw in q_lower for kw in edu_keywords):
@@ -1223,7 +1223,7 @@ class AdversarialDefenseEngine:
         W = 68
         print("═" * W)
         print("  ADVERSARIAL DEFENSE ENGINE REPORT")
-        print("  Responsible AI Framework v4.7")
+        print("  Responsible AI Framework v15h")
         print("═" * W)
 
         # Truncate message for display
