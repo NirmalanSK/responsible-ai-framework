@@ -38,6 +38,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Dict, List, Tuple
+from functools import lru_cache
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -797,7 +798,10 @@ def compute_counterfactual_bounds(f: CausalFindings) -> CounterfactualBounds:
     RCT special case: bounds collapse to point estimates.
     """
     p  = f.p_y_given_x if f.p_y_given_x > 0 else f.tce/100 + 0.05
-    pp = f.p_y_given_notx if f.p_y_given_notx >= 0 else max(0, p - f.tce/100)
+    # FIX v15h: was '>= 0' which is always True (0.0 >= 0), fallback never ran.
+    # When p_y_given_notx is unset (default 0.0), PNS collapsed to overconfident
+    # point estimate. Fix: '> 0' so default 0.0 triggers tce-based fallback.
+    pp = f.p_y_given_notx if f.p_y_given_notx > 0 else max(0, p - f.tce/100)
     tce = f.tce / 100.0
     p  = _clamp(p)
     pp = _clamp(pp)
@@ -1057,6 +1061,14 @@ class SCMEngineV2:
     """
 
     def run(self, findings: CausalFindings) -> SCMResultV2:
+        # ── lru_cache via module-level wrapper (see _run_scm_cached below) ──
+        # CausalFindings has __hash__ + __eq__ → cache-safe.
+        # Same findings object (e.g. repeated COMPAS tests) returns cached result.
+        return _run_scm_cached(findings)
+
+    # ── Internal (non-self) method — called by _run_scm_cached ───────────
+    @staticmethod
+    def _compute(findings: CausalFindings) -> SCMResultV2:
         # ── Get domain DAG ────────────────────────────────────────
         dag = DOMAIN_DAGS.get(findings.domain, DOMAIN_DAGS["misuse_safety"])
 
@@ -1204,6 +1216,17 @@ class SCMEngineV2:
         print(sep)
 
 
+# ── lru_cache wrapper (outside class — instance methods can't be cached directly) ──
+# CausalFindings has __hash__ + __eq__ → safe to cache.
+# maxsize=1000 covers all known test cases + live chatbot repeated queries.
+# PhD note: caching reduces latency for repeated bias profiles (e.g. COMPAS
+# queried multiple times across 195 unit tests → single computation).
+@lru_cache(maxsize=1000)
+def _run_scm_cached(findings: CausalFindings) -> SCMResultV2:
+    """Cached SCM computation — called by SCMEngineV2.run()."""
+    return SCMEngineV2._compute(findings)
+
+
 # ═══════════════════════════════════════════════════════════════════
 # KNOWN CASES — extended with v2 fields
 # ═══════════════════════════════════════════════════════════════════
@@ -1264,7 +1287,9 @@ CAUSAL_MATRIX = {
     "Representation_Bias":    [3,2,3,2,3],  # total=13 CENTRAL
     "Decision_Transparency":  [3,2,2,1,2],  # total=10
     "Misuse_Safety":          [2,3,2,3,3],  # total=13 CENTRAL
-    "Technical_Safety":       [2,2,2,3,2],  # total=11
+    "Technical_Safety":       [2,2,2,3,2],  # total=11 | YEAR 2: not yet in DOMAIN_TO_ROW
+                                              # Activated indirectly via Audit_Accountability cascade
+                                              # Year 2: add "technical_safety" domain + DAG
     "Criminal_Justice_Bias":  [3,2,3,1,2],  # total=11
     "Healthcare_Bias":        [3,2,3,1,2],  # total=11
     "Context_Poisoning":      [2,3,2,3,1],  # total=11
@@ -1332,9 +1357,18 @@ def get_domain_multiplier(query: str) -> tuple:
     Year 2: XLM-RoBERTa embedding classifier
     """
     q = query.lower()
-    if any(k in q for k in ["patient","clinical","medical","diagnosis","drug","hospital",
+    # FIX v15h: Check drug trafficking BEFORE healthcare — "drug" alone matched
+    # both, causing trafficking queries to be labelled "healthcare" (3.0×).
+    # Drug trafficking is general domain (1.0×); healthcare drug context is
+    # caught by clinical/medical/dosage/pharma keywords below.
+    if any(k in q for k in ["drug trafficking","drug synthesis","drug dealing",
+                             "narcotics","methamphetamine","heroin","cocaine supply",
+                             "fentanyl production","manufacture drugs"]):
+        return DOMAIN_RISK_MULTIPLIER["general"], "general"
+    if any(k in q for k in ["patient","clinical","medical","diagnosis","hospital",
                              "treatment","dosage","surgery","symptom","health","doctor",
-                             "cancer","diagnose","nurse","pharma","vaccine","therapy"]):
+                             "cancer","diagnose","nurse","pharma","vaccine","therapy",
+                             "drug overdose","drug interaction","medication"]):
         return DOMAIN_RISK_MULTIPLIER["healthcare"], "healthcare"
     if any(k in q for k in ["investment","trading","loan","credit","bank","financial",
                              "insurance","mortgage","fraud","portfolio","tax"]):
