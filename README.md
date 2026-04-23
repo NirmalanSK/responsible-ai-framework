@@ -6,7 +6,6 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-📐 **[Formal Mathematical Foundations (PDF)](docs/phd_math_proofs.pdf)** — Theorems, proofs, complexity analysis & impossibility results | [LaTeX Source](docs/phd_math_proofs.tex)
 
 **A unified middleware combining real-time AI safety + causal bias detection + legal admissibility scoring — to our knowledge, the first system to address all three layers in a single deployment-stage pipeline.**
 
