@@ -61,29 +61,26 @@ CUMULATIVE_BLOCK_THRESHOLD = 0.60   # 60% → hard block
 CUMULATIVE_WARN_THRESHOLD  = 0.45   # 45% → flag in response
 
 
-# ── RAI Context Extractor ───────────────────────────────────────────────
+# ── RAI Context Extractor ──────────────────────────────────────────────
 def build_rai_context(result, decision_name: str,
                       cum_override: bool = False,
                       cum_reason: str = "") -> dict:
-    """
-    Extract key findings from PipelineResult for LLM context.
-    Pulls SCM risk, attack type, VAC flag, and flagged step details.
-    """
+    """Extract SCM/Matrix/attack findings from PipelineResult for LLM."""
     flagged_steps = {}
     for step in getattr(result, "steps", []):
         if step.signal in ("BLOCK", "WARN", "ESCALATE"):
             flagged_steps[step.step_name] = step.detail
 
     return {
-        "decision"          : decision_name,
-        "risk_pct"          : round(result.scm_risk_pct, 1),
-        "attack_type"       : result.attack_type.value,
-        "emotion_flag"      : result.emotion_flag.value,
-        "vac_triggered"     : result.vac_triggered,
-        "jurisdiction"      : result.jurisdiction.value,
-        "flagged_steps"     : flagged_steps,
+        "decision"           : decision_name,
+        "risk_pct"           : round(result.scm_risk_pct, 1),
+        "attack_type"        : result.attack_type.value,
+        "emotion_flag"       : result.emotion_flag.value,
+        "vac_triggered"      : result.vac_triggered,
+        "jurisdiction"       : result.jurisdiction.value,
+        "flagged_steps"      : flagged_steps,
         "cumulative_override": cum_override,
-        "cumulative_reason" : cum_reason,
+        "cumulative_reason"  : cum_reason,
     }
 
 
@@ -91,16 +88,16 @@ def build_system_prompt(query: str, ctx: dict) -> tuple[str, str]:
     """
     Build (system_prompt, user_message) for LLM based on RAI decision.
 
-    BLOCK       → LLM explains why — does NOT answer harmful query
-    WARN        → LLM gives careful response with sensitivity note
-    EXPERT_REVIEW → LLM explains why human review needed
-    ALLOW       → Normal response; bias-aware if SCM flagged risk
+    BLOCK         → LLM explains why — does NOT answer harmful query
+    WARN          → LLM gives careful causal-aware response
+    EXPERT_REVIEW → LLM explains uncertainty + expert needed
+    ALLOW         → Normal response; bias-aware if SCM flagged risk
     """
     decision   = ctx["decision"]
     risk       = ctx["risk_pct"]
-    attack     = ctx["attack_type"]
     vac        = ctx["vac_triggered"]
     jur        = ctx["jurisdiction"]
+    attack     = ctx["attack_type"]
     flagged    = ctx["flagged_steps"]
     cum        = ctx["cumulative_override"]
     cum_reason = ctx["cumulative_reason"]
@@ -109,14 +106,13 @@ def build_system_prompt(query: str, ctx: dict) -> tuple[str, str]:
         f"  - {name}: {detail}" for name, detail in flagged.items()
     ) or "  - Pattern-based harm detection triggered"
 
-    # ── BLOCK ─────────────────────────────────────────────────────────
     if decision == "BLOCK":
         system = f"""You are the explanation layer of a Responsible AI governance framework.
 
-A user query was BLOCKED by the RAI pipeline. Your job:
-1. Explain WHY it was blocked using the findings below — be clear and respectful
-2. Do NOT answer or hint at the harmful content
-3. Briefly suggest what the user CAN ask instead (if safe alternative exists)
+A user query was BLOCKED. Your job:
+1. Explain WHY it was blocked using the RAI findings below — be clear and respectful
+2. Do NOT answer or hint at the harmful content in any way
+3. Briefly suggest a safe alternative if one exists
 
 RAI Findings:
   - Risk Score      : {risk}%
@@ -127,58 +123,54 @@ RAI Findings:
 {findings}
 {"  - CUMULATIVE SESSION RISK: " + cum_reason if cum else ""}
 
-Reply in 2–3 sentences. Begin with: "This query was blocked because..."
+Reply in 2-3 sentences. Begin with: "This query was blocked because..."
 """
         user_msg = f"Explain why this query was blocked: \"{query}\""
 
-    # ── WARN ──────────────────────────────────────────────────────────
     elif decision == "WARN":
         system = f"""You are a Responsible AI governed assistant with causal reasoning.
 
 This query is SENSITIVE (WARN level). You must:
 1. Open with one sentence noting why this topic is sensitive
 2. Give a balanced, factual, unbiased response
-3. Avoid reinforcing stereotypes or bias toward any protected group
-4. Where relevant, distinguish correlation from causation (Pearl causal reasoning)
-5. Note ethical considerations if the query touches protected groups or high-stakes decisions
+3. Avoid reinforcing stereotypes about any protected group
+4. Distinguish correlation from causation (Pearl causal reasoning)
+5. Note ethical considerations if the query touches protected groups
 
 RAI Findings:
-  - Risk Score   : {risk}% (WARN zone — between {risk-5:.0f}% and 70%)
+  - Risk Score   : {risk}% (WARN zone)
   - Jurisdiction : {jur}
   - Flagged by:
 {findings}
 """
         user_msg = query
 
-    # ── EXPERT_REVIEW / ESCALATE ──────────────────────────────────────
     elif decision in ("EXPERT_REVIEW", "ESCALATE"):
         system = f"""You are the explanation layer of a Responsible AI governance framework.
 
-This query falls in a GREY AREA — the automated system cannot confidently
-decide allow or block. It requires human expert review.
+This query falls in a GREY AREA requiring human expert review.
 
 RAI Findings:
-  - Risk Score      : {risk}% (uncertainty zone — between 20% and 70%)
-  - Jurisdiction    : {jur}
+  - Risk Score : {risk}% (uncertainty zone)
+  - Jurisdiction: {jur}
   - Uncertainty reason:
 {findings}
 
-Explain to the user:
-1. Why this specific query needs human review (1–2 sentences)
-2. What type of expert should review it (e.g. legal, medical, ethics board)
-3. What they can do in the meantime
+Explain:
+1. Why this query needs human review (1-2 sentences)
+2. What type of expert should review it (legal / medical / ethics board)
+3. What the user can do in the meantime
 
 Begin with: "Your query has been flagged for human expert review because..."
 """
         user_msg = f"Explain why this query needs human expert review: \"{query}\""
 
-    # ── ALLOW ─────────────────────────────────────────────────────────
-    else:
+    else:  # ALLOW
         bias_context = any(
-            any(kw in k.lower() for kw in ["scm", "bias", "causal", "fairness", "discriminat"])
+            any(kw in k.lower() for kw in
+                ["scm", "bias", "causal", "fairness", "discriminat"])
             for k in flagged.keys()
         )
-
         if bias_context or risk > 20:
             system = f"""You are a Responsible AI governed assistant with causal fairness reasoning.
 
@@ -187,11 +179,9 @@ The RAI framework allowed this query but detected bias-sensitive context (risk: 
 Instructions:
 1. Answer accurately and helpfully
 2. Do not perpetuate bias about protected groups (race, gender, age, religion, disability)
-3. Distinguish between correlation and causation where relevant
-4. If the query involves AI decisions about people, note the importance of causal fairness
+3. Distinguish correlation from causation where relevant
+4. If query involves AI decisions about people, note causal fairness principles
 5. Jurisdiction: {jur}
-
-Provide a clear, unbiased, factual response with appropriate reasoning.
 """
         else:
             system = (
@@ -204,9 +194,224 @@ Provide a clear, unbiased, factual response with appropriate reasoning.
     return system, user_msg
 
 
+def build_verify_prompt(query: str, draft: str, ctx: dict) -> str:
+    """
+    Build self-verification system prompt.
+    LLM checks its own draft against SCM/Matrix findings + original query.
+    Returns a system prompt for the verification pass.
+    """
+    decision = ctx["decision"]
+    risk     = ctx["risk_pct"]
+    vac      = ctx["vac_triggered"]
+    jur      = ctx["jurisdiction"]
+    attack   = ctx["attack_type"]
+    flagged  = ctx["flagged_steps"]
+
+    findings = "\n".join(
+        f"  - {name}: {detail}" for name, detail in flagged.items()
+    ) or "  - Pattern-based harm detection triggered"
+
+    if decision == "BLOCK":
+        return f"""You are a Responsible AI self-verification auditor.
+
+A draft explanation was generated for a BLOCKED query. Your task:
+Verify whether this explanation is ACCURATE and APPROPRIATE.
+
+Original query  : "{query}"
+Pipeline decision: BLOCK
+Risk score      : {risk}%
+Attack type     : {attack}
+VAC triggered   : {"YES" if vac else "No"}
+Jurisdiction    : {jur}
+Flagged steps:
+{findings}
+
+Draft explanation to verify:
+---
+{draft}
+---
+
+Check ALL of the following:
+1. CORRECT DECISION? Given risk={risk}% and findings above, was BLOCK the right call?
+   - If risk is between 30-70% and VAC=No and attack=NONE → consider if WARN is more appropriate
+   - If VAC=YES or risk>70% or attack detected → BLOCK is definitely correct
+2. ACCURATE EXPLANATION? Does the draft correctly describe the actual reason for blocking?
+   Does it match the flagged steps and findings above?
+3. SAFE CONTENT? Does the explanation accidentally reveal or hint at harmful information?
+4. RESPECTFUL TONE? Is it respectful to the user even while blocking?
+
+Respond in this exact format:
+VERDICT: [APPROVED / NEEDS_REVISION]
+DECISION_CORRECT: [YES / SHOULD_BE_WARN / YES_DEFINITELY]
+ISSUES: [list any problems found, or "None"]
+REVISED_RESPONSE: [if NEEDS_REVISION, write the corrected explanation here; if APPROVED, write "N/A"]
+"""
+
+    elif decision == "WARN":
+        return f"""You are a Responsible AI self-verification auditor.
+
+A draft response was generated for a SENSITIVE (WARN level) query. Your task:
+Verify whether this response is ACCURATE, UNBIASED, and APPROPRIATELY CAREFUL.
+
+Original query  : "{query}"
+Pipeline decision: WARN
+Risk score      : {risk}%
+Jurisdiction    : {jur}
+Flagged steps:
+{findings}
+
+Draft response to verify:
+---
+{draft}
+---
+
+Check ALL of the following:
+1. BIAS CHECK: Does the draft contain stereotypes, assumptions, or biased framing
+   about any protected group (race, gender, age, religion, disability, nationality)?
+2. CAUSAL ACCURACY: Does the draft incorrectly treat correlation as causation?
+   If the topic involves AI decisions about people, is fairness properly noted?
+3. SENSITIVITY: Does the draft appropriately acknowledge why this topic is sensitive?
+4. JURISDICTION: Are any jurisdiction-specific ({jur}) legal considerations relevant
+   and correctly addressed?
+5. FACTUAL ACCURACY: Are the claims in the draft actually correct?
+
+Respond in this exact format:
+VERDICT: [APPROVED / NEEDS_REVISION]
+ISSUES: [list any problems found, or "None"]
+REVISED_RESPONSE: [if NEEDS_REVISION, write the improved response here; if APPROVED, write "N/A"]
+"""
+
+    elif decision in ("EXPERT_REVIEW", "ESCALATE"):
+        return f"""You are a Responsible AI self-verification auditor.
+
+A draft explanation was generated for a query requiring EXPERT REVIEW. Your task:
+Verify whether this explanation is ACCURATE and HELPFUL.
+
+Original query  : "{query}"
+Pipeline decision: EXPERT_REVIEW
+Risk score      : {risk}%
+Jurisdiction    : {jur}
+Flagged steps:
+{findings}
+
+Draft explanation to verify:
+---
+{draft}
+---
+
+Check ALL of the following:
+1. UNCERTAINTY REASON: Does the draft accurately explain WHY the system is uncertain?
+   Does it match the flagged steps above?
+2. EXPERT TYPE: Is the suggested expert type correct for this domain?
+   (e.g., legal expert for discrimination claims, medical expert for health decisions)
+3. INTERIM GUIDANCE: Is the advice given to the user while they wait for expert review
+   safe, practical, and appropriate?
+4. TONE: Is it clear and helpful without being alarming?
+
+Respond in this exact format:
+VERDICT: [APPROVED / NEEDS_REVISION]
+ISSUES: [list any problems found, or "None"]
+REVISED_RESPONSE: [if NEEDS_REVISION, write the improved explanation here; if APPROVED, write "N/A"]
+"""
+
+    else:  # ALLOW
+        return f"""You are a Responsible AI self-verification auditor.
+
+A draft response was generated for an ALLOWED query. Your task:
+Verify whether this response is ACCURATE, UNBIASED, and APPROPRIATE.
+
+Original query  : "{query}"
+Pipeline decision: ALLOW
+Risk score      : {risk}% {"(bias-sensitive context flagged)" if risk > 20 else ""}
+Jurisdiction    : {jur}
+{"Flagged steps: " + findings if flagged else "No steps flagged — clean query."}
+
+Draft response to verify:
+---
+{draft}
+---
+
+Check ALL of the following:
+1. FACTUAL ACCURACY: Are the claims in the draft correct?
+2. BIAS CHECK: Does the draft contain any stereotypes, biased framing, or assumptions
+   about protected groups (race, gender, age, religion, disability, nationality)?
+   {"Note: SCM/Matrix flagged bias-sensitive context at " + str(risk) + "% risk — extra scrutiny needed." if risk > 20 else ""}
+3. COMPLETENESS: Does the draft actually answer the user's question?
+4. APPROPRIATENESS: Is the tone and depth right for the query?
+
+Respond in this exact format:
+VERDICT: [APPROVED / NEEDS_REVISION]
+ISSUES: [list any problems found, or "None"]
+REVISED_RESPONSE: [if NEEDS_REVISION, write the improved response here; if APPROVED, write "N/A"]
+"""
+
+
+def self_verify(
+    query: str,
+    draft: str,
+    ctx:   dict,
+    model: str,
+) -> tuple[str, bool, str]:
+    """
+    Two-pass LLM self-verification using SCM/Matrix findings.
+
+    Pass 1: LLM generates draft (done outside — passed as `draft`)
+    Pass 2: LLM verifies draft against RAI context → revise if needed
+
+    Returns:
+        final_response : str   — approved draft or revised response
+        was_revised    : bool  — True if LLM found issues and revised
+        issues_found   : str   — description of what was wrong (or "None")
+
+    For BLOCK decisions: also checks if BLOCK→WARN downgrade is warranted.
+    """
+    verify_prompt = build_verify_prompt(query, draft, ctx)
+
+    try:
+        verify_resp = client.chat.completions.create(
+            model    = model,
+            messages = [
+                {"role": "system", "content": verify_prompt},
+                {"role": "user",   "content": "Verify the draft response above."},
+            ],
+            max_tokens = 1024,
+        )
+        raw = verify_resp.choices[0].message.content or ""
+    except Exception as e:
+        # If verification fails, return original draft safely
+        return draft, False, f"[Verification error: {e}]"
+
+    # ── Parse structured response ────────────────────────────────────
+    verdict          = "APPROVED"
+    issues_found     = "None"
+    revised_response = ""
+
+    for line in raw.splitlines():
+        line_stripped = line.strip()
+        if line_stripped.startswith("VERDICT:"):
+            verdict = line_stripped.replace("VERDICT:", "").strip()
+        elif line_stripped.startswith("ISSUES:"):
+            issues_found = line_stripped.replace("ISSUES:", "").strip()
+        elif line_stripped.startswith("REVISED_RESPONSE:"):
+            revised_response = line_stripped.replace("REVISED_RESPONSE:", "").strip()
+
+    # Multi-line REVISED_RESPONSE handling
+    if "REVISED_RESPONSE:" in raw:
+        revised_response = raw.split("REVISED_RESPONSE:", 1)[1].strip()
+        if revised_response.upper().startswith("N/A"):
+            revised_response = ""
+
+    needs_revision = "NEEDS_REVISION" in verdict.upper()
+
+    if needs_revision and revised_response:
+        return revised_response, True, issues_found
+    else:
+        return draft, False, issues_found
+
+
 # ── LLM Call ───────────────────────────────────────────────────────────
 def call_llm(user_msg: str,
-             model:       str = "llama-3.3-70b-versatile",
+             model:        str = "llama-3.3-70b-versatile",
              system_prompt: str = "") -> str:
     """Send query to Llama 3 via Groq with a custom system prompt."""
     try:
@@ -215,7 +420,7 @@ def call_llm(user_msg: str,
             messages = [
                 {"role": "system", "content": system_prompt or
                     "You are a helpful, harmless, and honest AI assistant."},
-                {"role": "user", "content": user_msg},
+                {"role": "user",   "content": user_msg},
             ],
             max_tokens = 1024,
         )
@@ -294,7 +499,7 @@ def governed_chat(
         # legal_score   = ...,
     )
 
-    # ── Build Response ────────────────────────────────────────────────
+    # ── Build Response — Two-Pass Self-Verification ───────────────────
     # Extract full pipeline analysis for LLM context
     rai_ctx = build_rai_context(
         result,
@@ -303,27 +508,52 @@ def governed_chat(
         cum_reason    = base.get("cum_reason", ""),
     )
 
-    # Build decision-specific system prompt + user message
     system_prompt, user_msg = build_system_prompt(query, rai_ctx)
 
-    # ── BLOCK: LLM explains why — never answers harmful query ─────────
+    # Pass 1: Generate draft response
+    draft = call_llm(user_msg, model=model, system_prompt=system_prompt)
+
+    # Pass 2: Self-verify draft using SCM/Matrix findings
+    final_response, was_revised, issues = self_verify(query, draft, rai_ctx, model)
+
+    # ── Annotate revision info (visible in terminal, logged in batch) ─
+    revision_tag = ""
+    if was_revised:
+        revision_tag = f"\n[🔄 Self-verified — revised: {issues}]"
+
+    # ── Format per decision ───────────────────────────────────────────
     if base["decision"] == "BLOCK":
-        explanation = call_llm(user_msg, model=model, system_prompt=system_prompt)
-        return {**base, "response": f"🚫 BLOCKED\n\n{explanation}"}
+        return {
+            **base,
+            "response"    : f"🚫 BLOCKED\n\n{final_response}{revision_tag}",
+            "was_revised" : was_revised,
+            "verify_issues": issues,
+        }
 
-    # ── EXPERT_REVIEW: LLM explains uncertainty ───────────────────────
     if base["decision"] == "EXPERT_REVIEW":
-        explanation = call_llm(user_msg, model=model, system_prompt=system_prompt)
-        return {**base, "response": f"👤 EXPERT REVIEW NEEDED\n\n{explanation}"}
-
-    # ── ALLOW / WARN: LLM responds with RAI-aware system prompt ──────
-    llm_response = call_llm(user_msg, model=model, system_prompt=system_prompt)
+        return {
+            **base,
+            "response"    : f"👤 EXPERT REVIEW NEEDED\n\n{final_response}{revision_tag}",
+            "was_revised" : was_revised,
+            "verify_issues": issues,
+        }
 
     if dec == FinalDecision.WARN:
-        header = f"⚠️  Risk {base['risk']:.1f}% — Sensitive topic (governed response)\n\n"
-        return {**base, "response": header + llm_response}
+        header = f"⚠️  Risk {base['risk']:.1f}% — Sensitive topic (self-verified response)\n\n"
+        return {
+            **base,
+            "response"    : header + final_response + revision_tag,
+            "was_revised" : was_revised,
+            "verify_issues": issues,
+        }
 
-    return {**base, "response": llm_response}
+    # ALLOW
+    return {
+        **base,
+        "response"    : final_response + revision_tag,
+        "was_revised" : was_revised,
+        "verify_issues": issues,
+    }
 
 
 # ── Batch Run ───────────────────────────────────────────────────────────
@@ -546,7 +776,8 @@ def run_interactive(
         )
         dec = result["decision"]
 
-        print(f"\n[{dec}] risk={result['risk']:.1f}% | {result['latency_ms']:.0f}ms")
+        print(f"\n[{dec}] risk={result['risk']:.1f}% | {result['latency_ms']:.0f}ms"
+              + (" | 🔄 self-verified+revised" if result.get("was_revised") else " | ✓ self-verified"))
         print(result["response"])
         print()
 
