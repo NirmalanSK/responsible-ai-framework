@@ -147,6 +147,121 @@ Date: March 2026
 
 
 
+## 💡 IDEA: Two-Pass LLM Self-Verification → Future S13 Output Verifier
+Date: April 2026
+Status: Proof-of-concept built (v15i) — chatbot layer. Architectural path to pipeline clear.
+
+### The Problem Identified
+Pipeline (S00–S12) correctly classifies queries. But the LLM's *explanation* of that
+decision was unverified. Two failure modes existed:
+
+  1. Explanation inaccuracy:
+     Pipeline BLOCKs for SCM reason X, but LLM explains it as reason Y
+     → Misleads user, misrepresents framework findings
+
+  2. Decision softening:
+     BLOCK with risk=32% could be explained in a way that implies WARN
+     → Undermines governance integrity
+
+### The Solution Built (v15i — April 2026)
+Two-pass architecture added to both governed chatbots:
+
+  Pass 1: Draft generation
+    Decision-specific system prompt grounded in pipeline findings
+    (SCM activations, Matrix values, attack type, VAC flags, risk score)
+    LLM generates human-readable explanation of WHY this decision
+
+  Pass 2: self_verify()
+    LLM audits its own draft against full RAI context
+    Checks vary by decision type:
+
+    BLOCK:         Is BLOCK correct, or should this be WARN?
+                   (re-checks risk score / VAC presence / attack type)
+                   Explanation accurate? No harmful hints leaked?
+    WARN:          Correlation≠Causation confusion present?
+                   Jurisdiction addressed? Protected group bias in response?
+    EXPERT_REVIEW: Expert type correct (medical/legal/financial)?
+                   Interim guidance safe?
+    ALLOW:         Factual accuracy? Protected group bias? Complete?
+
+  Output tagged: ✓ self-verified | 🔄 self-verified+revised
+
+  New functions: build_rai_context(), build_system_prompt(),
+                 build_verify_prompt(), self_verify(), call_llm()
+
+  pipeline_v15.py untouched — all changes at chatbot layer only.
+
+### The Limitation Identified (Same Day)
+Self-verify is currently chatbot-specific.
+  governed_chatbot.py    → Groq/Llama has self-verify
+  gemini_governed_chatbot.py → Gemini has self-verify
+  But: any future AI model integrated with pipeline would NOT have self-verify
+  → Not truly model-agnostic middleware
+
+### Architectural Solution: S13 Output Verifier (Year 2)
+Move self-verification INTO the pipeline as Step 13.
+Pipeline becomes bidirectional middleware:
+
+  Input side (S00–S12):  Query governance — classify and decide
+  Output side (S13):     Response governance — verify the AI's own explanation
+
+  Full flow:
+    Query → S00–S12 → Decision
+                          ↓
+                  Any AI Model generates draft response
+                          ↓
+                  S13: Output Verifier  ← NEW (model-agnostic)
+                  Pipeline checks draft against own SCM/Matrix findings
+                  Same logic as current self_verify()
+                          ↓
+                  APPROVED → User
+                  NEEDS_REVISION → re-prompt → User
+
+  Benefits:
+    - Model-agnostic: works with ANY LLM (Groq, Gemini, GPT, local model)
+    - Pipeline governs both input AND output
+    - "Explanation accuracy" becomes a first-class RAI guarantee
+    - Single place to maintain verification logic (not duplicated per chatbot)
+
+### Connection to Year 2 Roadmap
+  This is the early precursor to Phase 5: Causal-Neural Feedback Loop
+    Phase 5 plan: "SCM findings inform LLM generation parameters"
+    S13 plan:     "SCM/Matrix findings verify LLM output accuracy"
+
+  Difference:
+    Phase 5 = proactive (SCM shapes generation BEFORE output)
+    S13     = reactive  (pipeline checks generation AFTER output)
+
+  Both together = complete causal control of the LLM's response:
+    SCM findings → shape generation (Phase 5) + verify output (S13)
+
+### PhD Defense Value
+  Year 1 claim: "Pipeline governs queries" (S00–S12)
+  Year 2 claim: "Pipeline governs queries AND responses" (S00–S13)
+
+  Examiner question: "But does your framework guarantee that the AI's
+  explanation of its decisions is accurate?"
+  Year 2 answer: "Yes — S13 Output Verifier cross-checks every LLM
+  response against the pipeline's own SCM/Matrix findings."
+
+  This closes the "who watches the AI's explanations?" gap.
+  Meta-governance: the framework governs not just queries, but its own outputs.
+
+### Implementation Path (Year 2, Phase 5 Extension)
+  Step 1: Extract self_verify() logic from governed_chatbot.py
+  Step 2: Create output_verifier.py (model-agnostic)
+          Input: (draft_response, pipeline_result, rai_context)
+          Output: (approved_response, verification_status, revision_reason)
+  Step 3: Add S13 call in pipeline_v15.py after decision engine
+          pipeline calls: output_verifier.verify(draft, result)
+  Step 4: Update both chatbots — remove self_verify(), use S13 instead
+  Step 5: New test class: TestS13OutputVerifier
+          Test: BLOCK explanation doesn't leak harmful content
+          Test: WARN explanation doesn't contain causation confusion
+          Test: ALLOW explanation factually accurate
+
+---
+
 ## 🎓 PhD Thesis Framing (Updated)
 Chapter 1: Introduction
   "Rules can be hacked. Values cannot — if truly internalized."
