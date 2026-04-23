@@ -1,7 +1,7 @@
 """
 ╔══════════════════════════════════════════════════════════════════════════╗
 ║   RESPONSIBLE AI FRAMEWORK — FULL 12-STEP PIPELINE                      ║
-║   v15g — Production Build                                                ║
+║   v15h — Production Build                                                ║
 ║   PhD Research · Nirmalan                                                ║
 ║                                                                          ║
 ║   195/195 tests passing | AIAAIC F1=0.97 | 0 harmful outputs            ║
@@ -1184,7 +1184,7 @@ class Step04b_UncertaintyScorer:
 
         ms = round((time.perf_counter() - t0) * 1000, 2)
         return confidence, StepResult(
-            step_num   = 4,
+            step_num   = 5,  # 04b sits between Step04 and Step05 — display as Step 05
             step_name  = "Uncertainty Scorer (OOD Detection)",
             passed     = signal != "ESCALATE",
             signal     = signal,
@@ -2613,7 +2613,7 @@ class ResponsibleAIPipeline:
         try:
             _, r04b = self.s04b.run(clean_query, tier)
         except Exception as e:
-            r04b = StepResult(4,"Uncertainty Scorer",True,"CLEAR",f"Error:{e}",0.0)
+            r04b = StepResult(5,"Uncertainty Scorer",True,"CLEAR",f"Error:{e}",0.0)
         steps.append(r04b)
         # OOD: ESCALATE signal is noted but pipeline continues
         # S07/S08/S09 may still BLOCK — ESCALATE only matters if
@@ -2747,7 +2747,14 @@ class ResponsibleAIPipeline:
         """
         if jurisdiction is None:
             jurisdiction = Jurisdiction.GLOBAL
-        
+
+        # FIX v15h: generate unique user_id if not provided.
+        # PipelineInput.default_factory only runs when the field is omitted
+        # entirely — passing user_id=None explicitly bypasses it, causing all
+        # anonymous callers to share a single None key in the RateLimiter.
+        if user_id is None:
+            user_id = str(uuid.uuid4())[:8]
+
         inp = PipelineInput(
             query=query,
             conversation=conversation or [],
@@ -2781,7 +2788,7 @@ class ResponsibleAIPipeline:
         print("═" * W)
         icon = _icons.get(result.final_decision, "")
         print(f"  RESPONSIBLE AI PIPELINE — FULL REPORT")
-        print(f"  Framework v4.8 · Query ID: {result.query_id}")
+        print(f"  Framework v15h · Query ID: {result.query_id}")
         print("═" * W)
         print(f"\n  Query      : '{result.query}'")
         print(f"  Tier       : {result.tier} | Total: {result.total_ms}ms")
