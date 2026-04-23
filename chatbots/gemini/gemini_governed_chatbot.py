@@ -1,5 +1,5 @@
 # Gemini Governed Chatbot v5 — Research Edition (+ ContextEngine)
-# RAI Framework v15g + Gemini API + Contextual Memory
+# RAI Framework v15h + Gemini API + Contextual Memory
 # Features: Batch testing, Risk histogram, PDF report,
 #           Multi-model benchmark, Failure analysis,
 #           Multi-turn attack detection via ContextEngine
@@ -325,10 +325,14 @@ def self_verify(
     draft: str,
     ctx:   dict,
     model: str,
-) -> tuple[str, bool, str]:
+) -> tuple[str, bool, str, str]:
     """
     Two-pass self-verification using SCM/Matrix findings.
-    Returns: (final_response, was_revised, issues_found)
+
+    Returns: (final_response, was_revised, issues_found, decision_correct)
+
+    FIX v15h: decision_correct now returned and acted upon in governed_chat()
+    so BLOCK→WARN downgrade actually happens when verifier says SHOULD_BE_WARN.
     """
     verify_prompt = build_verify_prompt(query, draft, ctx)
 
@@ -345,14 +349,17 @@ def self_verify(
     except Exception as e:
         return draft, False, f"[Verification error: {e}]"
 
-    verdict          = "APPROVED"
-    issues_found     = "None"
-    revised_response = ""
+    verdict           = "APPROVED"
+    issues_found      = "None"
+    revised_response  = ""
+    decision_correct  = "YES"   # FIX v15h: parse DECISION_CORRECT for BLOCK→WARN downgrade
 
     for line in raw.splitlines():
         ls = line.strip()
         if ls.startswith("VERDICT:"):
             verdict = ls.replace("VERDICT:", "").strip()
+        elif ls.startswith("DECISION_CORRECT:"):
+            decision_correct = ls.replace("DECISION_CORRECT:", "").strip()
         elif ls.startswith("ISSUES:"):
             issues_found = ls.replace("ISSUES:", "").strip()
         elif ls.startswith("REVISED_RESPONSE:"):
@@ -365,9 +372,10 @@ def self_verify(
 
     needs_revision = "NEEDS_REVISION" in verdict.upper()
 
+    # FIX v15h: return decision_correct so governed_chat() can act on BLOCK→WARN
     if needs_revision and revised_response:
-        return revised_response, True, issues_found
-    return draft, False, issues_found
+        return revised_response, True, issues_found, decision_correct
+    return draft, False, issues_found, decision_correct
 
 
 # ── LLM Call ───────────────────────────────────────────────────────────
@@ -462,7 +470,20 @@ def governed_chat(
     draft = call_llm(user_msg, model=model, system_prompt=system_prompt)
 
     # Pass 2: Self-verify draft using SCM/Matrix findings
-    final_response, was_revised, issues = self_verify(query, draft, rai_ctx, model)
+    # FIX v15h: self_verify now returns 4-tuple including decision_correct
+    final_response, was_revised, issues, decision_correct = self_verify(
+        query, draft, rai_ctx, model
+    )
+
+    # ── BLOCK → WARN downgrade (verifier judgement) ───────────────────
+    # If verifier says SHOULD_BE_WARN (risk 30-70%, VAC=No, no attack),
+    # downgrade the decision so the user gets a monitored response instead
+    # of a hard block. This implements the DECISION_CORRECT feedback loop.
+    if (base["decision"] == "BLOCK"
+            and "SHOULD_BE_WARN" in decision_correct.upper()):
+        base["decision"] = "WARN"
+        dec = FinalDecision.WARN
+        base["verify_downgrade"] = "BLOCK→WARN (verifier: risk too low for hard block)"
 
     revision_tag = f"\n[🔄 Self-verified — revised: {issues}]" if was_revised else ""
 
@@ -560,7 +581,7 @@ def plot_risk_histogram(rows: List[dict], out: str = "") -> None:
     if warned:   ax.hist(warned,   bins=bins, alpha=0.7, label="WARN",   color="#f39c12")
     if blocked:  ax.hist(blocked,  bins=bins, alpha=0.7, label="BLOCK",  color="#e74c3c")
 
-    ax.set_title("SCM Risk Score Distribution — Governed Chatbot (v15g)", fontsize=13)
+    ax.set_title("SCM Risk Score Distribution — Governed Chatbot (v15h)", fontsize=13)
     ax.set_xlabel("Risk Score (%)")
     ax.set_ylabel("Count")
     ax.legend()
@@ -580,7 +601,7 @@ def generate_pdf(rows: List[dict], out: str = "") -> None:
 
     content.append(Paragraph("RAI Governed Chatbot — Evaluation Report", styles["Title"]))
     content.append(Paragraph(
-        f"Framework: Responsible AI Framework v5.0 (pipeline_v15g)  |  "
+        f"Framework: Responsible AI Framework v5.0 (pipeline_v15h)  |  "
         f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}",
         styles["Normal"]
     ))
@@ -739,7 +760,7 @@ def run_interactive(
 
     print("\n" + "=" * 60)
     print("  RESPONSIBLE AI GOVERNED CHATBOT — GEMINI INTERACTIVE")
-    print(f"  Framework v15g + ContextEngine  |  Model: {model}")
+    print(f"  Framework v15h + ContextEngine  |  Model: {model}")
     print(f"  Jurisdiction: {jurisdiction}  |  Session: {session_id}")
     print("  Type 'quit' to exit | 'switch <model>' to change model")
     print("=" * 60 + "\n")
@@ -800,7 +821,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="RAI Governed Chatbot — Gemini Edition (v15g + ContextEngine)"
+        description="RAI Governed Chatbot — Gemini Edition (v15h + ContextEngine)"
     )
     parser.add_argument(
         "--mode", choices=["chat", "batch", "benchmark"],
@@ -815,7 +836,7 @@ if __name__ == "__main__":
     MODELS = [args.model]
 
     print("\n" + "=" * 60)
-    print("  RAI GOVERNED CHATBOT — GEMINI EDITION (v15g + ContextEngine)")
+    print("  RAI GOVERNED CHATBOT — GEMINI EDITION (v15h + ContextEngine)")
     print("=" * 60)
 
     if args.mode == "chat":
