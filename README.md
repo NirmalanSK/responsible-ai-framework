@@ -128,16 +128,55 @@ Query → S00 Context Memory Engine
       → ALLOW / WARN / BLOCK / ESCALATE
 ```
 
-### LLM Integration — Explained Governance Responses
+### LLM Integration — Two-Pass Explained Governance
 
-Every pipeline decision is passed as context to the LLM, which generates a human-readable explanation:
+The pipeline (S00–S12) and the chatbot layer are **architecturally separate**.
+
+- **`pipeline_v15.py`** — the 12-stage safety/RAI/legal analysis engine. Produces a decision (`ALLOW / WARN / BLOCK / ESCALATE`) plus structured findings (SCM values, Matrix activations, attack type, VAC flags). **Untouched in v15i.**
+- **`governed_chatbot.py` / `gemini_governed_chatbot.py`** — the deployment layer. Receives the pipeline decision and passes it to an LLM in a **two-pass architecture.**
 
 ```
-BLOCK         → LLM explains WHY blocked (SCM findings, attack type, VAC flag)
-                Harmful query never reaches LLM as an answer prompt
-WARN          → Sensitivity note + careful causal-aware response
-EXPERT_REVIEW → Explains uncertainty + which expert type is needed
-ALLOW         → Normal response; bias-aware system prompt if SCM flagged risk > 20%
+               Pipeline Decision + SCM/Matrix Findings
+                              │
+             ┌────────────────▼──────────────────────┐
+             │  Pass 1: Draft Generation              │
+             │  Decision-specific system prompt       │
+             │  LLM generates human-readable          │
+             │  explanation of WHY this decision      │
+             └────────────────┬──────────────────────┘
+                              │
+             ┌────────────────▼──────────────────────┐
+             │  Pass 2: Self-Verification             │
+             │  LLM audits its own draft against      │
+             │  RAI context (SCM/Matrix values)       │
+             └──────┬──────────────────┬─────────────┘
+                    │                  │
+             APPROVED ✓          NEEDS_REVISION 🔄
+             (original draft)    (LLM revises +
+                                  flags reason)
+```
+
+**What each decision type verifies in Pass 2:**
+
+| Decision | Self-Verification Checks |
+| --- | --- |
+| **BLOCK** | Is BLOCK correct, or should this be WARN? (risk score / VAC / attack type). Explanation accurate? No harmful hints leaked? |
+| **WARN** | Correlation≠Causation confusion? Jurisdiction addressed? Protected group bias in response? |
+| **EXPERT_REVIEW** | Expert type correct (medical/legal/financial)? Interim guidance safe? |
+| **ALLOW** | Factual accuracy? Protected group bias? Response complete? |
+
+**Why this matters:** The pipeline decision may be correct, but the LLM's *explanation* of that decision can still be inaccurate or misleading. Pass 2 closes this gap — the framework governs not just the query, but its own response.
+
+**Terminal output:**
+
+```
+[BLOCK] risk=32.8% | 450ms | ✓ self-verified
+🚫 BLOCKED — This query was blocked because...
+
+[WARN] risk=25.1% | 680ms | 🔄 self-verified+revised
+⚠️ Risk 25.1% — Sensitive topic
+[Revised response after bias check...]
+[🔄 Self-verified — revised: correlation-causation confusion detected]
 ```
 
 Both `governed_chatbot.py` (Groq + Llama 3.3 70B) and `gemini_governed_chatbot.py` (Gemini 2.0 Flash) implement this. `pipeline_v15.py` is untouched — all changes at chatbot layer only.
@@ -319,7 +358,7 @@ HarmBench requires semantic understanding to distinguish intent — same keyword
 | **Counterfactual Reasoning** | ✅ L3 (PNS bounds) | ❌ | ❌ | ❌ | ❌ | Partial |
 | **Sparse Causal Matrix** | ✅ 17×5 | ❌ | ❌ | ❌ | ❌ | ❌ |
 | **Multi-Turn Detection** | ✅ ContextEngine (4 signals) | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **LLM Explained Responses** | ✅ All 4 decisions | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **LLM Explained Responses** | ✅ Two-pass self-verified | ❌ | ❌ | ❌ | ❌ | ❌ |
 | **Working Code + Tests** | ✅ 195/195 tests | ✅ | ✅ | ✅ | ✅ | ❌ Theory only |
 | **Open Source** | ✅ MIT | ✅ | ✅ | ✅ | ✅ | ✅ |
 
@@ -478,7 +517,7 @@ Neither alone is sufficient for high-stakes domains.
 ```
 responsible-ai-framework/
 │
-├── pipeline_v15.py              # 12-step pipeline orchestrator (v15h)
+├── pipeline_v15.py              # 12-step pipeline orchestrator (v15i — untouched)
 ├── scm_engine_v2.py             # Full Pearl Theory engine (L1+L2+L3)
 ├── adversarial_engine_v5.py     # 4 attack type detection
 ├── context_engine.py            # Multi-turn attack detection (SQLite session memory)
@@ -487,10 +526,10 @@ responsible-ai-framework/
 │
 ├── chatbots/
 │   ├── groq/
-│   │   ├── governed_chatbot.py          # Groq + Llama 3.3 70B — LLM explained governance
+│   │   ├── governed_chatbot.py          # Groq + Llama 3.3 70B — two-pass self-verified governance
 │   │   └── groq_test_cases.csv          # 60-case RAI validation set
 │   └── gemini/
-│       ├── gemini_governed_chatbot.py   # Gemini 2.0 Flash — LLM explained governance
+│       ├── gemini_governed_chatbot.py   # Gemini 2.0 Flash — two-pass self-verified governance
 │       └── gemini_test_cases.csv
 │
 ├── evaluation/
@@ -575,9 +614,25 @@ After v15c (April):  177 passed, 2 failed   ← EU + sentencing patterns
 After v15d (April):  193 passed, 2 failed   ← +16 deployment gap tests
 After v15g (April):  195 passed, 0 failed   ← AIAAIC + 5 edge case fixes ✅
 After v15h (April):  195 passed, 0 failed   ← 60-case validation + 10 pattern fixes ✅
+After v15i (April):  195 passed, 0 failed   ← Two-pass LLM self-verification ✅
 ```
 
 > ✅ **Independently verified:** All 195 tests confirmed passing via fresh clone on external environment (April 2026).
+
+### v15i (April 2026) — Two-Pass LLM Self-Verification
+
+**Problem closed:** Pipeline correctly classifies queries, but LLM explanations of those decisions were unverified — an explanation could misrepresent the actual SCM/Matrix findings, or a BLOCK could be softened to a WARN without checking the risk score.
+
+**Solution:** Two-pass architecture added to both chatbots:
+
+- **Pass 1:** Draft explanation generated using a decision-specific system prompt grounded in pipeline findings
+- **Pass 2:** `self_verify()` — LLM audits its own draft against full RAI context (SCM activations, Matrix values, attack type, risk score)
+- BLOCK decisions additionally checked: should this be WARN based on risk score/VAC/attack evidence?
+- Output tagged: `✓ self-verified` or `🔄 self-verified+revised`
+
+New functions: `build_rai_context()`, `build_system_prompt()`, `build_verify_prompt()`, `self_verify()`, `call_llm()`
+
+`pipeline_v15.py` untouched — all changes at chatbot layer only.
 
 ### v15h (April 2026) — 60-Case Groq Validation + Pattern Fixes
 
