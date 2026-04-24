@@ -306,14 +306,14 @@
   <div class="step-detail" id="step-detail"></div>
 
   <hr class="divider">
-  <p class="formula-label">Final Decision Thresholds (Step 10)</p>
+  <p class="formula-label">Final Decision Thresholds (Step 10) — Config + Decision Engine</p>
   <div class="verdict-bar">
-    <div class="verdict-chip v-allow">ALLOW &lt; 35%</div>
-    <div class="verdict-chip v-warn">WARN 35–50%</div>
-    <div class="verdict-chip v-expert">EXPERT 50–65%</div>
-    <div class="verdict-chip v-block">BLOCK ≥ 65%</div>
+    <div class="verdict-chip v-allow">ALLOW  &lt; 30%</div>
+    <div class="verdict-chip v-warn">WARN  ≥ 30%</div>
+    <div class="verdict-chip v-block">BLOCK  ≥ 70%</div>
+    <div class="verdict-chip v-expert">EXPERT = Crisis emotion only</div>
   </div>
-  <p style="font-size:11px; color:var(--text3); margin-top:8px;">Priority: VAC &gt; Crisis &gt; High SCM risk &gt; Attack signals &gt; Legal violations &gt; Medium risk &gt; Allow</p>
+  <p style="font-size:11px; color:var(--text3); margin-top:8px;">Priority order (Decision Engine): VAC (any score) → Crisis emotion → SCM ≥ 70% → Attack score ≥ 0.65 → Any step BLOCK signal → warn_count ≥ 5 → SCM ≥ 30% → Jurisdiction issue → Allow</p>
 </div>
 
 <!-- ═══════════════════════════════════════════
@@ -555,7 +555,8 @@ raw      = 9 + (4×3) + (2×2) + (3×0.75)
 SCM_risk = min(100, 27.25/432 × 100 × 4.5)
          = min(100, 27.25 × 1.0416…)
          = 28.4%
-         → Decision: WARN (28.4 ≥ 35? No → ALLOW at this sub-step)</div>
+         → SCM-only risk = 28.4% — below WARN_THRESHOLD (30.0) → CLEAR at SCM-only sub-step
+         → After matrix fusion: risk_pct = 37.8% ≥ 30.0 → Step 05 final signal = WARN</div>
 
   <p class="formula-label" style="margin-top:12px;">④ activate_matrix("representation_bias", tce=12.4, CRITICAL)</p>
   <div class="formula-box">primary_row   = "Representation_Bias"
@@ -594,7 +595,7 @@ dominant_path  = P1_Interpretability or P3_Data</div>
 combined_risk = 37.84 × 1.0 = 37.84%
 
 risk_pct = 37.8%
-signal   = "WARN"  (37.8 ≥ 35 threshold ✓)
+signal   = "WARN"  (37.8 ≥ 30.0 WARN_THRESHOLD ✓ | below 70.0 BLOCK_THRESHOLD)
 
 Step 05 log detail:
 "TCE=12.4% | Med=68.0% | Flip=43.0% |
@@ -604,10 +605,10 @@ Step 05 log detail:
 
   <p class="formula-label" style="margin-top:12px;">⑥ → Decision Engine (Step 10) receives risk_pct = 37.8%</p>
   <div class="verdict-bar">
-    <div class="verdict-chip v-allow">ALLOW &lt; 35%</div>
-    <div class="verdict-chip v-warn winner">→ WARN 35–50% ★</div>
-    <div class="verdict-chip v-expert">EXPERT 50–65%</div>
-    <div class="verdict-chip v-block">BLOCK ≥ 65%</div>
+    <div class="verdict-chip v-allow">ALLOW  &lt; 30%</div>
+    <div class="verdict-chip v-warn winner">→ WARN  ≥ 30% ★  (37.8%)</div>
+    <div class="verdict-chip v-block">BLOCK  ≥ 70%</div>
+    <div class="verdict-chip v-expert">EXPERT = Crisis emotion</div>
   </div>
 
   <div class="note-box" style="margin-top:14px;">
@@ -676,7 +677,7 @@ const stepData = {
   11: {
     title: "S10 — Decision Engine (Final Arbitration)",
     code: "pipeline_v15.py : 2270",
-    body: `Synthesises all signals in strict priority order: VAC > Crisis > SCM≥65%→BLOCK, ≥50%→EXPERT REVIEW, ≥35%→WARN, else ALLOW. Cumulative warnings — multiple medium-severity signals across steps — can also trigger a WARN even without a single high threshold breach.`
+    body: `Synthesises all signals in strict priority order from the Decision Engine: (1) VAC violation → BLOCK, (2) Crisis emotion → EXPERT REVIEW, (3) SCM risk ≥ 70% → BLOCK, (4) Attack score ≥ 0.65 → BLOCK, (5) Any step BLOCK signal → BLOCK, (6) warn_count ≥ 5 → BLOCK, (7) SCM risk ≥ 30% or attack score ≥ 0.25 or escalate → WARN, (8) Jurisdiction issue or warn_count ≥ 2 → WARN, else → ALLOW. EXPERT REVIEW is triggered by crisis emotion — not a risk_pct range.`
   },
   12: {
     title: "S11 / S12 — Societal Monitor + Output Filter",
