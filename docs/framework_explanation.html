@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ta">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -237,8 +237,8 @@
      TAB 1 — 12-STEP PIPELINE
 ════════════════════════════════════════════ -->
 <div class="panel active" id="panel-pipeline">
-  <p class="section-title">12-Step Middleware Pipeline — User Prompt இருந்து Final Output வரை</p>
-  <p class="section-sub">ஒவ்வொரு step card-ஐயும் click பண்ணு — அந்த step என்ன செய்யுது, எந்த code line என்று பார்க்கலாம்.</p>
+  <p class="section-title">12-Step Middleware Pipeline — From User Prompt to Final Output</p>
+  <p class="section-sub">Click each step card to see what it does and which code line it maps to.</p>
 
   <div class="step-grid">
     <div class="step-card" onclick="showStep(1)">
@@ -321,7 +321,7 @@
 ════════════════════════════════════════════ -->
 <div class="panel" id="panel-pearl">
   <p class="section-title">Pearl Theory → Matrix — Exact Connection (Code-level)</p>
-  <p class="section-sub">இரண்டும் separate modules. Step 05-ல் exact ஒரே point-ல் join ஆகுது. கீழே actual code formulas.</p>
+  <p class="section-sub">Two separate modules that join at exactly one point in Step 05. Actual code formulas shown below.</p>
 
   <div class="chain-box pearl-side" style="margin-bottom:10px;">
     <div class="chain-label pearl-label">Pearl SCM Inputs → CausalFindings object</div>
@@ -467,7 +467,7 @@ if combined_risk ≥ 25.0:
 risk_pct = round(combined_risk, 1)   ← feeds Decision Engine</div>
 
   <div class="note-box">
-    <strong>Academic summary:</strong> Pearl = "harm causally இருக்கா, எவ்வளவு?" → SCM_risk%. Matrix = "அந்த harm எந்த 5 pathways (P1 Interpretability, P2 Behavior, P3 Data, P4 Robustness, P5 Society) வழியா spread ஆகுது?" → matrix_risk%. Pipeline = 60:40 ratio fusion. <strong>Matrix என்பது Pearl-க்கு மாற்று இல்ல — Pearl proof-ஐ operational pathway structure-ஆ convert பண்றது matrix.</strong> Docs-ல் சொன்னது: "SCM = Expert Witness · Matrix = Judge."
+    <strong>Academic summary:</strong> Pearl SCM = "Is harm causal, and how large is the effect?" → SCM_risk%. Matrix = "Which of the 5 harm pathways does that harm propagate through (P1 Interpretability, P2 Behavior, P3 Data, P4 Robustness, P5 Society)?" → matrix_risk%. Pipeline fuses both at a 60:40 ratio. <strong>The Matrix is not an alternative to Pearl — it converts Pearl's causal proof into an operational pathway structure.</strong> Conceptually: "SCM = Expert Witness · Matrix = Judge."
   </div>
 </div>
 
@@ -475,8 +475,8 @@ risk_pct = round(combined_risk, 1)   ← feeds Decision Engine</div>
      TAB 3 — STEP 05 DEEP DIVE
 ════════════════════════════════════════════ -->
 <div class="panel" id="panel-step05">
-  <p class="section-title">Step 05 — Amazon Hiring உதாரணத்துடன் Exact Calculation Trace</p>
-  <p class="section-sub">tce=12.4, med=68.0, flip=43.0, intv=15.0, domain=representation_bias — ஒவ்வொரு number-ம் எப்படி calculate ஆகுது.</p>
+  <p class="section-title">Step 05 — Exact Calculation Trace: Amazon Hiring Case</p>
+  <p class="section-sub">Input: tce=12.4, med=68.0, flip=43.0, intv=15.0, domain=representation_bias — every number calculated step by step.</p>
 
   <p class="formula-label">① Input → CausalFindings object</p>
   <div class="formula-box">CausalFindings(
@@ -611,7 +611,7 @@ Step 05 log detail:
   </div>
 
   <div class="note-box" style="margin-top:14px;">
-    <strong>Final output path:</strong> WARN → Step 12 safety notice attach பண்ணும். Bias warning-உடன் response user-க்கு கிடைக்கும். Step 11 (Societal Monitor) ஒரு "representation_bias" pattern-ஐ log பண்ணும். GDPR audit bundle attach ஆகும் (EU context-ல்).
+    <strong>Final output path:</strong> WARN → Step 12 attaches a safety notice to the response. The user receives the response with a bias warning appended. Step 11 (Societal Monitor) logs a "representation_bias" pattern. A GDPR audit bundle is attached when the EU jurisdiction is active.
   </div>
 
   <hr class="divider">
@@ -626,62 +626,62 @@ const stepData = {
   1: {
     title: "S01 — Input Sanitizer + Multilingual Layer",
     code: "pipeline_v15.py : 581",
-    body: `User prompt வந்த உடனே இந்த step ஓடும். Malformed unicode, oversized input, weird characters எல்லாம் normalize ஆகும். Multilingual prompt (Tamil, Arabic, French) இருந்தால் English processing path-க்கு prepare பண்ணும். Basic sanitization இங்கே நடக்கும்.`
+    body: `Runs immediately when the user prompt arrives. Malformed unicode, oversized input, and unusual characters are all normalised. Multilingual prompts (Tamil, Arabic, French) are prepared for the English processing path. Basic sanitization and NFKC unicode normalisation happen here.`
   },
   2: {
     title: "S02 — Conversation Graph",
     code: "pipeline_v15.py : 705",
-    body: `Current prompt மட்டும் பார்க்காது. முழு conversation history-யும் ஒரு graph மாதிரி model பண்ணும். "Slow-boiling" attack — ஒவ்வொரு message-லயும் கொஞ்சம் harmful direction-ல் shift பண்ணும் tactic-ஐ detect பண்ணும். Drift signals இங்கே raise ஆகும்.`
+    body: `Does not look at the current prompt alone. Models the full conversation history as a graph. Detects "slow-boiling" attacks — where each message gradually shifts in a harmful direction across a session. Drift signals are raised here and carried forward to the Decision Engine.`
   },
   3: {
     title: "S03 — Emotion Detector",
     code: "pipeline_v15.py : 790",
-    body: `User distress, anger, crisis state-ல் இருக்காரா என்று classify பண்ணும். இந்த classification final output-ஓட tone-ஐ influence பண்ணும். Crisis detected ஆனால் Step 10 priority-ல் உயர்வு கிடைக்கும்.`
+    body: `Classifies whether the user is in distress, anger, or a crisis state. This classification influences the tone of the final output. If a crisis is detected, Step 10 elevates the priority of the response pathway to a human-safe escalation route.`
   },
   4: {
     title: "S04 — Tier Router",
     code: "pipeline_v15.py : 901",
-    body: `எல்லா queries-க்கும் full expensive pipeline ஓட வேண்டியதில்லை. "Python for loop?" → Tier 1 (fast). "Medication dosage?" → Tier 2 (medium). "Bioweapon?" → Tier 3 (full deep analysis). Latency + compute savings.`
+    body: `Not every query needs the full expensive pipeline. "Python for loop?" → Tier 1 (fast path, ~150ms). "Medication dosage?" → Tier 2 (medium analysis). "Bioweapon synthesis?" → Tier 3 (full deep analysis, all 12 steps). This routing saves latency and compute for low-risk queries.`
   },
   5: {
     title: "S04b — Uncertainty Scorer",
     code: "pipeline_v15.py : 978",
-    body: `Query-ஓட domain confidently identify ஆகுதா? Grey-area query ஆ இருந்தால் escalation signal கொடுக்கும். Year 2-ல் XLM-RoBERTa classifier இதை replace பண்ணும் (line 995 comment).`
+    body: `Can the domain of this query be identified with confidence? If it is a grey-area query, an escalation signal is issued. In Year 2, an XLM-RoBERTa zero-shot classifier will replace the current keyword-based domain inference (see line 995 comment in pipeline_v15.py).`
   },
   6: {
     title: "S05 ★ — Pearl SCM Engine + Sparse Activation Matrix (CORE)",
     code: "pipeline_v15.py : 1196 | scm_engine_v2.py : 1042",
-    body: `இதுதான் framework-ஓட heart. Pearl L1→L2→L3 complete causal proof: Backdoor/Frontdoor/NDE/NIE/PNS/PN/PS எல்லாம் calculate ஆகும். SCM_risk% produce ஆகும். பிறகு domain + tce + severity கொண்டு activate_matrix() run ஆகும். Matrix aggregate_risk% produce ஆகும். Fusion: combined_risk = 0.6×SCM + 0.4×Matrix. "Pearl = Expert Witness · Matrix = Judge."`
+    body: `This is the heart of the framework. Full Pearl L1→L2→L3 causal proof is computed: Backdoor/Frontdoor adjustment, ATE/ATT/CATE, NDE/NIE effect decomposition, and Tian-Pearl PNS/PN/PS counterfactual bounds. This produces SCM_risk%. Then activate_matrix() runs using domain, tce, and severity — producing matrix_risk%. Fusion: combined_risk = 0.6×SCM + 0.4×Matrix. "SCM = Expert Witness · Matrix = Judge."`
   },
   7: {
     title: "S06 — SHAP / LIME Explainability Proxy",
     code: "pipeline_v15.py : 1404",
-    body: `Protected attributes (race, gender, age) decision-ஐ drive பண்றதா என்று SHAP proxy check பண்ணும். EU AI Act Article 13 explainability requirement-க்கு respond பண்ணும். Audit bundle-க்கு இந்த layer key.`
+    body: `Checks whether protected attributes (race, gender, age) are driving the model's decision via a SHAP proxy analysis. Responds to EU AI Act Article 13 explainability requirements. This layer is key to generating the Daubert-aligned audit bundle.`
   },
   8: {
     title: "S07 — Adversarial Defense Layer",
     code: "pipeline_v15.py : 1459 | adversarial_engine_v5.py",
-    body: `Jailbreak, roleplay wrapper attacks, authority spoofing, prompt injection, base64 encoded harmful content, malware synthesis — எல்லாம் detect பண்ணும். 3-tier detection. Tier 3 regex patterns (base64) — இதுதான் test_v15.py-ல் educational queries false-positive flag பண்ணிய known issue, Year 2 fix.`
+    body: `Detects jailbreaks, roleplay wrapper attacks, authority spoofing, prompt injection, base64-encoded harmful content, and malware synthesis requests. Uses 3-tier detection. Tier 3 regex patterns (base64) produced a known false-positive on educational queries in test_v15.py — documented as a Year 2 fix requiring semantic-level detection.`
   },
   9: {
     title: "S08 — Jurisdiction Engine",
     code: "pipeline_v15.py : 2004",
-    body: `EU AI Act, US HIPAA/state laws, India IT Act — same query different jurisdiction-ல் different compliance outcome தரலாம். Healthcare data EU-ல் GDPR, US-ல் HIPAA apply ஆகும். Multi-jurisdiction simultaneous check = framework-ஓட key differentiator.`
+    body: `EU AI Act, US HIPAA/state laws, India IT Act — the same query can produce different compliance outcomes under different jurisdictions. Healthcare data triggers GDPR in the EU and HIPAA in the US. Simultaneous multi-jurisdiction checking is a key differentiator of this framework.`
   },
   10: {
     title: "S09 — VAC Check (Value Alignment Core — Ethical Hard Floor)",
     code: "pipeline_v15.py : 2199",
-    body: `இந்த layer-ஐ எதுவும் override பண்ண முடியாது. Child sexual abuse, bioweapon synthesis, mass casualty planning → immediate BLOCK. Risk score என்னவாக இருந்தாலும் VAC triggers ஆனால் BLOCK final.`
+    body: `This layer cannot be overridden by any other signal. Child sexual abuse material, bioweapon synthesis, mass casualty planning → immediate BLOCK regardless of risk score. If a VAC trigger fires, BLOCK is final and no other step can reverse it.`
   },
   11: {
     title: "S10 — Decision Engine (Final Arbitration)",
     code: "pipeline_v15.py : 2270",
-    body: `எல்லா signals-யும் priority order-ல் synthesize: VAC > Crisis > SCM≥65%→BLOCK, ≥50%→EXPERT, ≥35%→WARN, else ALLOW. Cumulative warnings (multiple medium signals) கூட WARN trigger பண்ணலாம்.`
+    body: `Synthesises all signals in strict priority order: VAC > Crisis > SCM≥65%→BLOCK, ≥50%→EXPERT REVIEW, ≥35%→WARN, else ALLOW. Cumulative warnings — multiple medium-severity signals across steps — can also trigger a WARN even without a single high threshold breach.`
   },
   12: {
     title: "S11 / S12 — Societal Monitor + Output Filter",
     code: "pipeline_v15.py : 2383, 2424",
-    body: `S11: Population-level memory stub (Year 3). Attack patterns large-scale log பண்ணும். S12: BLOCK→refusal message. WARN→safety notice. EXPERT→audit bundle. ALLOW→clean response. GDPR audit log attach ஆகும்.`
+    body: `S11: Population-level memory stub (Year 3) — logs attack patterns at scale for societal monitoring. S12: BLOCK → refusal message returned. WARN → response with safety notice attached. EXPERT → full audit bundle generated for human reviewer. ALLOW → clean response passed through. GDPR-aligned audit log is attached to every decision.`
   }
 };
 
