@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Responsible AI Framework — Pearl + Matrix + 12-Step Pipeline</title>
+<style>
+  :root {
+    --bg:       #ffffff;
+    --bg2:      #f5f4f0;
+    --bg3:      #eeecea;
+    --bg-info:  #e6f1fb;
+    --text:     #1a1a18;
+    --text2:    #5f5e5a;
+    --text3:    #888780;
+    --border:   rgba(0,0,0,0.12);
+    --border2:  rgba(0,0,0,0.22);
+    --info:     #185fa5;
+    --mono:     'Courier New', monospace;
+    --sans:     -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --radius:   8px;
+    --radius-lg:12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:      #1e1e1c;
+      --bg2:     #2a2a28;
+      --bg3:     #323230;
+      --bg-info: #0c2a44;
+      --text:    #e8e6e0;
+      --text2:   #a8a69e;
+      --text3:   #706e68;
+      --border:  rgba(255,255,255,0.12);
+      --border2: rgba(255,255,255,0.22);
+      --info:    #85b7eb;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    padding: 32px 20px;
+    max-width: 860px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+  .subtitle {
+    font-size: 13px;
+    color: var(--text2);
+    margin-bottom: 24px;
+  }
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 0.5px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .tab {
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: var(--radius);
+    border: 0.5px solid var(--border);
+    cursor: pointer;
+    color: var(--text2);
+    background: transparent;
+    font-family: var(--sans);
+    transition: all 0.15s;
+  }
+  .tab:hover { background: var(--bg2); }
+  .tab.active {
+    background: var(--bg2);
+    color: var(--text);
+    border-color: var(--border2);
+  }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .section-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .section-sub {
+    font-size: 12px;
+    color: var(--text2);
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+  .formula-box {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    margin: 8px 0;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.9;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .formula-label {
+    font-family: var(--sans);
+    font-size: 11px;
+    color: var(--text3);
+    margin-bottom: 4px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .step-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  @media (max-width: 500px) {
+    .step-grid { grid-template-columns: 1fr; }
+    .two-col   { grid-template-columns: 1fr !important; }
+  }
+  .step-card {
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .step-card:hover { border-color: var(--border2); background: var(--bg2); }
+  .step-card.active-step {
+    border-color: var(--info);
+    background: var(--bg-info);
+  }
+  .step-num  { font-size: 10px; font-weight: 500; color: var(--text3); margin-bottom: 3px; letter-spacing: 0.08em; }
+  .step-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+  .step-short{ font-size: 11px; color: var(--text2); }
+  .step-detail {
+    margin-top: 14px;
+    border: 0.5px solid var(--info);
+    background: var(--bg-info);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    display: none;
+  }
+  .step-detail-title { font-size: 13px; font-weight: 500; color: var(--info); margin-bottom: 8px; }
+  .step-detail-body  { font-size: 12px; color: var(--text); line-height: 1.8; }
+  .code-ref { font-family: var(--mono); font-size: 11px; color: var(--text3); margin-top: 6px; }
+  .chain-box {
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 8px 12px;
+    flex: 1;
+  }
+  .chain-box.pearl-side  { border-color:#534AB7; background:rgba(83,74,183,0.07); }
+  .chain-box.matrix-side { border-color:#0F6E56; background:rgba(15,110,86,0.07); }
+  .chain-box.fusion-side { border-color:#993C1D; background:rgba(153,60,29,0.07); }
+  .chain-label { font-size: 11px; font-weight: 500; margin-bottom: 4px; }
+  .chain-val   { font-family: var(--mono); font-size: 11px; color: var(--text2); }
+  .pearl-label  { color: #534AB7; }
+  .matrix-label { color: #0F6E56; }
+  .fusion-label { color: #993C1D; }
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 8px 0;
+  }
+  .input-row { display: flex; gap: 5px; flex-wrap: wrap; margin: 6px 0; }
+  .input-pill {
+    font-size: 11px;
+    font-family: var(--mono);
+    background: var(--bg3);
+    border: 0.5px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 7px;
+    color: var(--text);
+  }
+  .verdict-bar { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .verdict-chip {
+    flex: 1;
+    min-width: 80px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 7px 4px;
+    border-radius: 5px;
+  }
+  .v-allow  { background:#EAF3DE; color:#27500A; }
+  .v-warn   { background:#FAEEDA; color:#633806; }
+  .v-block  { background:#FCEBEB; color:#501313; }
+  .v-expert { background:#EEEDFE; color:#26215C; }
+  .v-warn.winner { border: 2px solid #BA7517; }
+  .divider { border: none; border-top: 0.5px solid var(--border); margin: 16px 0; }
+  .step-core { border-color: #534AB7 !important; background: rgba(83,74,183,0.06) !important; }
+  .step-core .step-num  { color: #534AB7; }
+  .step-core .step-name { color: #26215C; }
+  .step-core .step-short{ color: #3C3489; }
+  .fusion-formula-box {
+    border-color: #993C1D;
+    background: rgba(153,60,29,0.06);
+    color: var(--text);
+  }
+  .note-box {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.8;
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-left: 3px solid var(--border2);
+    background: var(--bg2);
+    border-radius: 0 var(--radius) var(--radius) 0;
+  }
+  .note-box strong { color: var(--text); }
+</style>
+</head>
+<body>
+
+<h1>Responsible AI Framework v5.0</h1>
+<p class="subtitle">Pearl Causality + Sparse Matrix + 12-Step Pipeline — Professor Explanation Reference</p>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('pipeline')">12-Step Pipeline</button>
+  <button class="tab" onclick="switchTab('pearl')">Pearl → Matrix Link</button>
+  <button class="tab" onclick="switchTab('step05')">Step 05 Deep Dive</button>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     TAB 1 — 12-STEP PIPELINE
+════════════════════════════════════════════ -->
+<div class="panel active" id="panel-pipeline">
+  <p class="section-title">12-Step Middleware Pipeline — User Prompt இருந்து Final Output வரை</p>
+  <p class="section-sub">ஒவ்வொரு step card-ஐயும் click பண்ணு — அந்த step என்ன செய்யுது, எந்த code line என்று பார்க்கலாம்.</p>
+
+  <div class="step-grid">
+    <div class="step-card" onclick="showStep(1)">
+      <div class="step-num">STEP 01</div>
+      <div class="step-name">Input Sanitizer</div>
+      <div class="step-short">Clean + Normalize + Multilingual</div>
+    </div>
+    <div class="step-card" onclick="showStep(2)">
+      <div class="step-num">STEP 02</div>
+      <div class="step-name">Conversation Graph</div>
+      <div class="step-short">History drift detection</div>
+    </div>
+    <div class="step-card" onclick="showStep(3)">
+      <div class="step-num">STEP 03</div>
+      <div class="step-name">Emotion Detector</div>
+      <div class="step-short">Distress / Crisis classify</div>
+    </div>
+    <div class="step-card" onclick="showStep(4)">
+      <div class="step-num">STEP 04</div>
+      <div class="step-name">Tier Router</div>
+      <div class="step-short">Cheap path vs Deep analysis</div>
+    </div>
+    <div class="step-card" onclick="showStep(5)">
+      <div class="step-num">STEP 04b</div>
+      <div class="step-name">Uncertainty Scorer</div>
+      <div class="step-short">Unknown domain detection</div>
+    </div>
+    <div class="step-card step-core" onclick="showStep(6)">
+      <div class="step-num">STEP 05 ★ CORE</div>
+      <div class="step-name">Pearl SCM + Matrix</div>
+      <div class="step-short">Causal proof + Risk fusion</div>
+    </div>
+    <div class="step-card" onclick="showStep(7)">
+      <div class="step-num">STEP 06</div>
+      <div class="step-name">SHAP / LIME Proxy</div>
+      <div class="step-short">Protected attribute bias check</div>
+    </div>
+    <div class="step-card" onclick="showStep(8)">
+      <div class="step-num">STEP 07</div>
+      <div class="step-name">Adversarial Defense</div>
+      <div class="step-short">Jailbreak + Injection detect</div>
+    </div>
+    <div class="step-card" onclick="showStep(9)">
+      <div class="step-num">STEP 08</div>
+      <div class="step-name">Jurisdiction Engine</div>
+      <div class="step-short">EU / US / India legal check</div>
+    </div>
+    <div class="step-card" onclick="showStep(10)">
+      <div class="step-num">STEP 09</div>
+      <div class="step-name">VAC Ethics Check</div>
+      <div class="step-short">Absolute ethical floor</div>
+    </div>
+    <div class="step-card" onclick="showStep(11)">
+      <div class="step-num">STEP 10</div>
+      <div class="step-name">Decision Engine</div>
+      <div class="step-short">All signals → final verdict</div>
+    </div>
+    <div class="step-card" onclick="showStep(12)">
+      <div class="step-num">STEP 11 / 12</div>
+      <div class="step-name">Output Filter</div>
+      <div class="step-short">Safe format → User</div>
+    </div>
+  </div>
+
+  <div class="step-detail" id="step-detail"></div>
+
+  <hr class="divider">
+  <p class="formula-label">Final Decision Thresholds (Step 10)</p>
+  <div class="verdict-bar">
+    <div class="verdict-chip v-allow">ALLOW &lt; 35%</div>
+    <div class="verdict-chip v-warn">WARN 35–50%</div>
+    <div class="verdict-chip v-expert">EXPERT 50–65%</div>
+    <div class="verdict-chip v-block">BLOCK ≥ 65%</div>
+  </div>
+  <p style="font-size:11px; color:var(--text3); margin-top:8px;">Priority: VAC &gt; Crisis &gt; High SCM risk &gt; Attack signals &gt; Legal violations &gt; Medium risk &gt; Allow</p>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     TAB 2 — PEARL → MATRIX LINK
+════════════════════════════════════════════ -->
+<div class="panel" id="panel-pearl">
+  <p class="section-title">Pearl Theory → Matrix — Exact Connection (Code-level)</p>
+  <p class="section-sub">இரண்டும் separate modules. Step 05-ல் exact ஒரே point-ல் join ஆகுது. கீழே actual code formulas.</p>
+
+  <div class="chain-box pearl-side" style="margin-bottom:10px;">
+    <div class="chain-label pearl-label">Pearl SCM Inputs → CausalFindings object</div>
+    <div class="input-row">
+      <span class="input-pill">tce=12.4</span>
+      <span class="input-pill">med=68.0</span>
+      <span class="input-pill">flip=43.0</span>
+      <span class="input-pill">intv=15.0</span>
+      <span class="input-pill">rct=False</span>
+      <span class="input-pill">domain="repr_bias"</span>
+      <span class="input-pill">p_y_given_x=0.41</span>
+      <span class="input-pill">p_y_given_notx=0.29</span>
+      <span class="input-pill">p_x=0.40</span>
+      <span class="input-pill">subgroup_tce={...}</span>
+    </div>
+    <div class="chain-val">→ SCMEngineV2.run() → SCMResultV2</div>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <p class="formula-label pearl-label">L2 — Backdoor Adjustment Formula</p>
+      <div class="formula-box">P(Y=1|do(X=1)) = Σ_z P(Y|X,Z=z)·P(Z=z)
+         [Pearl 1993]
+
+ATE = P(Y|do(X=1)) − P(Y|do(X=0))
+    = p_y_given_x − p_y_given_notx
+    ≈ tce / 100</div>
+
+      <p class="formula-label pearl-label" style="margin-top:10px;">L2 — Frontdoor (latent confounders)</p>
+      <div class="formula-box">P(Y|do(X)) = Σ_m P(M=m|X)
+  · Σ_x' P(Y|M=m,X=x')·P(X=x')
+
+proxy: NIE = (med/100) × (tce/100)</div>
+
+      <p class="formula-label pearl-label" style="margin-top:10px;">L2 — ATE / ATT / CATE</p>
+      <div class="formula-box">ATE  = tce / 100
+sel  = 1 + max(0, (0.5 − p_x)/0.5) × 0.3
+ATT  = clamp(ATE × sel)
+CATE = {subgroup: subgroup_tce[s]/100}
+gap  = max(CATE) − min(CATE)
+→ if gap > 5pp: intersectional bias ⚠</div>
+    </div>
+    <div>
+      <p class="formula-label pearl-label">L2 — Effect Decomposition (NDE + NIE)</p>
+      <div class="formula-box">TE  = tce / 100
+NIE = (med/100) × TE   ← mediated path
+NDE = TE − NIE         ← direct path
+
+if NDE ≥ 70%: "PRIMARILY DIRECT"
+  → AI itself causes harm (strong liability)
+if NIE ≥ 70%: "PRIMARILY MEDIATED"
+  → systemic pathway (shared liability)</div>
+
+      <p class="formula-label pearl-label" style="margin-top:10px;">L3 — Tian-Pearl Bounds (PNS / PN / PS)</p>
+      <div class="formula-box">p  = p_y_given_x    p' = p_y_given_notx
+
+PNS: max(0, p−p') ≤ PNS ≤ min(p,1−p')
+PN : max(0,(TCE−p')/p) ≤ PN ≤ min(1,(1−p')/p)
+PS : max(0,(TCE−(1−p))/(1−p'))
+        ≤ PS ≤ min(1, p/(1−p'))
+
+if PN > 0.5: "but-for" causation met
+  → legal admissibility strongest</div>
+
+      <p class="formula-label pearl-label" style="margin-top:10px;">v1 Rules → SCM_risk%</p>
+      <div class="formula-box">Rule 1: severity  = tce≥10→CRIT(4), ≥5→HIGH(3)
+Rule 2: edge      = med≥70→CRIT(4), ≥40→STR(3)
+Rule 3: detection = flip≥30→EASY(2)
+Rule 4: sev_adj   = adjust by intv%
+Rule 5: epistemic if tce&lt;2 and flip&lt;5
+
+raw      = 9 + sev_adj×3 + det×2 + edge×0.75
+SCM_risk = min(100, raw/432 × 100 × 4.5)</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div class="chain-box matrix-side" style="margin-bottom:10px;">
+    <div class="chain-label matrix-label">Matrix Inputs (derived from Pearl SCM output)</div>
+    <div class="input-row">
+      <span class="input-pill">domain (from findings)</span>
+      <span class="input-pill">tce → tce_factor = min(tce/20, 1.0)</span>
+      <span class="input-pill">severity → sev_multiplier {1:0.6, 2:0.8, 3:1.0, 4:1.2}</span>
+    </div>
+    <div class="chain-val">→ activate_matrix(domain, tce, Severity) → MatrixActivation</div>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <p class="formula-label matrix-label">Steps 1–2 — Row Selection + Cascade Check</p>
+      <div class="formula-box">primary_row = DOMAIN_TO_ROW[domain]
+primary_total = sum(CAUSAL_MATRIX[primary_row])
+
+# Central node threshold = 12
+if primary_total ≥ 12:
+    cascade_fired = True
+    cascaded = CASCADE_MAP[primary_row]
+
+# Example: "representation_bias" → total=13
+CASCADE_MAP["Representation_Bias"] = [
+  "Criminal_Justice_Bias",   # total=11
+  "Healthcare_Bias",         # total=11
+  "Decision_Transparency"    # total=10
+]
+active_rows = [primary] + cascaded  # sparse</div>
+    </div>
+    <div>
+      <p class="formula-label matrix-label">Steps 3–5 — Cell Weights + Pathway Scores</p>
+      <div class="formula-box">for each active_row:
+  row_factor = 1.0 if primary else 0.6
+  for each pathway P1..P5:
+    w = CAUSAL_MATRIX[row][Pi]
+    activated = w × sev_mult × tce_factor
+                  × row_factor
+
+pathway_score[Pi] = Σ activated[Pi]
+                    / max_possible
+
+aggregate_risk = Σ all pathway_totals
+                 / (max_possible × 5)
+# 0.0 → 1.0
+# P1=Interpretability P2=Behavior
+# P3=Data P4=Robustness P5=Society</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <p class="formula-label fusion-label">★ FUSION POINT — pipeline_v15.py line 1328</p>
+  <div class="formula-box fusion-formula-box">matrix_risk = activation.aggregate_risk × 100.0
+
+combined_risk = 0.6 × SCM_risk%  +  0.4 × matrix_risk%
+
+# Domain Multiplier (only when real causal_data provided):
+if combined_risk ≥ 25.0:
+    combined_risk = combined_risk × domain_multiplier
+
+# Domain multiplier values:
+#   general=1.0×   entertainment=1.5×
+#   education=2.0× finance=2.5×  healthcare=3.0×
+
+risk_pct = round(combined_risk, 1)   ← feeds Decision Engine</div>
+
+  <div class="note-box">
+    <strong>Academic summary:</strong> Pearl = "harm causally இருக்கா, எவ்வளவு?" → SCM_risk%. Matrix = "அந்த harm எந்த 5 pathways (P1 Interpretability, P2 Behavior, P3 Data, P4 Robustness, P5 Society) வழியா spread ஆகுது?" → matrix_risk%. Pipeline = 60:40 ratio fusion. <strong>Matrix என்பது Pearl-க்கு மாற்று இல்ல — Pearl proof-ஐ operational pathway structure-ஆ convert பண்றது matrix.</strong> Docs-ல் சொன்னது: "SCM = Expert Witness · Matrix = Judge."
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     TAB 3 — STEP 05 DEEP DIVE
+════════════════════════════════════════════ -->
+<div class="panel" id="panel-step05">
+  <p class="section-title">Step 05 — Amazon Hiring உதாரணத்துடன் Exact Calculation Trace</p>
+  <p class="section-sub">tce=12.4, med=68.0, flip=43.0, intv=15.0, domain=representation_bias — ஒவ்வொரு number-ம் எப்படி calculate ஆகுது.</p>
+
+  <p class="formula-label">① Input → CausalFindings object</p>
+  <div class="formula-box">CausalFindings(
+  tce   = 12.4,        # Total Causal Effect % (Amazon: female penalised 12.4%)
+  med   = 68.0,        # Mediation % through biased_ranking_score
+  flip  = 43.0,        # Counterfactual flip rate % (if protected attr removed)
+  intv  = 15.0,        # do(fix) intervention reduction %
+  rct   = False,       # no randomised trial data
+  domain= "representation_bias",
+  p_y_given_x    = 0.41,    # P(hired | female=True)
+  p_y_given_notx = 0.29,    # P(hired | female=False)
+  p_x            = 0.40,    # P(female) in applicant pool
+  subgroup_tce   = {"female": 12.4, "male": 1.2}
+)</div>
+
+  <p class="formula-label" style="margin-top:12px;">② SCMEngineV2._compute() — L2 Calculations</p>
+  <div class="two-col">
+    <div>
+      <div class="formula-box">Backdoor ATE:
+ py_do_x1 = 0.41, py_do_x0 = 0.29
+ ATE = 0.41 − 0.29 = 0.1200  (12.0%)
+ Confounders: biased_training_data
+ Method: Backdoor Adjustment ✓
+
+Frontdoor:
+ nie_frac = (68/100)×(12.4/100) = 0.08432
+ Applicable: True
+ Mediator: biased_ranking_score
+ Frontdoor ATE proxy ≈ 8.4%</div>
+
+      <div class="formula-box" style="margin-top:8px;">Effect Decomposition:
+ TE  = 12.4/100 = 0.124
+ NIE = (68/100) × 0.124 = 0.0843 (68%)
+ NDE = 0.124 − 0.0843 = 0.0397  (32%)
+
+ NIE ≥ 70%? No. NDE ≥ 70%? No.
+ → "Mixed: Direct=32%, Mediated=68%"
+ Harm flows MOSTLY through
+ biased_ranking_score (systemic)</div>
+    </div>
+    <div>
+      <div class="formula-box">ATE/ATT/CATE:
+ ATE  = 0.124 (12.4%)
+ sel  = 1 + (0.5−0.40)/0.5 × 0.3 = 1.06
+ ATT  = min(1, 0.124×1.06) = 0.1314 (13.1%)
+ CATE = {female:0.124, male:0.012}
+ gap  = 0.124−0.012 = 0.112 (11.2pp)
+ → ⚠ Intersectional bias detected</div>
+
+      <div class="formula-box" style="margin-top:8px;">Tian-Pearl Bounds:
+ p=0.41, p'=0.29
+ PNS_lo = max(0, 0.41−0.29) = 0.120
+ PNS_hi = min(0.41, 1−0.29) = 0.410
+ PNS_pt ≈ (0.12+0.41)/2 = 0.265
+
+ PN_pt ≈ TCE/p = 0.124/0.41 = 0.302
+ but-for met? PN>0.5? No → moderate
+
+ Legal Score: ~0.65 (STRONG)
+ → L2+Mediation, exceeds balance of
+   probabilities. Expert review needed.</div>
+    </div>
+  </div>
+
+  <p class="formula-label" style="margin-top:12px;">③ v1 Rules → SCM_risk%</p>
+  <div class="formula-box">Rule 1: tce=12.4 ≥ 10       → severity  = CRITICAL (value=4)
+Rule 2: med=68.0 ≥ 40        → edge      = STRONG   (value=3)
+Rule 3: flip=43.0 ≥ 30       → detection = EASY     (value=2)
+Rule 4: intv=15.0 ≤ 20, sev&lt;4 → escalate → sev_adj = CRITICAL (4)
+Rule 5: tce=12.4≥2, flip=43≥5  → identifiable ✓ (no epistemic risk)
+
+raw      = 9 + (4×3) + (2×2) + (3×0.75)
+         = 9 + 12 + 4 + 2.25
+         = 27.25
+
+SCM_risk = min(100, 27.25/432 × 100 × 4.5)
+         = min(100, 27.25 × 1.0416…)
+         = 28.4%
+         → Decision: WARN (28.4 ≥ 35? No → ALLOW at this sub-step)</div>
+
+  <p class="formula-label" style="margin-top:12px;">④ activate_matrix("representation_bias", tce=12.4, CRITICAL)</p>
+  <div class="formula-box">primary_row   = "Representation_Bias"
+weights       = [3, 2, 3, 2, 3]   total = 13 → CENTRAL NODE ✓
+cascade_fired = True
+cascaded_rows = ["Criminal_Justice_Bias","Healthcare_Bias","Decision_Transparency"]
+active_rows   = 4 of 17  (sparse activation)
+
+sev_multiplier = 1.2  (CRITICAL=4)
+tce_factor     = min(12.4/20.0, 1.0) = 0.62
+
+Representation_Bias (primary, row_factor=1.0):
+  P1 = 3 × 1.2 × 0.62 × 1.0 = 2.232
+  P2 = 2 × 1.2 × 0.62 × 1.0 = 1.488
+  P3 = 3 × 1.2 × 0.62 × 1.0 = 2.232
+  P4 = 2 × 1.2 × 0.62 × 1.0 = 1.488
+  P5 = 3 × 1.2 × 0.62 × 1.0 = 2.232
+
+Criminal_Justice_Bias (cascaded, row_factor=0.6):
+  weights = [3,2,3,1,2]
+  P1 = 3 × 1.2 × 0.62 × 0.6 = 1.339
+  P3 = 3 × 1.2 × 0.62 × 0.6 = 1.339  ...
+
+max_possible = 3 × 1.2 × 1.0 × 4 = 14.4
+aggregate_risk ≈ 0.52   → matrix_risk = 52.0%
+dominant_path  = P1_Interpretability or P3_Data</div>
+
+  <p class="formula-label" style="margin-top:12px; color:#993C1D;">⑤ ★ Fusion + Domain Multiplier → Final risk_pct</p>
+  <div class="formula-box fusion-formula-box">combined_risk = 0.6 × 28.4  +  0.4 × 52.0
+             = 17.04 + 20.80
+             = 37.84%
+
+# Domain inference: query has "hire" keyword
+# → NOT healthcare/finance → general (1.0×)
+# 37.84 ≥ 25? Yes → apply multiplier
+combined_risk = 37.84 × 1.0 = 37.84%
+
+risk_pct = 37.8%
+signal   = "WARN"  (37.8 ≥ 35 threshold ✓)
+
+Step 05 log detail:
+"TCE=12.4% | Med=68.0% | Flip=43.0% |
+ Risk=37.8% → WARN |
+ Matrix: Representation_Bias agg=0.52 |
+ CASCADE→4 rows"</div>
+
+  <p class="formula-label" style="margin-top:12px;">⑥ → Decision Engine (Step 10) receives risk_pct = 37.8%</p>
+  <div class="verdict-bar">
+    <div class="verdict-chip v-allow">ALLOW &lt; 35%</div>
+    <div class="verdict-chip v-warn winner">→ WARN 35–50% ★</div>
+    <div class="verdict-chip v-expert">EXPERT 50–65%</div>
+    <div class="verdict-chip v-block">BLOCK ≥ 65%</div>
+  </div>
+
+  <div class="note-box" style="margin-top:14px;">
+    <strong>Final output path:</strong> WARN → Step 12 safety notice attach பண்ணும். Bias warning-உடன் response user-க்கு கிடைக்கும். Step 11 (Societal Monitor) ஒரு "representation_bias" pattern-ஐ log பண்ணும். GDPR audit bundle attach ஆகும் (EU context-ல்).
+  </div>
+
+  <hr class="divider">
+  <p class="formula-label">Professor-level one-line thesis</p>
+  <div class="note-box">
+    "User prompt first cleaned and classified; then Judea Pearl SCM engine proves whether harm or bias is causal (L1→L2→L3), the sparse activation matrix maps which of the 5 harm pathways are activated (Interpretability/Behavior/Data/Robustness/Society), both are fused 60:40 into one risk score, then legal, adversarial, and absolute ethics gates produce the final governed output."
+  </div>
+</div>
+
+<script>
+const stepData = {
+  1: {
+    title: "S01 — Input Sanitizer + Multilingual Layer",
+    code: "pipeline_v15.py : 581",
+    body: `User prompt வந்த உடனே இந்த step ஓடும். Malformed unicode, oversized input, weird characters எல்லாம் normalize ஆகும். Multilingual prompt (Tamil, Arabic, French) இருந்தால் English processing path-க்கு prepare பண்ணும். Basic sanitization இங்கே நடக்கும்.`
+  },
+  2: {
+    title: "S02 — Conversation Graph",
+    code: "pipeline_v15.py : 705",
+    body: `Current prompt மட்டும் பார்க்காது. முழு conversation history-யும் ஒரு graph மாதிரி model பண்ணும். "Slow-boiling" attack — ஒவ்வொரு message-லயும் கொஞ்சம் harmful direction-ல் shift பண்ணும் tactic-ஐ detect பண்ணும். Drift signals இங்கே raise ஆகும்.`
+  },
+  3: {
+    title: "S03 — Emotion Detector",
+    code: "pipeline_v15.py : 790",
+    body: `User distress, anger, crisis state-ல் இருக்காரா என்று classify பண்ணும். இந்த classification final output-ஓட tone-ஐ influence பண்ணும். Crisis detected ஆனால் Step 10 priority-ல் உயர்வு கிடைக்கும்.`
+  },
+  4: {
+    title: "S04 — Tier Router",
+    code: "pipeline_v15.py : 901",
+    body: `எல்லா queries-க்கும் full expensive pipeline ஓட வேண்டியதில்லை. "Python for loop?" → Tier 1 (fast). "Medication dosage?" → Tier 2 (medium). "Bioweapon?" → Tier 3 (full deep analysis). Latency + compute savings.`
+  },
+  5: {
+    title: "S04b — Uncertainty Scorer",
+    code: "pipeline_v15.py : 978",
+    body: `Query-ஓட domain confidently identify ஆகுதா? Grey-area query ஆ இருந்தால் escalation signal கொடுக்கும். Year 2-ல் XLM-RoBERTa classifier இதை replace பண்ணும் (line 995 comment).`
+  },
+  6: {
+    title: "S05 ★ — Pearl SCM Engine + Sparse Activation Matrix (CORE)",
+    code: "pipeline_v15.py : 1196 | scm_engine_v2.py : 1042",
+    body: `இதுதான் framework-ஓட heart. Pearl L1→L2→L3 complete causal proof: Backdoor/Frontdoor/NDE/NIE/PNS/PN/PS எல்லாம் calculate ஆகும். SCM_risk% produce ஆகும். பிறகு domain + tce + severity கொண்டு activate_matrix() run ஆகும். Matrix aggregate_risk% produce ஆகும். Fusion: combined_risk = 0.6×SCM + 0.4×Matrix. "Pearl = Expert Witness · Matrix = Judge."`
+  },
+  7: {
+    title: "S06 — SHAP / LIME Explainability Proxy",
+    code: "pipeline_v15.py : 1404",
+    body: `Protected attributes (race, gender, age) decision-ஐ drive பண்றதா என்று SHAP proxy check பண்ணும். EU AI Act Article 13 explainability requirement-க்கு respond பண்ணும். Audit bundle-க்கு இந்த layer key.`
+  },
+  8: {
+    title: "S07 — Adversarial Defense Layer",
+    code: "pipeline_v15.py : 1459 | adversarial_engine_v5.py",
+    body: `Jailbreak, roleplay wrapper attacks, authority spoofing, prompt injection, base64 encoded harmful content, malware synthesis — எல்லாம் detect பண்ணும். 3-tier detection. Tier 3 regex patterns (base64) — இதுதான் test_v15.py-ல் educational queries false-positive flag பண்ணிய known issue, Year 2 fix.`
+  },
+  9: {
+    title: "S08 — Jurisdiction Engine",
+    code: "pipeline_v15.py : 2004",
+    body: `EU AI Act, US HIPAA/state laws, India IT Act — same query different jurisdiction-ல் different compliance outcome தரலாம். Healthcare data EU-ல் GDPR, US-ல் HIPAA apply ஆகும். Multi-jurisdiction simultaneous check = framework-ஓட key differentiator.`
+  },
+  10: {
+    title: "S09 — VAC Check (Value Alignment Core — Ethical Hard Floor)",
+    code: "pipeline_v15.py : 2199",
+    body: `இந்த layer-ஐ எதுவும் override பண்ண முடியாது. Child sexual abuse, bioweapon synthesis, mass casualty planning → immediate BLOCK. Risk score என்னவாக இருந்தாலும் VAC triggers ஆனால் BLOCK final.`
+  },
+  11: {
+    title: "S10 — Decision Engine (Final Arbitration)",
+    code: "pipeline_v15.py : 2270",
+    body: `எல்லா signals-யும் priority order-ல் synthesize: VAC > Crisis > SCM≥65%→BLOCK, ≥50%→EXPERT, ≥35%→WARN, else ALLOW. Cumulative warnings (multiple medium signals) கூட WARN trigger பண்ணலாம்.`
+  },
+  12: {
+    title: "S11 / S12 — Societal Monitor + Output Filter",
+    code: "pipeline_v15.py : 2383, 2424",
+    body: `S11: Population-level memory stub (Year 3). Attack patterns large-scale log பண்ணும். S12: BLOCK→refusal message. WARN→safety notice. EXPERT→audit bundle. ALLOW→clean response. GDPR audit log attach ஆகும்.`
+  }
+};
+
+function showStep(n) {
+  const data = stepData[n];
+  const det = document.getElementById('step-detail');
+  det.style.display = 'block';
+  det.innerHTML = `<div class="step-detail-title">${data.title}</div>
+    <div class="step-detail-body">${data.body}</div>
+    <div class="code-ref">📄 ${data.code}</div>`;
+  document.querySelectorAll('.step-card').forEach(c => c.classList.remove('active-step'));
+  document.querySelectorAll('.step-card')[n - 1]?.classList.add('active-step');
+  det.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  const map = { pipeline: 0, pearl: 1, step05: 2 };
+  document.querySelectorAll('.tab')[map[name]].classList.add('active');
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>
