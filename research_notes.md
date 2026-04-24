@@ -3181,3 +3181,164 @@ Year 3:      Auto-Adaptive Weights (Phase 3 Matrix section)
                SHA-256 tamper detection on weight history
 ```
 
+
+
+---
+
+## 💡 CLARIFICATION: Non-Causal vs Causal Prompt — Exact Code Path (April 2026)
+Source: Today's session — professor Q&A preparation
+
+### The Two Paths Explained
+
+#### Path A — Causal prompt (e.g. "Amazon AI hiring bias")
+
+```
+User prompt
+     ↓
+S04 Tier Router → Tier 2 or 3
+     ↓
+Step 05:
+  causal_data = KNOWN_CASES["amazon_hiring_2018"]
+  (OR auto_compute_findings() in Year 2)
+     ↓
+SCMEngineV2.run(findings) → full Pearl calculation
+  → Backdoor, Frontdoor, NDE/NIE, PNS/PN/PS, risk_score
+     ↓
+activate_matrix(domain, tce, severity) → matrix_risk
+     ↓
+combined_risk = 0.6 × SCM_risk + 0.4 × matrix_risk
+     ↓
+risk_pct = 37.8% → WARN
+```
+
+**Year 1 TCE source — exact flow:**
+```python
+# pipeline_v15.py Step 05
+
+# Option 1: Named known case (hardcoded in code)
+# These values are from published literature, manually entered
+KNOWN_CASES = {
+    "amazon_hiring_2018": CausalFindings(tce=12.4, med=68.0, ...),
+    "compas_2016":        CausalFindings(tce=18.3, med=52.0, ...),
+}
+
+# Option 2: causal_data=None (no known case) → keyword heuristic
+def _infer_findings(query):
+    if "weapon" or "hack" in query:
+        return CausalFindings(tce=15.0, domain="misuse_safety", ...)
+    elif "medication" or "hire" in query:
+        return CausalFindings(tce=6.0, domain="representation_bias", ...)
+    else:
+        return DEFAULT_FINDINGS  # tce=7.0, domain="misuse_safety" (conservative)
+```
+
+**Year 1 weakness (honest gap for PhD defense):**
+  "TCE values are manually curated from published literature,
+   not auto-computed. Year 2 DoWhy integration fixes this."
+
+---
+
+#### Path B — Non-causal prompt (e.g. "What is AI?", "Can you explain clearly?")
+
+```
+User prompt: "What is AI?"
+     ↓
+S04 Tier Router → Tier 1  (no risk keywords → cheap path)
+     ↓
+Step 05 — Tier 1 branch (pipeline_v15.py ~1226):
+
+  base_risk = 15.0  # flat default, no SCM run
+
+  # Domain keyword check:
+  q_lower = "what is ai?"
+  # No match: race/weapon/medical/hack/privacy/deepfake
+  dk = None  # ← no domain signal
+
+  # if dk is None → matrix SKIPPED ENTIRELY
+  # (activate_matrix never called)
+
+  # Domain multiplier check:
+  # No healthcare/finance keywords → general (1.0×)
+  # base_risk=15.0 < 25.0 → multiplier NOT applied
+
+  signal = "CLEAR"   # 15.0 < 30.0 threshold
+  return 15.0, StepResult(signal="CLEAR")
+
+     ↓
+Decision Engine → ALLOW
+     ↓
+Output Filter → clean response to user
+```
+
+**Key academic point:**
+  Non-causal prompts bypass SCM entirely (Tier 1 path).
+  Matrix only fires IF domain keyword detected.
+  Safe, low-risk queries get fast path — no unnecessary computation.
+
+  Professor question: "How do you handle safe queries efficiently?"
+  Answer: "Tier Router sends safe queries through Tier 1. SCM and
+           Matrix only run for queries where causal risk signals exist.
+           This is the sparse activation principle — only 4 of 17
+           matrix rows fire even for high-risk queries."
+
+---
+
+## 💡 CLARIFICATION: DoWhy Temporary vs BO Weights Persistent — Explicit Distinction (April 2026)
+Source: Today's session — common confusion point
+
+### What is TEMPORARY (not saved)?
+
+```
+DoWhy computation output:
+  auto_compute_findings(aiaaic_df, "representation_bias")
+  → CausalFindings(tce=12.3, med=67.5, ...)
+
+This is COMPUTED ON DEMAND when a query arrives.
+NOT saved to disk.
+Only benefit: @lru_cache — if EXACT same prompt hits again,
+  cached result returned (session-level only).
+
+Why not save? TCE values depend on which dataset slice
+is used. Different incident data → different TCE.
+DoWhy is a computation engine, not a storage engine.
+```
+
+### What is PERSISTENT (saved to disk)?
+
+```
+Bayesian Optimization output:
+  optimal_weights = gp_minimize(objective, space, n_calls=100)
+  → CAUSAL_MATRIX weights: [3,2,3,2,3] → [4,2,3,1,4]
+
+These ARE saved:
+  Option A (Year 2 simple):  matrix_weights_bo.json
+  Option B (Year 2+ prod):   SQLite DB (weight_updates table)
+                             — already coded in adaptive_matrix_updater.py
+
+On pipeline startup:
+  if matrix_weights_bo.json exists:
+      load weights → override CAUSAL_MATRIX static defaults
+  else:
+      use hardcoded defaults [3,2,3,2,3]
+
+Why save? BO takes 4-16 hours to run. Cannot rerun on every startup.
+          Weights are learned once (or every 6 months), then reused.
+```
+
+### Summary Table
+
+| | DoWhy Computation | BO Matrix Weights |
+|---|---|---|
+| **What** | TCE, ATE, NDE, NIE, PNS values | CAUSAL_MATRIX [P1..P5] per domain |
+| **When computed** | On-demand per query | Once (4-16 hrs), every 6 months |
+| **Saved to disk?** | NO — compute fresh each time | YES — json or SQLite |
+| **Cache?** | @lru_cache (session-level) | Persistent file (cross-session) |
+| **Year 1 equivalent** | KNOWN_CASES manual dict | Static hardcoded [3,2,3,2,3] |
+| **Year 2 upgrade** | DoWhy auto-compute | AIAAIC + BO calibration |
+
+**Professor one-liner:**
+  "DoWhy computes causal inputs dynamically from incident data — like a
+   calculator run per query. BO calibrates the matrix weights once from
+   2,223 real incidents — like training parameters saved to disk."
+
+---
