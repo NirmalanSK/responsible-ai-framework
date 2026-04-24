@@ -1,6 +1,6 @@
 # Responsible AI Framework v5.0
 
-[🌐 Open Interactive Dashboard](https://nirmalansk.github.io/responsible-ai-framework/responsible_ai_v5_0.html)
+[🌐 Open Interactive Dashboard](https://nirmalansk.github.io/responsible-ai-framework/responsible_ai_v5_0.html) &nbsp;&nbsp; [📖 Framework Deep-Dive Explanation](https://nirmalansk.github.io/responsible-ai-framework/framework_explanation.html)
 
 [![Tests](https://github.com/NirmalanSK/responsible-ai-framework/actions/workflows/ci.yml/badge.svg)](https://github.com/NirmalanSK/responsible-ai-framework/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
@@ -543,7 +543,8 @@ responsible-ai-framework/
 │   └── groq_60case_context_memory.csv   # ContextEngine session turns (multi-turn proof)
 │
 └── docs/
-    ├── responsible_ai_v5_0.html         # Interactive dashboard
+    ├── responsible_ai_v5_0.html         # Interactive dashboard (DAG · Roadmap · Ablation · Latency)
+    ├── framework_explanation.html       # Interactive deep-dive: Pearl→Matrix link · 12-step pipeline · Step 05 trace
     ├── phd_math_proofs.pdf              # Formal mathematical proofs (PDF)
     └── phd_math_proofs.tex              # Formal mathematical proofs (LaTeX source)
 ```
