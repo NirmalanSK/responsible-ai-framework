@@ -181,6 +181,22 @@ The pipeline (S00–S12) and the chatbot layer are **architecturally separate**.
 
 Both `governed_chatbot.py` (Groq + Llama 3.3 70B) and `gemini_governed_chatbot.py` (Gemini 2.0 Flash) implement this. `pipeline_v15.py` is untouched — all changes at chatbot layer only.
 
+**Year 2 Migration Target:** Self-verification is currently chatbot-layer-specific — tied to Groq and Gemini. This means any future LLM integrated directly into the pipeline (Claude, GPT-5, Gemma, etc.) would bypass Pass 2 verification entirely. Year 2 resolves this by migrating `self_verify()` into the pipeline as **Step 13 (Universal Self-Verify)** via an LLM adapter pattern:
+
+```python
+# Year 2 — LLM-agnostic adapter pattern:
+pipeline.run(query, llm_adapter=ClaudeAdapter())   # ✅ self-verified
+pipeline.run(query, llm_adapter=GPTAdapter())      # ✅ self-verified
+pipeline.run(query, llm_adapter=GemmaAdapter())    # ✅ self-verified
+
+# Current (Year 1) — chatbot-specific:
+governed_chatbot.py   → Groq   → self_verify() ✅
+gemini_governed_chatbot.py → Gemini → self_verify() ✅
+# Any other LLM integrated directly → ❌ no self-verify
+```
+
+This makes the framework a **true universal middleware** — governance applies at the pipeline level, independent of which LLM is downstream.
+
 ---
 
 ## 🔬 Novel Contributions — Safety + RAI + Legal (All Three)
@@ -226,6 +242,7 @@ Both `governed_chatbot.py` (Groq + Llama 3.3 70B) and `gemini_governed_chatbot.p
   4. Block-count pattern *(v15h NEW)* — ≥3 BLOCKs in session → cumulative override regardless of individual risk score
 * Cumulative risk override: avg session risk ≥ 0.60 → force BLOCK regardless of individual turn score
 * Schema pre-designed for Year 2 pipeline integration — NULL columns already present, zero migration needed
+* **Year 2 target:** ContextEngine promoted to Step 00 inside pipeline — same DB, same schema, zero migration
 * Tamper-evident conversation audit trail (turn-by-turn risk progression = court-admissible intent evidence)
 * Auto-exports session CSV on every run → future AIAAIC multi-turn validation dataset
 
@@ -700,6 +717,7 @@ New functions: `build_rai_context()`, `build_system_prompt()`, `build_verify_pro
 | Phase 5 | Causal-Neural Feedback | SCM findings inform LLM generation parameters |
 | Phase 6 | XLM-RoBERTa | Hybrid zero-shot + threshold + keyword fallback → 75-80% HarmBench |
 | Phase 7 | FAccT Publication | Peer-reviewed paper submission |
+| Phase 8 | Universal Self-Verify (Step 13) | Migrate `self_verify()` from chatbot layer → pipeline via LLM adapter pattern — any future LLM auto-verified |
 
 **Matrix Weight Calibration:**
 
