@@ -810,7 +810,7 @@ Extended: Full technical plan added April 2026
   Month 8-9:  Validation
                 Amazon TCE ± 3% tolerance check
                 COMPAS flip rate ± 5% tolerance check
-                test_v15.py: verify 177/179 still passing
+                test_v15.py: verify 195/195 still passing
 
   Month 9:    FAccT/AIES paper draft begin
                 "Data-Driven SCM for Real-Time AI Safety"
@@ -984,7 +984,7 @@ Papers:
     Pearl coverage:   They = L1+L2    | Ours = L1+L2+L3 (PNS/PN/PS) ← STRONGER
     Deployment:       They = post-hoc | Ours = real-time middleware ← UNIQUE
     Safety:           They = none     | Ours = 4 attack types ← UNIQUE
-    Code:             They = theory   | Ours = 177/179 tests ← STRONGER
+    Code:             They = theory   | Ours = 195/195 tests ← STRONGER
     DAG approach:     They = auto-discover | Ours = expert-defined (Year 2: fix)
 
   KEY FRAMING (use in SOP + thesis):
@@ -3776,3 +3776,5 @@ A: "The BaseProcessor.safe_process() wrapper guarantees no exception
    stability takes priority over extension completeness."
 
 ---
+
+
