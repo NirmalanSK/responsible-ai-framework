@@ -1399,6 +1399,12 @@ class Step05_SCMEngine:
             return CausalFindings(tce=6.0,  med=45.0, flip=12.0,
                                   intv=30.0, rct=False, domain="representation_bias",
                                   _query=query)
+        # v15h fix: socioeconomic/poverty/crime — protected group causal path
+        elif any(w in q for w in ["poverty", "poor", "crime", "crimes",
+                                   "socioeconomic", "inequality", "criminal"]):
+            return CausalFindings(tce=9.0,  med=55.0, flip=18.0,
+                                  intv=35.0, rct=False, domain="criminal_justice_bias",
+                                  _query=query)
         else:
             import dataclasses
             f = dataclasses.replace(self.DEFAULT_FINDINGS, _query=query)
