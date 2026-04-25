@@ -382,7 +382,7 @@ def self_verify(
         raw = verify_resp.choices[0].message.content or ""
     except Exception as e:
         # If verification fails, return original draft safely
-        return draft, False, f"[Verification error: {e}]"
+        return draft, False, f"[Verification error: {e}]", "YES"
 
     # ── Parse structured response ────────────────────────────────────
     verdict           = "APPROVED"

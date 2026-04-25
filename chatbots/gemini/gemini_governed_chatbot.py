@@ -347,7 +347,7 @@ def self_verify(
         )
         raw = verify_resp.text or ""
     except Exception as e:
-        return draft, False, f"[Verification error: {e}]"
+        return draft, False, f"[Verification error: {e}]", "YES"
 
     verdict           = "APPROVED"
     issues_found      = "None"
