@@ -928,7 +928,8 @@ class Step04_TierRouter:
     ]
     TIER2_SIGNALS = [
         "medication", "drug", "surgery", "medical",
-        "legal", "law", "court", "criminal",
+        "legal", "law", "court", "criminal", "crime", "crimes",
+        "poverty", "poor people", "socioeconomic", "inequality",
         "security", "privacy", "confidential",
         "mental health", "depression", "suicide",
         "political", "election", "vote",
@@ -1236,6 +1237,8 @@ class Step05_SCMEngine:
                         q_lower = query.lower()
                         if any(w in q_lower for w in ["race","racial","gender","female","hire","bias","compas","recidivism"]):
                             dk = "representation_bias" if "gender" in q_lower or "hire" in q_lower or "female" in q_lower else "criminal_justice_bias"
+                        elif any(w in q_lower for w in ["poverty","poor people","socioeconomic","inequality","crime","crimes","commit crime"]):
+                            dk = "criminal_justice_bias"
                         elif any(w in q_lower for w in ["sarin","nerve agent","vx","synthesize","synthesis","weapon","bomb","explosive"]):
                             dk = "misuse_safety"
                         elif any(w in q_lower for w in ["patient","hospital","healthcare","medical","doctor"]):
@@ -1305,7 +1308,8 @@ class Step05_SCMEngine:
                                                           "scholarship","dropout","zip code","parental income",
                                                           "socioeconomic","discrimination","age","elderly","over 65"]):
                         domain_key = "representation_bias"
-                    elif any(w in q_lower for w in ["recidivism","criminal","risk score","compas","sentencing","prison"]):
+                    elif any(w in q_lower for w in ["recidivism","criminal","risk score","compas","sentencing","prison",
+                                                          "poverty","poor people","crime","crimes","commit crime","inequality"]):
                         domain_key = "criminal_justice_bias"
                     elif any(w in q_lower for w in ["sarin","nerve agent","vx","weapon","synthesize","synthesis"]):
                         domain_key = "misuse_safety"
@@ -1418,6 +1422,7 @@ class Step06_SHAPProxy:
         "gender", "race", "ethnicity", "religion", "age",
         "disability", "sexual orientation", "nationality",
         "caste", "political", "pregnancy",
+        "socioeconomic", "poverty", "poor", "class", "income",  # v15h fix: socioeconomic protected group
     ]
 
     def run(self, tier: int, query: str) -> tuple[float, StepResult]:
