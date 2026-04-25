@@ -3342,3 +3342,437 @@ Why save? BO takes 4-16 hours to run. Cannot rerun on every startup.
    2,223 real incidents — like training parameters saved to disk."
 
 ---
+
+---
+
+## 🔭 FUTURE EXTENSIONS — Plugin Architecture Plan (April 2026)
+Source: Gap analysis + Xiaomi AI review + internal assessment
+Status: DESIGNED (not yet implemented) — Year 2/3 targets
+
+---
+
+### WHY EXTERNAL (NOT INTERNAL)?
+
+Current framework core claim:
+  "First unified middleware combining Safety + RAI + Legal proof
+   in a single real-time deployment pipeline."
+
+If we modify the 12-step pipeline to add multimodal/agentic code:
+  ❌ 195 passing tests may break
+  ❌ Core thesis gets diluted
+  ❌ Unfinished stub code weakens the repo
+
+Correct approach = PLUGIN ARCHITECTURE:
+  ✅ 12-step pipeline ZERO changes
+  ✅ Extensions wrap AROUND the pipeline
+  ✅ Each gap = separate module, added when ready
+  ✅ If a module fails → pipeline still runs (graceful degradation)
+
+---
+
+### GAP MAP — Current vs Future
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║           RESPONSIBLE AI FRAMEWORK — EXTENSION MAP              ║
+╠══════════════════════════════════════════════════════════════════╣
+║                                                                  ║
+║  INPUT LAYER (Pre-Processors)          CURRENT      FUTURE       ║
+║  ┌─────────────────────────┐                                     ║
+║  │ Text Input      ────────│──────────── ✅ DONE    —           ║
+║  │ Image Input     ────────│──────────── ❌ GAP 1   Year 2      ║
+║  │ Audio Input     ────────│──────────── ❌ GAP 1   Year 2      ║
+║  │ Video Input     ────────│──────────── ❌ GAP 1   Year 3      ║
+║  │ Agent Action    ────────│──────────── ❌ GAP 2   Year 2      ║
+║  └────────────┬────────────┘                                     ║
+║               │                                                  ║
+║               ▼                                                  ║
+║  ╔════════════════════════════════════╗                          ║
+║  ║   12-STEP PIPELINE (UNCHANGED)     ║  ← NEVER TOUCH THIS     ║
+║  ║                                    ║                          ║
+║  ║  S01 Input Sanitizer               ║                          ║
+║  ║  S02 Context Engine                ║                          ║
+║  ║  S03 Emotion Detector              ║                          ║
+║  ║  S04 Tier Router                   ║                          ║
+║  ║  S05 Domain Classifier             ║                          ║
+║  ║  S06 SCM Engine v2  ←─────────────╫── Pearl L1/L2/L3        ║
+║  ║  S07 Causal Matrix  ←─────────────╫── 17×5 Sparse Activation ║
+║  ║  S08 Fairness Layer                ║                          ║
+║  ║  S09 Adversarial Defense           ║                          ║
+║  ║  S10 Jurisdiction Engine           ║                          ║
+║  ║  S11 Decision Engine               ║                          ║
+║  ║  S12 Output Filter + Audit         ║                          ║
+║  ╚════════════════╤═══════════════════╝                          ║
+║                   │                                              ║
+║  OUTPUT LAYER (Post-Processors)        CURRENT      FUTURE       ║
+║  ┌────────────────┴────────────┐                                 ║
+║  │ Text Response   ────────────│──────── ✅ DONE    —           ║
+║  │ Audit Trail     ────────────│──────── ✅ DONE    —           ║
+║  │ Agent Gate      ────────────│──────── ❌ GAP 2   Year 2      ║
+║  │ NL Explanation  ────────────│──────── ❌ GAP 6   Year 2      ║
+║  │ Court PDF       ────────────│──────── ❌ GAP 6   Year 3      ║
+║  └─────────────────────────────┘                                 ║
+║                                                                  ║
+║  SURROUNDING LAYERS                    CURRENT      FUTURE       ║
+║  ┌─────────────────────────────┐                                 ║
+║  │ Legal Engine (3 juris.)     │──────── ✅ DONE    —           ║
+║  │ Legal Engine (50+ juris.)   │──────── ❌ GAP 5   Year 3      ║
+║  │ Static Matrix Weights       │──────── ✅ DONE    —           ║
+║  │ BO-Calibrated Weights       │──────── ❌ GAP 3   Year 2      ║
+║  │ Single-threaded Python      │──────── ✅ DONE    —           ║
+║  │ Async/Kubernetes            │──────── ❌ GAP 4   Year 3      ║
+║  └─────────────────────────────┘                                 ║
+╚══════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+### 6 GAPS — Priority + Pearl Connection
+
+```
+GAP 1: MULTIMODAL (Image / Audio / Video)
+  Problem : Text-only pipeline misses image-embedded hate, audio bias
+  Solution: Pre-processor converts Image→text (OCR/CLIP),
+            Audio→text (Whisper), then feeds existing S01
+  Pearl link: Image bias → new CausalFindings input to SCM Engine
+              (skin_tone_representation → TCE via CLIP features)
+  Year 2 target: CLIP + Whisper integration
+  Year 3 target: Cross-modal causal graph
+  Dependency: Existing S01 Input Sanitizer accepts the extracted text
+
+GAP 2: AGENTIC ACTION MONITORING
+  Problem : Pipeline only gates text output, not AI agent ACTIONS
+            (purchases, code execution, hiring decisions)
+  Solution: Post-processor evaluates action BEFORE execution
+            High-risk context (hiring, loans) → SCM Engine triggered
+            Financial actions → human confirmation required
+  Pearl link: Agent action = do(X) intervention on real world
+              "AI selects candidate" = do(hire=1) — must run SCM
+  Year 2 target: Action-level risk scoring + tool call audit trail
+  Year 3 target: Multi-agent causal dependency graph
+
+GAP 3: REAL-TIME LEARNING (Static → Adaptive)
+  Problem : Matrix weights hardcoded, attack patterns manually updated
+  Solution: BO calibration (ALREADY PLANNED — Year 2)
+            + Online learning with concept drift detection
+            + Federated learning across deployments (Year 3)
+  Pearl link: BO = learn optimal do(weights) from AIAAIC incidents
+  Year 2 target: BO on 2,223 incidents (AIAAIC) — already in roadmap
+  Year 3 target: Federated BO across org deployments
+
+GAP 4: PRODUCTION SCALABILITY
+  Problem : Single-threaded Python demo, ~500ms latency
+  Solution: Async pipeline (asyncio), GPU-accelerated NLP (CUDA),
+            Kubernetes microservice architecture
+  Year 3 target: <100ms P95 latency for clinical deployment
+  Note: NOT a research gap — engineering gap.
+        PhD research phase: prototype performance acceptable.
+
+GAP 5: LEGAL ENGINE EXPANSION (3 → 50+ jurisdictions)
+  Problem : Only US/EU/India/Global covered
+  Solution: Plugin jurisdiction architecture — community contributed
+            Legal knowledge graph + case law integration
+  Year 3 target: China, Brazil, Canada, UK, ASEAN modules
+  Implementation: Each jurisdiction = separate JSON rule file
+                  loaded at startup via plugin_loader()
+
+GAP 6: EXPLAINABILITY UX
+  Problem : Audit trail = raw JSON. Unusable for judges/regulators.
+  Solution: NL explanation generator (LLM-powered summary of audit)
+            D3.js interactive causal graph visualization
+            Court-ready PDF report generator
+  Year 2 target: NL explanation + interactive DAG (extends dashboard)
+  Year 3 target: Full court-ready PDF with Daubert alignment
+```
+
+---
+
+### ARCHITECTURE — How Extensions Link to Pipeline
+
+```
+FILE STRUCTURE (Year 2+):
+
+responsible-ai-framework/
+│
+├── pipeline_v15.py           ← UNCHANGED (canonical)
+├── scm_engine_v2.py          ← UNCHANGED (canonical)
+├── adversarial_engine_v5.py  ← UNCHANGED (canonical)
+│
+├── extensions/               ← NEW folder (Year 2)
+│   ├── __init__.py
+│   ├── base_processor.py     ← Interface (design complete)
+│   ├── multimodal_processor.py    ← Gap 1 (Year 2)
+│   ├── agentic_monitor.py         ← Gap 2 (Year 2)
+│   ├── jurisdiction_plugins/      ← Gap 5 (Year 3)
+│   │   ├── eu_ai_act.json
+│   │   ├── china_ai_law.json
+│   │   └── brazil_ai_bill.json
+│   └── explainability/            ← Gap 6 (Year 2)
+│       ├── nl_explainer.py
+│       └── pdf_reporter.py
+│
+├── extended_pipeline.py      ← NEW orchestrator (Year 2)
+│
+└── tests/
+    ├── test_v15.py           ← UNCHANGED (195 tests)
+    └── test_extensions.py    ← NEW (Year 2)
+```
+
+---
+
+### INTERFACE DESIGN (base_processor.py) — Architecture Locked
+
+```python
+# extensions/base_processor.py
+# STATUS: Design complete — implementation Year 2
+# PURPOSE: Every extension MUST implement this.
+#          Guarantees pipeline safety regardless of extension failures.
+
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
+from enum import Enum
+import time
+import uuid
+
+
+class ProcessorType(Enum):
+    PRE_PROCESSOR  = "pre_processor"   # Runs BEFORE 12-step pipeline
+    POST_PROCESSOR = "post_processor"  # Runs AFTER 12-step pipeline
+    PARALLEL       = "parallel"        # Runs ALONGSIDE pipeline
+
+
+class RiskLevel(Enum):
+    SAFE     = "safe"
+    LOW      = "low"
+    MEDIUM   = "medium"
+    HIGH     = "high"
+    CRITICAL = "critical"
+
+
+@dataclass
+class ProcessorResult:
+    """Standardized output from every extension module."""
+    processor_id      : str
+    processor_type    : ProcessorType
+    risk_level        : RiskLevel
+    risk_score        : float                    # 0.0 to 1.0
+    findings          : List[Dict[str, Any]]     # Detailed findings
+    recommendations   : List[str]                # What to do next
+    metadata          : Dict[str, Any] = field(default_factory=dict)
+    processing_time_ms: float = 0.0
+    requires_escalation: bool = False
+    block_recommended : bool = False
+
+
+@dataclass
+class UnifiedInput:
+    """
+    Extended input — backward compatible with existing pipeline.
+    text field = existing pipeline input (unchanged).
+    All new fields are Optional — won't break existing code.
+    """
+    # ── Existing (backward compatible) ──────────────────
+    text        : str
+    session_id  : str  = ""
+    jurisdiction: str  = "global"
+
+    # ── NEW: Multimodal (Gap 1) ──────────────────────────
+    image_data  : Optional[bytes] = None
+    image_url   : Optional[str]   = None
+    audio_data  : Optional[bytes] = None
+    audio_url   : Optional[str]   = None
+    video_data  : Optional[bytes] = None
+
+    # ── NEW: Agentic context (Gap 2) ─────────────────────
+    agent_id          : Optional[str]  = None
+    agent_action      : Optional[str]  = None   # "purchase", "execute_code"
+    agent_action_params: Optional[Dict] = None
+    agent_tool_calls  : List[Dict]     = field(default_factory=list)
+
+    # ── Metadata ─────────────────────────────────────────
+    metadata   : Dict[str, Any] = field(default_factory=dict)
+    timestamp  : float          = field(default_factory=time.time)
+    request_id : str            = field(default_factory=lambda: str(uuid.uuid4()))
+
+
+class BaseProcessor(ABC):
+    """
+    Abstract base for ALL extensions.
+    KEY GUARANTEE: safe_process() NEVER lets exceptions escape.
+    Pipeline stability > extension completeness.
+    """
+
+    def __init__(self, processor_id: str, processor_type: ProcessorType):
+        self.processor_id   = processor_id
+        self.processor_type = processor_type
+        self._enabled       = True
+
+    @abstractmethod
+    def process(self, unified_input: UnifiedInput) -> ProcessorResult:
+        """Main logic. MUST NOT raise — catch internally."""
+        pass
+
+    @abstractmethod
+    def validate(self) -> bool:
+        """Check if processor is properly configured."""
+        pass
+
+    def safe_process(self, unified_input: UnifiedInput) -> Optional[ProcessorResult]:
+        """
+        NEVER raises. Pipeline always gets a result or None.
+        If extension crashes → returns error ProcessorResult (low risk).
+        Pipeline continues normally.
+        """
+        if not self._enabled:
+            return None
+
+        start = time.time()
+        try:
+            result = self.process(unified_input)
+            result.processing_time_ms = (time.time() - start) * 1000
+            return result
+        except Exception as e:
+            return ProcessorResult(
+                processor_id   = self.processor_id,
+                processor_type = self.processor_type,
+                risk_level     = RiskLevel.LOW,
+                risk_score     = 0.0,
+                findings       = [{"type": "processor_error", "error": str(e)}],
+                recommendations= ["Review processor configuration"],
+                processing_time_ms = (time.time() - start) * 1000,
+                metadata       = {"error": True}
+            )
+```
+
+---
+
+### EXTENDED PIPELINE FLOW — How All Layers Connect
+
+```
+User sends request (text / image / audio / agent action)
+│
+▼
+┌─────────────────────────────────────────────────────────┐
+│ LAYER 1: PRE-PROCESSORS (Year 2)                        │
+│                                                         │
+│  MultimodalProcessor.safe_process(unified_input)        │
+│    → Image  → CLIP safety + bias + OCR → extracted_text │
+│    → Audio  → Whisper transcription  → extracted_text   │
+│    → Merge: effective_text = original + extracted_text  │
+│                                                         │
+│  If pre-processor finds CRITICAL → early_block = True   │
+│  Pipeline still runs (for audit) but output = BLOCK     │
+└─────────────────────┬───────────────────────────────────┘
+                      │ effective_text (merged)
+                      ▼
+┌─────────────────────────────────────────────────────────┐
+│ LAYER 2: EXISTING 12-STEP PIPELINE (UNCHANGED)          │
+│                                                         │
+│  pipeline_v15.process(text=effective_text,              │
+│                        session_id=...,                  │
+│                        jurisdiction=...)                │
+│                                                         │
+│  Returns: {final_decision, risk_score, audit_trail}     │
+│  ALLOW/WARN/EXPERT/BLOCK — same as current              │
+└─────────────────────┬───────────────────────────────────┘
+                      │ pipeline result
+                      ▼
+┌─────────────────────────────────────────────────────────┐
+│ LAYER 3: POST-PROCESSORS (Year 2)                       │
+│                                                         │
+│  AgenticMonitor.safe_process(unified_input)             │
+│    → Agent action evaluation (hiring, purchase, code)   │
+│    → Tool call validation (SQL injection, rate limits)  │
+│    → High-bias context detection → SCM Engine triggered │
+│                                                         │
+│  NLExplainer.safe_process(pipeline_result)              │
+│    → Converts audit JSON → human-readable explanation   │
+│    → "The system detected 12.4% causal bias because..." │
+└─────────────────────┬───────────────────────────────────┘
+                      │ aggregated result
+                      ▼
+┌─────────────────────────────────────────────────────────┐
+│ FINAL AGGREGATION                                       │
+│                                                         │
+│  Decision priority:                                     │
+│    Any layer BLOCK  → final = BLOCK                     │
+│    Any layer ESCALATE → escalation_required = True      │
+│    All ALLOW → final = ALLOW                            │
+│                                                         │
+│  Risk score: max(pre_risk, pipeline_risk, post_risk)    │
+│  Audit trail: merged from all layers                    │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+### YEAR-BY-YEAR IMPLEMENTATION PLAN
+
+```
+YEAR 1 (Current — 2026) ← WHERE WE ARE NOW
+  ✅ 12-step pipeline (complete)
+  ✅ SCM Engine v2 — Pearl L1/L2/L3
+  ✅ 17×5 Sparse Causal Matrix
+  ✅ 195/195 tests passing
+  ✅ Governed chatbot (Groq + Gemini)
+  ✅ AIAAIC-style validation (F1=0.97)
+  🔧 XLM-RoBERTa hybrid tiering (in progress)
+  🔧 BO weight calibration (planned)
+  🔧 Plugin architecture interface (DESIGNED)
+
+YEAR 2 (2026-2027) — PhD Year 1
+  🔧 MultimodalProcessor — CLIP + Whisper
+  🔧 AgenticMonitor — action gating + tool validation
+  🔧 NLExplainer — human-readable audit output
+  🔧 BO calibration — AIAAIC 2,223 incidents
+  🔧 DoWhy integration — automated DAG sensitivity
+  🔧 SBERT semantic tiering — replace keyword patterns
+  🔧 SafeNudge fairness audit — SCM on nudge rates
+
+YEAR 3 (2027-2028) — PhD Year 2
+  🔧 Jurisdiction plugin system — 10+ countries
+  🔧 Async pipeline — <100ms P95 latency
+  🔧 Federated learning — cross-deployment BO
+  🔧 Multi-agent causal dependency graph
+  🔧 Court-ready PDF report generator
+  🔧 FAccT / AIES publication target
+  🔧 NYC ADS Task Force deployment pilot
+
+YEAR 4+ (2028+)
+  🔧 Edge deployment (on-device, privacy-preserving)
+  🔧 AGI-adjacent risk profiles
+  🔧 Industry-specific modules (healthcare, finance, legal)
+  🔧 Global regulatory auto-update (live legal knowledge graph)
+```
+
+---
+
+### PROFESSOR Q&A — Future Extensions
+
+Q: "Your framework is text-only. What about images and audio?"
+A: "Correct — Year 1 focus is text-based causal governance, which is
+   where Pearl's framework is most mature. I have designed a plugin
+   architecture that adds multimodal support as a pre-processor:
+   images are converted to text via CLIP + OCR, audio via Whisper,
+   then the existing 12-step pipeline processes the merged text
+   unchanged. Year 2 implementation target. The interface is designed
+   — UnifiedInput dataclass supports all modalities, BaseProcessor
+   guarantees pipeline stability regardless of extension failures."
+
+Q: "AI agents will act autonomously. Does your framework handle that?"
+A: "Yes — this is Gap 2 in my roadmap. Agent actions (purchases,
+   hiring selections, code execution) require a post-processor gate.
+   Critically, hiring and loan actions trigger the SCM Engine's
+   do-calculus — because agent selection IS a do(X) intervention.
+   Year 2 target: AgenticMonitor post-processor with action-level
+   risk scoring and tool call audit trail."
+
+Q: "What happens if an extension module fails?"
+A: "The BaseProcessor.safe_process() wrapper guarantees no exception
+   escapes the extension layer. If MultimodalProcessor crashes, the
+   pipeline receives the original text input unchanged and runs
+   normally. Graceful degradation is the design principle — pipeline
+   stability takes priority over extension completeness."
+
+---
