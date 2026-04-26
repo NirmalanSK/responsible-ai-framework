@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Responsible AI Framework v5.0 — Dynamic Assessment</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'JetBrains Mono',Consolas,monospace;background:#0d0f14;color:#c9d1d9;font-size:13px;min-height:100vh}
+.hdr{background:#161b22;border-bottom:1px solid #21262d;padding:14px 24px;display:flex;align-items:center;gap:16px}
+.hdr h1{font-size:15px;font-weight:700;color:#58a6ff;letter-spacing:0.05em}
+.hdr .badge{background:#1f2937;border:1px solid #30363d;border-radius:4px;padding:2px 8px;font-size:11px;color:#8b949e}
+.main{display:grid;grid-template-columns:300px 1fr;gap:0;height:calc(100vh - 49px)}
+.sidebar{background:#161b22;border-right:1px solid #21262d;padding:16px;overflow-y:auto}
+.content{overflow-y:auto;padding:16px}
+.panel-title{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#8b949e;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #21262d}
+.ctrl-group{margin-bottom:14px}
+.ctrl-group label{display:flex;justify-content:space-between;font-size:11px;color:#8b949e;margin-bottom:4px}
+.ctrl-group label span{color:#e6edf3;font-weight:700;font-family:monospace}
+input[type=range]{width:100%;accent-color:#58a6ff;cursor:pointer;height:4px}
+select{width:100%;background:#0d1117;border:1px solid #30363d;color:#c9d1d9;padding:6px 8px;border-radius:4px;font-size:12px;font-family:monospace;cursor:pointer}
+select:focus{outline:1px solid #58a6ff}
+.formula-box{background:#0d1117;border:1px solid #21262d;border-radius:6px;padding:10px;margin:8px 0;font-size:11px;line-height:1.8}
+.formula-box .eq{color:#79c0ff;font-family:monospace}
+.formula-box .val{color:#ffa657;font-weight:700}
+.formula-box .result{color:#3fb950;font-weight:700}
+.tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid #21262d;padding-bottom:0}
+.tab{padding:7px 14px;font-size:12px;cursor:pointer;border-radius:4px 4px 0 0;color:#8b949e;border:1px solid transparent;border-bottom:none;margin-bottom:-1px;font-family:monospace}
+.tab.active{background:#161b22;color:#58a6ff;border-color:#21262d;border-bottom-color:#161b22}
+.tab:hover:not(.active){color:#c9d1d9}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.step-card{background:#161b22;border:1px solid #21262d;border-radius:6px;padding:10px 12px;margin-bottom:8px;position:relative;overflow:hidden}
+.step-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.step-card.clear::before{background:#3fb950}
+.step-card.warn::before{background:#d29922}
+.step-card.block::before{background:#f85149}
+.step-card.escalate::before{background:#8b949e}
+.step-card.skip::before{background:#30363d}
+.step-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.step-num{font-size:10px;color:#8b949e}
+.step-name{font-size:12px;color:#e6edf3;font-weight:600}
+.signal{font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;letter-spacing:0.08em}
+.signal.CLEAR{background:#0d2a1a;color:#3fb950;border:1px solid #1a4a2a}
+.signal.WARN{background:#2a1f00;color:#d29922;border:1px solid #4a3700}
+.signal.BLOCK{background:#2a0d0d;color:#f85149;border:1px solid #4a1a1a}
+.signal.ESCALATE{background:#21262d;color:#8b949e;border:1px solid #30363d}
+.signal.SKIP{background:#161b22;color:#484f58;border:1px solid #21262d}
+.step-detail{font-size:10px;color:#8b949e;line-height:1.6;margin-top:4px}
+.step-formula{font-size:10px;color:#79c0ff;font-family:monospace;margin-top:4px;background:#0d1117;padding:4px 6px;border-radius:3px;line-height:1.7}
+.matrix-wrap{overflow-x:auto}
+.matrix-table{border-collapse:separate;border-spacing:3px;width:100%;min-width:500px}
+.matrix-table th{font-size:10px;color:#8b949e;text-align:center;padding:4px;letter-spacing:0.06em}
+.matrix-table .row-label{font-size:10px;text-align:right;padding:2px 8px;white-space:nowrap;color:#8b949e;border-radius:3px}
+.matrix-table .row-label.primary{color:#79c0ff;font-weight:700}
+.matrix-table .row-label.cascaded{color:#a5d6ff}
+.matrix-table .cell{width:52px;height:28px;border-radius:4px;text-align:center;vertical-align:middle;font-size:11px;font-weight:700;position:relative;transition:all 0.2s}
+.matrix-table .cell .raw{font-size:9px;display:block;opacity:0.7}
+.decision-box{border-radius:8px;padding:20px;text-align:center;margin-bottom:16px}
+.decision-box.ALLOW{background:#0d2a1a;border:2px solid #3fb950}
+.decision-box.WARN{background:#2a1f00;border:2px solid #d29922}
+.decision-box.BLOCK{background:#2a0d0d;border:2px solid #f85149}
+.decision-box.EXPERT_REVIEW{background:#1f1a2a;border:2px solid #a371f7}
+.decision-label{font-size:28px;font-weight:700;letter-spacing:0.08em;margin-bottom:6px}
+.decision-label.ALLOW{color:#3fb950}
+.decision-label.WARN{color:#d29922}
+.decision-label.BLOCK{color:#f85149}
+.decision-label.EXPERT_REVIEW{color:#a371f7}
+.decision-reason{font-size:11px;color:#8b949e;margin-top:4px}
+.risk-gauge{margin:12px 0}
+.risk-bar-wrap{background:#21262d;border-radius:4px;height:10px;overflow:hidden;position:relative}
+.risk-bar{height:100%;border-radius:4px;transition:width 0.4s ease}
+.risk-pct{font-size:20px;font-weight:700;font-family:monospace}
+.risk-thresholds{display:flex;font-size:9px;color:#484f58;justify-content:space-between;margin-top:2px}
+.row-indicator{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px;vertical-align:middle}
+.indicator-primary{background:#58a6ff}
+.indicator-cascade{background:#a5d6ff}
+.indicator-inactive{background:#30363d}
+.cascade-badge{font-size:9px;padding:1px 5px;border-radius:10px;background:#1f2937;border:1px solid #30363d;color:#8b949e;margin-left:4px;vertical-align:middle}
+.cascade-badge.fired{background:#0d2a3a;border-color:#1a4a6a;color:#79c0ff}
+.legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;font-size:10px;color:#8b949e}
+.legend span{display:flex;align-items:center;gap:4px}
+.scm-rule{background:#161b22;border:1px solid #21262d;border-radius:6px;padding:10px;margin-bottom:8px}
+.scm-rule-title{font-size:11px;color:#e6edf3;font-weight:700;margin-bottom:6px}
+.scm-rule-body{font-size:10px;color:#8b949e;line-height:1.8}
+.rule-result{display:inline-block;padding:1px 6px;border-radius:3px;font-weight:700;font-size:10px}
+.rule-result.L{background:#1a2a1a;color:#3fb950;border:1px solid #2a4a2a}
+.rule-result.M{background:#2a2a0d;color:#d29922;border:1px solid #4a4a1a}
+.rule-result.H{background:#2a1f0d;color:#ffa657;border:1px solid #4a3a1a}
+.rule-result.C{background:#2a0d0d;color:#f85149;border:1px solid #4a1a1a}
+.pathway-bar{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:10px}
+.pathway-bar .name{width:110px;color:#8b949e;text-align:right;flex-shrink:0}
+.pathway-bar .bar{flex:1;background:#21262d;border-radius:3px;height:8px;overflow:hidden}
+.pathway-bar .bar-fill{height:100%;border-radius:3px;background:#58a6ff;transition:width 0.4s}
+.pathway-bar .score{width:40px;color:#79c0ff;font-family:monospace;font-size:10px;text-align:right}
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.summary-card{background:#161b22;border:1px solid #21262d;border-radius:6px;padding:12px}
+.summary-card .sc-label{font-size:10px;color:#8b949e;margin-bottom:4px;letter-spacing:0.08em}
+.summary-card .sc-value{font-size:16px;font-weight:700;font-family:monospace;color:#e6edf3}
+.check-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #21262d;font-size:11px}
+.check-row:last-child{border-bottom:none}
+.chk{width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+.chk.pass{background:#0d2a1a;color:#3fb950;border:1px solid #1a4a2a}
+.chk.fail{background:#2a0d0d;color:#f85149;border:1px solid #4a1a1a}
+.chk.warn{background:#2a1f00;color:#d29922;border:1px solid #4a3700}
+.no-data{text-align:center;color:#484f58;padding:40px;font-size:11px}
+@media(max-width:700px){.main{grid-template-columns:1fr;height:auto}.sidebar{border-right:none;border-bottom:1px solid #21262d}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <h1>Responsible AI Framework v5.0</h1>
+  <span class="badge">Dynamic Assessment Engine</span>
+  <span class="badge">17×5 Matrix</span>
+  <span class="badge">12-Step Pipeline</span>
+</div>
+<div class="main">
+<div class="sidebar">
+  <div class="panel-title">Causal Input Parameters</div>
+  
+  <div class="ctrl-group">
+    <label>TCE — Total Causal Effect <span id="lbl-tce">7.0%</span></label>
+    <input type="range" id="sl-tce" min="0" max="20" step="0.5" value="7">
+    <div class="formula-box" style="margin-top:4px">
+      <div class="eq">L2 Backdoor: TCE = P(Y|do(X=1)) − P(Y|do(X=0))</div>
+    </div>
+  </div>
+  <div class="ctrl-group">
+    <label>MED — Mediation % <span id="lbl-med">60%</span></label>
+    <input type="range" id="sl-med" min="0" max="100" step="1" value="60">
+    <div class="formula-box" style="margin-top:4px">
+      <div class="eq">MED = NIE / TCE × 100 (indirect path %)</div>
+    </div>
+  </div>
+  <div class="ctrl-group">
+    <label>FlipRate — Counterfactual <span id="lbl-flip">17%</span></label>
+    <input type="range" id="sl-flip" min="0" max="50" step="0.5" value="17">
+    <div class="formula-box" style="margin-top:4px">
+      <div class="eq">L3 Proxy: PNS = P(Y₁=1, Y₀=0)</div>
+    </div>
+  </div>
+  <div class="ctrl-group">
+    <label>INTV — do(fix) Reduction <span id="lbl-intv">20%</span></label>
+    <input type="range" id="sl-intv" min="0" max="100" step="1" value="20">
+    <div class="formula-box" style="margin-top:4px">
+      <div class="eq">do(X←x*): intervention on treatment node</div>
+    </div>
+  </div>
+
+  <div class="ctrl-group">
+    <label>Domain</label>
+    <select id="sel-domain">
+      <option value="misuse_safety">Misuse / Safety</option>
+      <option value="representation_bias">Representation Bias</option>
+      <option value="criminal_justice_bias">Criminal Justice Bias</option>
+      <option value="context_poisoning">Context Poisoning</option>
+      <option value="decision_transparency">Decision Transparency</option>
+      <option value="disinformation">Disinformation</option>
+      <option value="harassment">Harassment</option>
+      <option value="cyberattack">Cyberattack</option>
+      <option value="privacy_violation">Privacy Violation</option>
+      <option value="financial_fraud">Financial Fraud</option>
+      <option value="medical_harm">Medical Harm</option>
+      <option value="physical_violence">Physical Violence</option>
+      <option value="hate_speech">Hate Speech</option>
+      <option value="drug_trafficking">Drug Trafficking</option>
+      <option value="child_safety">Child Safety</option>
+      <option value="identity_forgery">Identity Forgery</option>
+      <option value="audit_gap">Audit / Accountability</option>
+    </select>
+  </div>
+  <div class="ctrl-group">
+    <label>Jurisdiction</label>
+    <select id="sel-jur">
+      <option value="GLOBAL">GLOBAL (most restrictive)</option>
+      <option value="EU">EU (GDPR + AI Act)</option>
+      <option value="US">US (NIST RMF + HIPAA)</option>
+      <option value="IN">India (IT Act)</option>
+    </select>
+  </div>
+  <div class="ctrl-group">
+    <label style="justify-content:flex-start;gap:8px;cursor:pointer">
+      <input type="checkbox" id="chk-rct" style="width:auto">
+      <span>RCT Data Available</span>
+    </label>
+  </div>
+
+  <div class="panel-title" style="margin-top:8px">Live Risk Summary</div>
+  <div id="sidebar-summary" style="font-size:11px;line-height:2"></div>
+</div>
+
+<div class="content">
+  <div class="tabs">
+    <div class="tab active" data-tab="pipeline">Pipeline Trace (12 Steps)</div>
+    <div class="tab" data-tab="matrix">17×5 Activation Matrix</div>
+    <div class="tab" data-tab="formulas">SCM Formulas</div>
+    <div class="tab" data-tab="decision">Final Decision</div>
+  </div>
+
+  <div class="tab-panel active" id="tab-pipeline"></div>
+  <div class="tab-panel" id="tab-matrix"></div>
+  <div class="tab-panel" id="tab-formulas"></div>
+  <div class="tab-panel" id="tab-decision"></div>
+</div>
+</div>
+
+<script>
+const CAUSAL_MATRIX = {
+  "Representation_Bias":   [3,2,3,2,3],
+  "Decision_Transparency": [3,2,2,1,2],
+  "Misuse_Safety":         [2,3,2,3,3],
+  "Technical_Safety":      [2,2,2,3,2],
+  "Criminal_Justice_Bias": [3,2,3,1,2],
+  "Healthcare_Bias":       [3,2,3,1,2],
+  "Context_Poisoning":     [2,3,2,3,1],
+  "Disinformation":        [2,3,1,2,3],
+  "Harassment":            [2,3,1,2,2],
+  "Cyberattack":           [2,2,2,3,1],
+  "Privacy_Violation":     [2,2,3,2,1],
+  "Audit_Accountability":  [3,2,2,2,3],
+  "Financial_Fraud":       [2,3,2,2,1],
+  "Physical_Violence":     [1,3,1,2,2],
+  "Hate_Speech":           [2,2,1,2,3],
+  "Drug_Trafficking":      [1,3,2,2,1],
+  "Identity_Forgery":      [2,2,2,2,1],
+};
+const ROW_ORDER = Object.keys(CAUSAL_MATRIX);
+const PATHWAY_NAMES = ["P1 Interpret.","P2 Behavior","P3 Data","P4 Robust.","P5 Society"];
+const PATHWAY_SHORT = ["P1","P2","P3","P4","P5"];
+const CASCADE_MAP = {
+  "Representation_Bias": ["Criminal_Justice_Bias","Healthcare_Bias","Decision_Transparency"],
+  "Misuse_Safety": ["Physical_Violence","Drug_Trafficking","Cyberattack","Context_Poisoning"],
+  "Audit_Accountability": ["Decision_Transparency","Technical_Safety","Privacy_Violation"],
+};
+const DOMAIN_TO_ROW = {
+  "misuse_safety":"Misuse_Safety","representation_bias":"Representation_Bias",
+  "criminal_justice_bias":"Criminal_Justice_Bias","context_poisoning":"Context_Poisoning",
+  "decision_transparency":"Decision_Transparency","disinformation":"Disinformation",
+  "harassment":"Harassment","cyberattack":"Cyberattack","privacy_violation":"Privacy_Violation",
+  "financial_fraud":"Financial_Fraud","medical_harm":"Healthcare_Bias",
+  "physical_violence":"Physical_Violence","hate_speech":"Hate_Speech",
+  "drug_trafficking":"Drug_Trafficking","child_safety":"Representation_Bias",
+  "identity_forgery":"Identity_Forgery","audit_gap":"Audit_Accountability",
+};
+const DOMAIN_MULT = {"healthcare":3.0,"finance":2.5,"education":2.0,"entertainment":1.5,"general":1.0};
+const DOMAIN_MULT_MAP = {
+  "medical_harm":"healthcare","financial_fraud":"finance","drug_trafficking":"general",
+  "misuse_safety":"general","representation_bias":"general","criminal_justice_bias":"general",
+};
+
+function getSevLabel(v){return["","LOW","MEDIUM","HIGH","CRITICAL"][v]||"LOW"}
+function getDetLabel(v){return{2:"HARD",3:"MODERATE",4:"EASY"}[v]||"HARD"}
+function getEdgeLabel(v){return["","WEAK","MODERATE","STRONG","CRITICAL"][v]||"WEAK"}
+
+function computeSCM(tce, med, flip, intv, rct){
+  // Rule 01
+  let sev = tce>=10?4: tce>=5?3: tce>=2?2:1;
+  // Rule 02
+  let edge = med>=70?4: med>=40?3: med>=20?2:1;
+  // Rule 03
+  let det = flip>=30?4: flip>=10?3:2;
+  // Rule 04
+  let sevAdj = sev, rule04msg="";
+  if(intv>=80){sevAdj=Math.max(1,sev-1);rule04msg=`do(fix) ${intv}% → severity ${getSevLabel(sev)}→${getSevLabel(sevAdj)}`}
+  else if(intv<=20&&sev<4){sevAdj=Math.min(4,sev+1);rule04msg=`do(fix) only ${intv}% → severity escalated ${getSevLabel(sev)}→${getSevLabel(sevAdj)}`}
+  else{rule04msg=`do(fix) ${intv}% → no severity change`}
+  // Rule 05
+  let identifiable = !(tce<2&&flip<5&&!rct);
+  // Risk score formula
+  let raw = 9 + sevAdj*3 + det*2 + edge*0.75;
+  let base_risk = Math.min(100, raw/432*100*4.5);
+  return {sev,edge,det,sevAdj,rule04msg,identifiable,raw,base_risk,sevLabel:getSevLabel(sevAdj),edgeLabel:getEdgeLabel(edge),detLabel:getDetLabel(det)};
+}
+
+function computeMatrix(domain, tce, scm){
+  let primaryRow = DOMAIN_TO_ROW[domain]||"Misuse_Safety";
+  let primaryTotal = CAUSAL_MATRIX[primaryRow].reduce((a,b)=>a+b,0);
+  let cascadeFired = primaryTotal >= 12;
+  let cascadedRows = cascadeFired ? (CASCADE_MAP[primaryRow]||[]) : [];
+  let activeRows = [...new Set([primaryRow,...cascadedRows])];
+  
+  let sevMult = {1:0.6,2:0.8,3:1.0,4:1.2}[scm.sevAdj]||1.0;
+  let tceFactor = Math.min(tce/20.0, 1.0);
+  
+  let activeCells = {}, pathwayTotals = [0,0,0,0,0];
+  for(let row of activeRows){
+    let w = CAUSAL_MATRIX[row]||[2,2,2,2,2];
+    let rf = row===primaryRow ? 1.0 : 0.6;
+    let cellW = {};
+    for(let i=0;i<5;i++){
+      let aw = w[i]*sevMult*tceFactor*rf;
+      cellW[PATHWAY_SHORT[i]] = aw;
+      pathwayTotals[i] += aw;
+    }
+    activeCells[row] = cellW;
+  }
+  let maxPossible = 3*sevMult*1.0*activeRows.length;
+  let pathwayScores = pathwayTotals.map(t=>maxPossible>0?t/maxPossible:0);
+  let dominantIdx = pathwayScores.indexOf(Math.max(...pathwayScores));
+  let aggregateRisk = maxPossible>0 ? pathwayTotals.reduce((a,b)=>a+b,0)/(maxPossible*5) : 0;
+  
+  return {primaryRow,cascadeFired,cascadedRows,activeRows,activeCells,pathwayTotals,pathwayScores,aggregateRisk,sevMult,tceFactor,dominantPath:PATHWAY_SHORT[dominantIdx]};
+}
+
+function getDomainMult(domain){
+  let key = DOMAIN_MULT_MAP[domain]||"general";
+  return {mult:DOMAIN_MULT[key],label:key};
+}
+
+function computeAll(){
+  let tce   = parseFloat(document.getElementById('sl-tce').value);
+  let med   = parseFloat(document.getElementById('sl-med').value);
+  let flip  = parseFloat(document.getElementById('sl-flip').value);
+  let intv  = parseFloat(document.getElementById('sl-intv').value);
+  let rct   = document.getElementById('chk-rct').checked;
+  let domain= document.getElementById('sel-domain').value;
+  let jur   = document.getElementById('sel-jur').value;
+
+  let scm = computeSCM(tce,med,flip,intv,rct);
+  let mat = computeMatrix(domain, tce, scm);
+  let dm  = getDomainMult(domain);
+  
+  // Combined risk: 60% SCM + 40% matrix
+  let matRisk = mat.aggregateRisk * 100;
+  let combinedRisk = 0.6*scm.base_risk + 0.4*matRisk;
+  if(combinedRisk >= 25) combinedRisk = Math.min(100, combinedRisk*dm.mult);
+  combinedRisk = Math.round(combinedRisk*10)/10;
+  
+  // SCM decision
+  let scmDecision = scm.base_risk>=65?"BLOCK":scm.base_risk>=50?"ESCALATE":scm.base_risk>=35?"WARN":"ALLOW";
+  
+  // Simulate pipeline steps
+  let tier = combinedRisk>=50?3: combinedRisk>=30?2:1;
+  let shap = (domain.includes("bias")||domain==="criminal_justice_bias"||domain==="representation_bias")?0.30:0.10;
+  let emotionSignal = "CLEAR";
+  let attackScore = 0.0;
+  let vacTriggered = false;
+  let jurisIssue = (combinedRisk>=40 && (domain.includes("bias")||domain==="harassment"))&&jur!="GLOBAL";
+  
+  // Determine pipeline step signals
+  let steps = buildSteps(tce,med,flip,intv,rct,domain,jur,tier,scm,mat,combinedRisk,scmDecision,shap,dm,matRisk);
+  
+  // Final decision
+  let warnCount = steps.filter(s=>s.signal==="WARN"||s.signal==="ESCALATE").length;
+  let blockCount = steps.filter(s=>s.signal==="BLOCK").length;
+  let finalDecision, finalReason;
+  if(vacTriggered){finalDecision="BLOCK";finalReason="VAC absolute violation"}
+  else if(blockCount>0){finalDecision="BLOCK";finalReason="BLOCK signal from: "+steps.find(s=>s.signal==="BLOCK").name}
+  else if(combinedRisk>=70){finalDecision="BLOCK";finalReason=`SCM risk=${combinedRisk.toFixed(1)}% ≥ 70% threshold`}
+  else if(warnCount>=5){finalDecision="BLOCK";finalReason=`${warnCount} WARN signals — cumulative risk too high`}
+  else if(combinedRisk>=30||warnCount>=2){finalDecision="WARN";finalReason=`SCM risk=${combinedRisk.toFixed(1)}% ≥ 30% or ${warnCount} risk signals`}
+  else if(warnCount===1){finalDecision="WARN";finalReason="Single risk signal detected"}
+  else{finalDecision="ALLOW";finalReason="All checks passed"}
+  
+  return {tce,med,flip,intv,rct,domain,jur,scm,mat,dm,matRisk,combinedRisk,scmDecision,tier,shap,steps,finalDecision,finalReason,warnCount,blockCount};
+}
+
+function buildSteps(tce,med,flip,intv,rct,domain,jur,tier,scm,mat,combinedRisk,scmDecision,shap,dm,matRisk){
+  let steps = [];
+  // S01
+  steps.push({num:"01",name:"Input Sanitizer",signal:"CLEAR",detail:"NFKC normalization · zero-width char removal · multilingual detection",formula:"Unicode NFKC → ASCII scan → length check (max 50K chars)"});
+  // S02
+  steps.push({num:"02",name:"Conversation Graph",signal:"CLEAR",detail:"Drift score = 0.00 — No escalation pattern in single-turn query",formula:"drift_score = max(escalation_pairs_hit) → 0.00"});
+  // S03
+  steps.push({num:"03",name:"Emotion Detector",signal:"CLEAR",detail:"No crisis / distress / anger patterns detected",formula:"regex scan: CRISIS_PATTERNS → DISTRESS_PATTERNS → ANGER_PATTERNS"});
+  // S04
+  let tierReason = combinedRisk>=50?"High-risk domain → Tier 3":combinedRisk>=30?"Sensitive domain → Tier 2":"No risk signals → Tier 1";
+  steps.push({num:"04",name:"Tier Router",signal:"CLEAR",detail:`Tier ${tier} selected — ${tierReason} (est. ${tier===1?150:tier===2?350:600}ms)`,formula:`tier=${tier}: ${tier===3?"TIER3_SIGNALS or drift≥0.70":tier===2?"TIER2_SIGNALS or drift≥0.35":"no signals"}`});
+  // S04b OOD
+  let oodConf = 0.55, oodSignal = "CLEAR";
+  steps.push({num:"04b",name:"OOD / Uncertainty Scorer",signal:oodSignal,detail:`Domain identified — confidence=0.55 domain=${domain}`,formula:"keyword_conf = min(0.30 + hits×0.20, 0.85) → grey_area_check"});
+  // S05 SCM+Matrix
+  let s5sig = combinedRisk>=70?"BLOCK":combinedRisk>=30?"WARN":"CLEAR";
+  steps.push({
+    num:"05",
+    name:"SCM Engine + Activation Matrix",
+    signal:s5sig,
+    detail:`TCE=${tce}% | MED=${med}% | Flip=${flip}% | Risk=${combinedRisk.toFixed(1)}% → ${scmDecision} | Matrix: ${mat.primaryRow} agg=${mat.aggregateRisk.toFixed(3)} ${mat.cascadeFired?"| CASCADE→"+mat.activeRows.length+" rows":""}`,
+    formula:`scm_risk=${scm.base_risk.toFixed(1)}% | matrix_risk=${matRisk.toFixed(1)}% | combined=0.6×${scm.base_risk.toFixed(1)}+0.4×${matRisk.toFixed(1)}=${((0.6*scm.base_risk+0.4*matRisk)).toFixed(1)}% ×${dm.mult}=${combinedRisk.toFixed(1)}%`
+  });
+  // S06 SHAP
+  let shapSig = shap>=0.30?"WARN":"CLEAR";
+  steps.push({num:"06",name:"SHAP/LIME Proxy",signal:tier===1?"SKIP":shapSig,detail:tier===1?"Tier 1 — skipped":`Protected attribute influence proxy=${(shap*100).toFixed(0)}% ${shap>=0.30?"⚠ > 30% threshold":"✓ within threshold"}`,formula:`shap_proxy = min(protected_attr_count × 0.15, 1.0) = ${shap.toFixed(2)}`});
+  // S07 Adversarial
+  steps.push({num:"07",name:"Adversarial Defense Layer",signal:"CLEAR",detail:"Attack=NONE | Score=0.000 — no jailbreak/injection/roleplay/spoofing patterns",formula:"4-tier: slow_boil → roleplay_wrapper → authority_spoof → prompt_injection"});
+  // S08 Jurisdiction
+  let j8sig = "CLEAR", j8detail=`No ${jur} violations detected`;
+  if(combinedRisk>=50&&domain.includes("bias")){j8sig="WARN";j8detail=`${jur} extra-protected attribute in decision context with SHAP=${(shap*100).toFixed(0)}%`}
+  steps.push({num:"08",name:`Jurisdiction Engine (${jur})`,signal:j8sig,detail:j8detail,formula:`DIRECT_DISCRIMINATION patterns → JURISDICTION_RULES[${jur}] → GDPR_Art22 check`});
+  // S09 VAC
+  steps.push({num:"09",name:"VAC Check (Immovable Ethical Core)",signal:"CLEAR",detail:"No VAC violations — core principles intact (CSAM/bioweapon/nuclear/genocide patterns clear)",formula:"VAC_ABSOLUTE_BLOCKS regex scan (both original + NFKC-normalized query)"});
+  // S10 Decision
+  let d10sig = combinedRisk>=70?"BLOCK":combinedRisk>=30?"WARN":"CLEAR";
+  steps.push({num:"10",name:"Decision Engine",signal:d10sig,detail:`Priority check: VAC→Emotion→SCM≥70→Attack→Blocks→WarnCount→SCM≥30→JurisIssue→ALLOW`,formula:`scm_risk=${combinedRisk.toFixed(1)}% → threshold check → final signal`});
+  // S11
+  steps.push({num:"11",name:"Societal Monitor (Year 3 stub)",signal:"CLEAR",detail:"[STUB] Population-level drift logged — Year 3: Redis cross-user tracking",formula:"Year 3: population_rate = warn_block_count / total (last 60s) with differential privacy"});
+  // S12
+  let s12action = combinedRisk>=70?"Refusal message set":combinedRisk>=30?"Safety notice prepended":"No output modifications needed";
+  if(jur==="EU"&&shap>=0.15) s12action += " | GDPR Art.22 audit bundle attached";
+  steps.push({num:"12",name:"Output Filter",signal:"CLEAR",detail:s12action,formula:`decision=${combinedRisk>=70?"BLOCK":combinedRisk>=30?"WARN":"ALLOW"} → sanitize → ${jur==="EU"?"EU audit bundle":"standard"} response`});
+  
+  return steps;
+}
+
+function renderPipeline(data){
+  let html = `<div class="legend">
+    <span><span class="row-indicator" style="background:#3fb950"></span>CLEAR</span>
+    <span><span class="row-indicator" style="background:#d29922"></span>WARN</span>
+    <span><span class="row-indicator" style="background:#f85149"></span>BLOCK</span>
+    <span><span class="row-indicator" style="background:#484f58"></span>SKIP</span>
+  </div>`;
+  for(let s of data.steps){
+    let sig = s.signal==="SKIP"?"skip":s.signal.toLowerCase();
+    html += `<div class="step-card ${sig}">
+      <div class="step-hdr">
+        <div>
+          <span class="step-num">STEP ${s.num}</span>
+          <span class="step-name" style="margin-left:8px">${s.name}</span>
+        </div>
+        <span class="signal ${s.signal}">${s.signal}</span>
+      </div>
+      <div class="step-detail">${s.detail}</div>
+      <div class="step-formula">${s.formula}</div>
+    </div>`;
+  }
+  document.getElementById('tab-pipeline').innerHTML = html;
+}
+
+function cellColor(w, isActive, isPrimary){
+  if(!isActive) return {bg:'#161b22',color:'#30363d'};
+  let maxW = isPrimary?3.5:2.1;
+  let ratio = Math.min(w/maxW,1);
+  if(isPrimary){
+    let r=Math.round(13+ratio*50), g=Math.round(95+ratio*130), b=Math.round(255);
+    return {bg:`rgba(${88-ratio*30},${166+ratio*40},${255},${0.15+ratio*0.6})`,color:`rgba(88,166,255,${0.4+ratio*0.6})`};
+  } else {
+    return {bg:`rgba(165,214,255,${0.08+ratio*0.35})`,color:`rgba(165,214,255,${0.5+ratio*0.4})`};
+  }
+}
+
+function renderMatrix(data){
+  let {mat} = data;
+  let html = `<div style="margin-bottom:12px">
+    <div class="legend">
+      <span><span class="row-indicator indicator-primary"></span>Primary row</span>
+      <span><span class="row-indicator indicator-cascade"></span>Cascade row</span>
+      <span><span class="row-indicator indicator-inactive"></span>Inactive</span>
+    </div>
+    <div style="font-size:11px;color:#8b949e;margin-bottom:8px">
+      Primary: <span style="color:#79c0ff;font-weight:700">${mat.primaryRow}</span>
+      &nbsp;|&nbsp; Cascade: <span class="cascade-badge ${mat.cascadeFired?'fired':''}">
+        ${mat.cascadeFired?'FIRED — '+mat.cascadedRows.length+' rows cascade':'NOT FIRED (total < 12)'}
+      </span>
+      &nbsp;|&nbsp; sevMult: <span style="color:#ffa657">${mat.sevMult.toFixed(2)}</span>
+      &nbsp;|&nbsp; tceFactor: <span style="color:#ffa657">${mat.tceFactor.toFixed(3)}</span>
+    </div>
+  </div>
+  <div class="matrix-wrap"><table class="matrix-table">
+  <thead><tr>
+    <th style="width:160px;text-align:right">Harm Domain Row</th>
+    <th>Total</th>`;
+  for(let p of PATHWAY_SHORT) html+=`<th>${p}</th>`;
+  html+=`<th>Status</th></tr></thead><tbody>`;
+  
+  for(let row of ROW_ORDER){
+    let isPrimary = row===mat.primaryRow;
+    let isCascade = mat.cascadedRows.includes(row);
+    let isActive  = mat.activeRows.includes(row);
+    let weights   = CAUSAL_MATRIX[row];
+    let rowTotal  = weights.reduce((a,b)=>a+b,0);
+    let isCentral = rowTotal>=12;
+    let labelCls  = isPrimary?"primary":isCascade?"cascaded":"";
+    
+    html += `<tr>
+      <td class="row-label ${labelCls}" style="padding:2px 8px;font-size:11px">
+        ${isPrimary?'▶ ':isCascade?'↳ ':'  '}${row.replace(/_/g,' ')}
+        ${isCentral?`<span style="font-size:9px;color:${isPrimary?'#58a6ff':isCascade?'#a5d6ff':'#484f58'}"> ★${rowTotal}</span>`:`<span style="font-size:9px;color:#484f58"> ${rowTotal}</span>`}
+      </td>
+      <td style="text-align:center;font-size:11px;color:${isActive?(isCentral?'#ffa657':'#c9d1d9'):'#484f58'}">${rowTotal}</td>`;
+    
+    for(let i=0;i<5;i++){
+      let rawW = weights[i];
+      let activatedW = isActive ? (mat.activeCells[row]?.[PATHWAY_SHORT[i]]||0) : 0;
+      let cc = cellColor(activatedW, isActive, isPrimary);
+      html += `<td class="cell" style="background:${cc.bg};color:${cc.color}">
+        ${rawW}<span class="raw">${isActive?activatedW.toFixed(2):'-'}</span>
+      </td>`;
+    }
+    
+    let statusTxt = isPrimary?'◉ PRIMARY':isCascade?'→ CASCADE':'○ inactive';
+    let statusColor = isPrimary?'#58a6ff':isCascade?'#a5d6ff':'#30363d';
+    html += `<td style="font-size:10px;color:${statusColor};white-space:nowrap;padding:0 8px">${statusTxt}</td></tr>`;
+  }
+  
+  html += `</tbody></table></div>
+  <div style="margin-top:16px">
+    <div class="panel-title">Pathway Scores (P1–P5)</div>`;
+  for(let i=0;i<5;i++){
+    let score = mat.pathwayScores[i];
+    let isDom = PATHWAY_SHORT[i]===mat.dominantPath;
+    html += `<div class="pathway-bar">
+      <span class="name">${PATHWAY_NAMES[i]}</span>
+      <div class="bar"><div class="bar-fill" style="width:${(score*100).toFixed(1)}%;background:${isDom?'#58a6ff':'#388bfd'}"></div></div>
+      <span class="score">${(score*100).toFixed(1)}%${isDom?' ★':''}</span>
+    </div>`;
+  }
+  html += `<div style="margin-top:10px;font-size:11px;color:#8b949e">
+    <span style="color:#e6edf3">Aggregate Risk: </span>
+    <span style="color:#ffa657;font-weight:700;font-size:14px">${(mat.aggregateRisk*100).toFixed(1)}%</span>
+    <span style="margin-left:12px">Dominant pathway: <span style="color:#58a6ff">${mat.dominantPath}</span></span>
+  </div></div>`;
+  
+  document.getElementById('tab-matrix').innerHTML = html;
+}
+
+function renderFormulas(data){
+  let {tce,med,flip,intv,rct,scm,mat,dm,matRisk,combinedRisk} = data;
+  let html = `
+  <div class="scm-rule">
+    <div class="scm-rule-title">Rule 01 — Severity from TCE (L2 Backdoor)</div>
+    <div class="scm-rule-body">
+      tce = <span style="color:#ffa657">${tce}%</span> → 
+      ${tce>=10?'≥ 10':tce>=5?'≥ 5':tce>=2?'≥ 2':'< 2'} threshold →
+      Severity = <span class="rule-result ${scm.sev===4?'C':scm.sev===3?'H':scm.sev===2?'M':'L'}">${getSevLabel(scm.sev)}</span> (value=${scm.sev})<br>
+      Formula: <span style="color:#79c0ff">tce≥10→CRITICAL | tce≥5→HIGH | tce≥2→MEDIUM | else→LOW</span>
+    </div>
+  </div>
+  <div class="scm-rule">
+    <div class="scm-rule-title">Rule 02 — Edge Strength from MED (NIE/TCE Mediation)</div>
+    <div class="scm-rule-body">
+      med = <span style="color:#ffa657">${med}%</span> → 
+      ${med>=70?'≥ 70':med>=40?'≥ 40':med>=20?'≥ 20':'< 20'} threshold →
+      EdgeStrength = <span class="rule-result ${scm.edge===4?'C':scm.edge===3?'H':scm.edge===2?'M':'L'}">${getEdgeLabel(scm.edge)}</span> (value=${scm.edge})<br>
+      Formula: <span style="color:#79c0ff">med≥70→CRITICAL | med≥40→STRONG | med≥20→MODERATE | else→WEAK</span>
+    </div>
+  </div>
+  <div class="scm-rule">
+    <div class="scm-rule-title">Rule 03 — Detection from FlipRate (L3 Counterfactual PNS)</div>
+    <div class="scm-rule-body">
+      flip = <span style="color:#ffa657">${flip}%</span> → 
+      ${flip>=30?'≥ 30':flip>=10?'≥ 10':'< 10'} threshold →
+      Detection = <span class="rule-result ${scm.det===4?'C':scm.det===3?'H':'L'}">${getDetLabel(scm.det)}</span> (value=${scm.det})<br>
+      Formula: <span style="color:#79c0ff">flip≥30→EASY | flip≥10→MODERATE | else→HARD</span>
+    </div>
+  </div>
+  <div class="scm-rule">
+    <div class="scm-rule-title">Rule 04 — Severity Adjustment via do(fix) Intervention</div>
+    <div class="scm-rule-body">
+      intv = <span style="color:#ffa657">${intv}%</span> | base severity = ${getSevLabel(scm.sev)}<br>
+      → <span style="color:#e6edf3">${scm.rule04msg}</span><br>
+      Adjusted Severity = <span class="rule-result ${scm.sevAdj===4?'C':scm.sevAdj===3?'H':scm.sevAdj===2?'M':'L'}">${scm.sevLabel}</span> (value=${scm.sevAdj})<br>
+      Formula: <span style="color:#79c0ff">intv≥80 → sev−1 | intv≤20 → sev+1 | else → unchanged</span>
+    </div>
+  </div>
+  <div class="scm-rule">
+    <div class="scm-rule-title">Rule 05 — Identifiability Check</div>
+    <div class="scm-rule-body">
+      tce=${tce} | flip=${flip} | rct=${rct} → 
+      ${scm.identifiable?'<span class="rule-result L">IDENTIFIABLE</span>':'<span class="rule-result C">NOT IDENTIFIABLE (epistemic risk floor=3)</span>'}<br>
+      Condition: <span style="color:#79c0ff">tce≥2 OR flip≥5 OR rct=true</span>
+    </div>
+  </div>
+  <div class="scm-rule">
+    <div class="scm-rule-title">SCM Risk Score Formula (Step 05 core)</div>
+    <div class="scm-rule-body" style="font-family:monospace;line-height:2">
+      <span style="color:#8b949e">base</span> = 9 (floor)<br>
+      <span style="color:#8b949e">sev</span>  = ${scm.sevAdj} × 3 = <span style="color:#ffa657">${scm.sevAdj*3}</span><br>
+      <span style="color:#8b949e">det</span>  = ${scm.det} × 2 = <span style="color:#ffa657">${scm.det*2}</span><br>
+      <span style="color:#8b949e">edge</span> = ${scm.edge} × 0.75 = <span style="color:#ffa657">${(scm.edge*0.75).toFixed(2)}</span><br>
+      <span style="color:#8b949e">raw</span>  = 9 + ${scm.sevAdj*3} + ${scm.det*2} + ${(scm.edge*0.75).toFixed(2)} = <span style="color:#ffa657">${scm.raw.toFixed(2)}</span><br>
+      <span style="color:#8b949e">base_risk</span> = ${scm.raw.toFixed(2)} / 432 × 100 × 4.5 = <span style="color:#ffa657">${scm.base_risk.toFixed(1)}%</span><br>
+    </div>
+  </div>
+  <div class="scm-rule">
+    <div class="scm-rule-title">Matrix Activation (Step 05 — 17×5 Sparse)</div>
+    <div class="scm-rule-body" style="font-family:monospace;line-height:2">
+      primaryRow = <span style="color:#58a6ff">${mat.primaryRow}</span><br>
+      primaryTotal = ${CAUSAL_MATRIX[mat.primaryRow].join('+')} = <span style="color:#ffa657">${CAUSAL_MATRIX[mat.primaryRow].reduce((a,b)=>a+b,0)}</span> ${mat.cascadeFired?'≥ 12 → CASCADE FIRES':'< 12 → no cascade'}<br>
+      activeRows = [${mat.activeRows.join(', ')}] (${mat.activeRows.length} rows)<br>
+      sevMult = ${mat.sevMult.toFixed(2)} | tceFactor = min(${tce}/20, 1.0) = ${mat.tceFactor.toFixed(3)}<br>
+      aggregate_risk = Σ(pathway_totals) / (max_possible × 5) = <span style="color:#ffa657">${(mat.aggregateRisk*100).toFixed(1)}%</span>
+    </div>
+  </div>
+  <div class="scm-rule">
+    <div class="scm-rule-title">Combined Risk Calculation (Step 05 final)</div>
+    <div class="scm-rule-body" style="font-family:monospace;line-height:2">
+      scm_risk = <span style="color:#ffa657">${scm.base_risk.toFixed(1)}%</span><br>
+      matrix_risk = ${(mat.aggregateRisk*100).toFixed(1)}% (from 17×5 matrix)<br>
+      combined = 0.6 × ${scm.base_risk.toFixed(1)} + 0.4 × ${(mat.aggregateRisk*100).toFixed(1)} = <span style="color:#ffa657">${(0.6*scm.base_risk+0.4*mat.aggregateRisk*100).toFixed(1)}%</span><br>
+      domain_multiplier = <span style="color:#ffa657">×${dm.mult}</span> (${dm.label})<br>
+      ${(0.6*scm.base_risk+0.4*mat.aggregateRisk*100)>=25?`final = ${(0.6*scm.base_risk+0.4*mat.aggregateRisk*100).toFixed(1)}% × ${dm.mult} =`:'(risk < 25%, multiplier skipped) final ='} <span style="color:#f85149;font-weight:700;font-size:14px">${combinedRisk.toFixed(1)}%</span>
+    </div>
+  </div>`;
+  document.getElementById('tab-formulas').innerHTML = html;
+}
+
+function renderDecision(data){
+  let {finalDecision,finalReason,combinedRisk,steps,warnCount,blockCount,scm,mat,dm,tce,med,flip,intv,jur,mat:m} = data;
+  let decColor = {ALLOW:'#3fb950',WARN:'#d29922',BLOCK:'#f85149',EXPERT_REVIEW:'#a371f7'}[finalDecision];
+  let decIcon  = {ALLOW:'✓',WARN:'⚠',BLOCK:'✕',EXPERT_REVIEW:'⊕'}[finalDecision];
+  
+  let riskColor = combinedRisk>=70?'#f85149':combinedRisk>=30?'#d29922':'#3fb950';
+  let barColor  = riskColor;
+  
+  let html = `
+  <div class="decision-box ${finalDecision}" style="border-color:${decColor}">
+    <div class="decision-label ${finalDecision}" style="color:${decColor}">${decIcon} ${finalDecision}</div>
+    <div class="decision-reason">${finalReason}</div>
+  </div>
+  
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="sc-label">SCM CAUSAL RISK</div>
+      <div class="sc-value" style="color:${riskColor}">${combinedRisk.toFixed(1)}%</div>
+      <div style="margin-top:6px"><div class="risk-bar-wrap"><div class="risk-bar" style="width:${Math.min(combinedRisk,100)}%;background:${barColor}"></div></div></div>
+      <div class="risk-thresholds"><span>0</span><span style="margin-left:${30}%;color:#d29922">30</span><span style="margin-left:${40}%;color:#f85149">70</span><span>100</span></div>
+    </div>
+    <div class="summary-card">
+      <div class="sc-label">MATRIX AGGREGATE</div>
+      <div class="sc-value" style="color:#79c0ff">${(data.mat.aggregateRisk*100).toFixed(1)}%</div>
+      <div style="margin-top:4px;font-size:10px;color:#8b949e">Domain: ${mat.primaryRow.replace(/_/g,' ')}<br>Cascade: ${mat.cascadeFired?'FIRED ('+mat.activeRows.length+' rows)':'NOT fired'}</div>
+    </div>
+    <div class="summary-card">
+      <div class="sc-label">SEVERITY</div>
+      <div class="sc-value" style="color:${scm.sevAdj===4?'#f85149':scm.sevAdj===3?'#ffa657':scm.sevAdj===2?'#d29922':'#3fb950'}">${scm.sevLabel}</div>
+      <div style="margin-top:4px;font-size:10px;color:#8b949e">Edge: ${scm.edgeLabel} | Det: ${scm.detLabel}<br>Domain mult: ×${dm.mult} (${dm.label})</div>
+    </div>
+    <div class="summary-card">
+      <div class="sc-label">SIGNAL COUNTS</div>
+      <div class="sc-value">${blockCount>0?`<span style="color:#f85149">${blockCount} BLOCK</span>`:warnCount>0?`<span style="color:#d29922">${warnCount} WARN</span>`:'<span style="color:#3fb950">All CLEAR</span>'}</div>
+      <div style="margin-top:4px;font-size:10px;color:#8b949e">Warn: ${warnCount} | Block: ${blockCount}<br>Jurisdiction: ${jur}</div>
+    </div>
+  </div>
+
+  <div class="panel-title">Decision Priority Checks</div>
+  <div style="background:#161b22;border:1px solid #21262d;border-radius:6px;padding:12px">
+    ${[
+      {label:'P1: VAC violation',pass:true,reason:'No absolute block patterns matched'},
+      {label:'P2: Crisis emotion',pass:true,reason:'No distress / crisis signals'},
+      {label:'P3: SCM risk ≥ 70%',pass:combinedRisk<70,reason:`risk=${combinedRisk.toFixed(1)}% ${combinedRisk>=70?'→ BLOCK':'< 70% ✓'}`},
+      {label:'P4: Attack score ≥ 0.65',pass:true,reason:'No adversarial attack detected'},
+      {label:'P5: Any BLOCK signal',pass:blockCount===0,reason:`${blockCount} block signal(s) in steps`},
+      {label:'P6: warn_count ≥ 5',pass:warnCount<5,reason:`${warnCount} warn signal(s) ${warnCount>=5?'→ BLOCK':'< 5 ✓'}`},
+      {label:`P7: SCM ≥ 30% or escalate`,pass:combinedRisk<30,reason:`risk=${combinedRisk.toFixed(1)}% ${combinedRisk>=30?'→ WARN':'< 30% ✓'}`},
+      {label:'P8: Jurisdiction issue',pass:finalDecision==='ALLOW'||finalDecision==='WARN',reason:`${jur} compliance check ${finalDecision!=='BLOCK'?'passed':'triggered'}`},
+    ].map(c=>`<div class="check-row">
+      <div class="chk ${c.pass?'pass':'fail'}">${c.pass?'✓':'✕'}</div>
+      <div style="flex:1">
+        <span style="color:#e6edf3">${c.label}</span>
+        <span style="color:#8b949e;margin-left:8px;font-size:10px">${c.reason}</span>
+      </div>
+    </div>`).join('')}
+  </div>
+  
+  <div style="margin-top:12px;padding:10px;background:#161b22;border:1px solid #21262d;border-radius:6px;font-size:10px;color:#8b949e">
+    <span style="color:#e6edf3">Causal inputs: </span>
+    TCE=${tce}% | MED=${med}% | FlipRate=${flip}% | INTV=${intv}%
+    &nbsp;|&nbsp; <span style="color:#e6edf3">Dominant pathway: </span>${mat.dominantPath}
+    &nbsp;|&nbsp; <span style="color:#e6edf3">Active rows: </span>${mat.activeRows.length}/17
+  </div>`;
+  
+  document.getElementById('tab-decision').innerHTML = html;
+}
+
+function updateSidebar(data){
+  let {combinedRisk,finalDecision,scm,mat,dm} = data;
+  let fc = {ALLOW:'#3fb950',WARN:'#d29922',BLOCK:'#f85149',EXPERT_REVIEW:'#a371f7'}[finalDecision];
+  document.getElementById('sidebar-summary').innerHTML = `
+    <div>SCM risk: <span style="color:#ffa657">${scm.base_risk.toFixed(1)}%</span></div>
+    <div>Matrix agg: <span style="color:#79c0ff">${(mat.aggregateRisk*100).toFixed(1)}%</span></div>
+    <div>Combined: <span style="color:${combinedRisk>=70?'#f85149':combinedRisk>=30?'#d29922':'#3fb950'}">${combinedRisk.toFixed(1)}%</span></div>
+    <div>Severity: <span style="color:#ffa657">${scm.sevLabel}</span></div>
+    <div>Edge: <span style="color:#8b949e">${scm.edgeLabel}</span></div>
+    <div>Detection: <span style="color:#8b949e">${scm.detLabel}</span></div>
+    <div>Domain mult: <span style="color:#8b949e">×${dm.mult} (${dm.label})</span></div>
+    <div>Cascade: <span style="color:${mat.cascadeFired?'#58a6ff':'#484f58'}">${mat.cascadeFired?'FIRED ('+mat.activeRows.length+' rows)':'not fired'}</span></div>
+    <hr style="border-color:#21262d;margin:8px 0">
+    <div style="font-size:14px;font-weight:700;color:${fc}">→ ${finalDecision}</div>
+  `;
+}
+
+function update(){
+  try{
+    let data = computeAll();
+    renderPipeline(data);
+    renderMatrix(data);
+    renderFormulas(data);
+    renderDecision(data);
+    updateSidebar(data);
+    document.getElementById('lbl-tce').textContent  = parseFloat(document.getElementById('sl-tce').value).toFixed(1)+'%';
+    document.getElementById('lbl-med').textContent  = document.getElementById('sl-med').value+'%';
+    document.getElementById('lbl-flip').textContent = parseFloat(document.getElementById('sl-flip').value).toFixed(1)+'%';
+    document.getElementById('lbl-intv').textContent = document.getElementById('sl-intv').value+'%';
+  }catch(e){console.error(e)}
+}
+
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('tab-'+t.dataset.tab).classList.add('active');
+  });
+});
+['sl-tce','sl-med','sl-flip','sl-intv'].forEach(id=>document.getElementById(id).addEventListener('input',update));
+document.getElementById('sel-domain').addEventListener('change',update);
+document.getElementById('sel-jur').addEventListener('change',update);
+document.getElementById('chk-rct').addEventListener('change',update);
+update();
+</script>
+</body>
+</html>

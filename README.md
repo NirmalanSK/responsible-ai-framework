@@ -1,6 +1,6 @@
 # Responsible AI Framework v5.0
 
-[🌐 Open Interactive Dashboard](https://nirmalansk.github.io/responsible-ai-framework/responsible_ai_v5_0.html) &nbsp;&nbsp; [📖 Framework Deep-Dive Explanation](https://nirmalansk.github.io/responsible-ai-framework/framework_explanation.html) &nbsp;&nbsp; [🧮 Math Trace: Theory vs Implementation](docs/theory_vs_implementation_full_trace.md)
+[🌐 Open Interactive Dashboard](https://nirmalansk.github.io/responsible-ai-framework/responsible_ai_v5_0.html) &nbsp;&nbsp; [📖 Framework Deep-Dive Explanation](https://nirmalansk.github.io/responsible-ai-framework/framework_explanation.html) &nbsp;&nbsp; [⚗️ Dynamic Assessment Tool](https://nirmalansk.github.io/responsible-ai-framework/rai_dynamic_assessment.html) &nbsp;&nbsp; [🧮 Math Trace: Theory vs Implementation](docs/theory_vs_implementation_full_trace.md)
 
 [![Tests](https://github.com/NirmalanSK/responsible-ai-framework/actions/workflows/ci.yml/badge.svg)](https://github.com/NirmalanSK/responsible-ai-framework/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
@@ -207,6 +207,8 @@ This makes the framework a **true universal middleware** — governance applies 
 * Only relevant cells activate (sparse) → efficient
 * Central nodes (weight ≥12) cascade to adjacent rows
 * **No paper combines** multi-domain + causal weights + cascade interaction
+
+> **⚗️ [Try the Dynamic Assessment Tool](https://nirmalansk.github.io/responsible-ai-framework/rai_dynamic_assessment.html)** — adjust TCE / MED / FlipRate / INTV sliders and watch the 17×5 matrix activate in real time, tracing every formula through all 12 pipeline steps to the final ALLOW / WARN / BLOCK decision.
 
 ### 2. SCM Engine v2 — Full Pearl Theory
 
@@ -565,6 +567,7 @@ responsible-ai-framework/
 └── docs/
     ├── responsible_ai_v5_0.html         # Interactive dashboard (DAG · Roadmap · Ablation · Latency)
     ├── framework_explanation.html       # Interactive deep-dive: Pearl→Matrix link · 12-step pipeline · Step 05 trace
+    ├── rai_dynamic_assessment.html      # Dynamic assessment — live sliders → 17×5 matrix activation + 12-step pipeline trace + SCM formulas
     ├── phd_math_proofs.pdf              # Formal mathematical proofs (PDF)
     └── phd_math_proofs.tex              # Formal mathematical proofs (LaTeX source)
 ```
