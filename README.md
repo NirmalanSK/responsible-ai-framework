@@ -1,6 +1,6 @@
 # Responsible AI Framework v5.0
 
-[🌐 Open Interactive Dashboard](https://nirmalansk.github.io/responsible-ai-framework/responsible_ai_v5_0.html) &nbsp;&nbsp; [📖 Framework Deep-Dive Explanation](https://nirmalansk.github.io/responsible-ai-framework/framework_explanation.html)
+[🌐 Open Interactive Dashboard](https://nirmalansk.github.io/responsible-ai-framework/responsible_ai_v5_0.html) &nbsp;&nbsp; [📖 Framework Deep-Dive Explanation](https://nirmalansk.github.io/responsible-ai-framework/framework_explanation.html) &nbsp;&nbsp; [🧮 Math Trace: Theory vs Implementation](docs/theory_vs_implementation_full_trace.md)
 
 [![Tests](https://github.com/NirmalanSK/responsible-ai-framework/actions/workflows/ci.yml/badge.svg)](https://github.com/NirmalanSK/responsible-ai-framework/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
@@ -217,6 +217,9 @@ This makes the framework a **true universal middleware** — governance applies 
 * Tian-Pearl PNS/PN/PS Bounds
 * do-calculus 3-Rule verification
 * Legal Admissibility Score (Daubert-aligned standard + EU AI Act Art.13)
+
+> **📄 Full worked trace (COMPAS case):** [Theory vs Implementation — Start-to-End Calculations](docs/theory_vs_implementation_full_trace.md)
+> Shows Pearl formulas → trigger mapping → SCM score → 17×5 matrix cascade → pipeline combination → final decision, with theory (weighted sum) and implementation (point-based formula + domain multiplier) side by side.
 
 ### 3. Uncertainty Scorer (Step 04b)
 
