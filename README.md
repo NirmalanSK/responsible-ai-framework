@@ -568,6 +568,7 @@ responsible-ai-framework/
     ├── responsible_ai_v5_0.html         # Interactive dashboard (DAG · Roadmap · Ablation · Latency)
     ├── framework_explanation.html       # Interactive deep-dive: Pearl→Matrix link · 12-step pipeline · Step 05 trace
     ├── rai_dynamic_assessment.html      # Dynamic assessment — live sliders → 17×5 matrix activation + 12-step pipeline trace + SCM formulas
+    ├── theory_vs_implementation_full_trace.md  # Full Pearl formula trace: COMPAS case → SCM → 17×5 matrix → pipeline → decision
     ├── phd_math_proofs.pdf              # Formal mathematical proofs (PDF)
     └── phd_math_proofs.tex              # Formal mathematical proofs (LaTeX source)
 ```
