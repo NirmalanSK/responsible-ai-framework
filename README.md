@@ -592,6 +592,11 @@ responsible-ai-framework/
 │   ├── groq_60case_risk_hist.png        # SCM risk score distribution chart
 │   └── groq_60case_context_memory.csv   # ContextEngine session turns (multi-turn proof)
 │
+├── reports/
+│   ├── RAI_v15b_5Case_LiveReport.docx   # March 2026 — CASE_01–05 live pipeline execution (5/5 BLOCK)
+│   ├── RAI_v15e_5Case_Report_v2.docx    # March 2026 — CASE_06–10 pipeline + Qwen verification (3 BLOCK · 2 WARN)
+│   └── validation_10_cases.html         # April 2026 — Dynamic assessment formula validation (1B · 5W · 4A · 10/10 Python≡HTML match)
+│
 └── docs/
     ├── responsible_ai_v5_0.html         # Interactive dashboard (DAG · Roadmap · Ablation · Latency)
     ├── framework_explanation.html       # Interactive deep-dive: Pearl→Matrix link · 12-step pipeline · Step 05 trace
