@@ -1329,8 +1329,17 @@ class Step05_SCMEngine:
                 
                 # Combine: 60% SCM + 40% matrix
                 matrix_risk = activation.aggregate_risk * 100.0
+                # Step 1: Base combination (60/40)
                 combined_risk = 0.6 * risk_pct + 0.4 * matrix_risk
-
+                #               = 0.6×24.74 + 0.4×33.0 = 28.04%
+                
+                # Step 2: Legal contribution (v15j) — ONLY when causal_data provided
+                if causal_data is not None:
+                    legal_score = getattr(result, "legal_score", 0.0)  # pulls from SCMResultV2
+                    if legal_score > 0.0:
+                        legal_contribution = legal_score * 8.0          # 0.65 × 8 = 5.2%
+                        combined_risk = min(100.0, combined_risk + 5.2) # 28.04 + 5.2 = 33.24%   
+                        
                 # Domain multiplier (v15e) — ONLY when real causal_data provided
                 dom_tag2 = ""
                 if causal_data is not None:
