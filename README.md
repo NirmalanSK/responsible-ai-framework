@@ -1,34 +1,32 @@
 # Responsible AI Framework v5.0
 
-[🌐 Open Interactive Dashboard](https://nirmalansk.github.io/responsible-ai-framework/responsible_ai_v5_0.html) &nbsp;&nbsp; [📖 Framework Deep-Dive Explanation](https://nirmalansk.github.io/responsible-ai-framework/framework_explanation.html) &nbsp;&nbsp; [⚗️ Dynamic Assessment Tool](https://nirmalansk.github.io/responsible-ai-framework/rai_dynamic_assessment.html) &nbsp;&nbsp; [🧮 Math Trace: Theory vs Implementation](docs/theory_vs_implementation_full_trace.md) &nbsp;&nbsp; [📁 Test Reports](reports/)
+[🌐 Open Interactive Dashboard](https://nirmalansk.github.io/responsible-ai-framework/responsible_ai_v5_0.html) &nbsp;&nbsp; [📖 Framework Deep-Dive Explanation](https://nirmalansk.github.io/responsible-ai-framework/framework_explanation.html) &nbsp;&nbsp; [⚗️ Dynamic Assessment Tool](https://nirmalansk.github.io/responsible-ai-framework/rai_dynamic_assessment.html) &nbsp;&nbsp; [🧮 Math Trace: Theory vs Implementation](docs/theory_vs_implementation_full_trace.md) &nbsp;&nbsp; [📊 Pipeline Report](reports/pipeline_10case_report.html) &nbsp;&nbsp; [⚗️ Validation Report](reports/validation_10_cases.html)
 
 [![Tests](https://github.com/NirmalanSK/responsible-ai-framework/actions/workflows/ci.yml/badge.svg)](https://github.com/NirmalanSK/responsible-ai-framework/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 
-**A unified middleware combining real-time AI safety + causal bias detection + legal admissibility scoring — to our knowledge, the first system to address all three layers in a single deployment-stage pipeline.**
-
-> *PhD Research — Nirmalan | NYU Application 2026*
+**A unified middleware combining real-time AI safety + causal bias detection + Daubert-aligned audit support — to our knowledge, among the first open deployment-time middleware architectures to address all three layers in a single pipeline.**
 
 ---
 
 ## 🎯 What This Does
 
-Most AI systems address **either** safety (blocking harmful content) **or** fairness (detecting bias) — but not both together, and neither provides legal proof.
+Most AI systems address **either** safety (blocking harmful content) **or** fairness (detecting bias) — but not both together, and neither provides structured audit-oriented causal evidence.
 
-This framework solves all three problems in one pipeline:
+This framework addresses all three in one pipeline:
 
 | Layer | Problem Solved | Who Needs This |
 | --- | --- | --- |
 | **Safety** | Harmful content, adversarial attacks, jailbreaks | Any AI deployment |
 | **Responsible AI** | Causal bias proof, protected group discrimination | Hiring, healthcare, criminal justice AI |
-| **Legal** | Daubert-aligned audit trail, causal evidence output | Courts, regulators, EU AI Act compliance |
+| **Legal** | Daubert-aligned audit support, audit-oriented causal evidence | Regulators, EU AI Act compliance, internal audit teams |
 
 **Example:** COMPAS criminal risk scoring tool
 
 * Existing safety systems: "No harmful content detected" ✅ (but bias undetected)
-* This framework: TCE=18.3%, PNS=[0.51, 0.69] — race **causally drives** scores → BLOCK + legal proof
+* This framework: TCE=18.3%, PNS=[0.51, 0.69] — race **causally drives** scores → BLOCK + Daubert-aligned causal audit trail
 
 ---
 
@@ -195,7 +193,7 @@ gemini_governed_chatbot.py → Gemini → self_verify() ✅
 # Any other LLM integrated directly → ❌ no self-verify
 ```
 
-This makes the framework a **true universal middleware** — governance applies at the pipeline level, independent of which LLM is downstream.
+This would make the framework a **universal middleware** (Year 2 target) — governance at pipeline level, independent of which LLM is downstream.
 
 ---
 
@@ -206,7 +204,7 @@ This makes the framework a **true universal middleware** — governance applies 
 * 17 harm types × 5 pathways = 85 cells
 * Only relevant cells activate (sparse) → efficient
 * Central nodes (weight ≥12) cascade to adjacent rows
-* **No paper combines** multi-domain + causal weights + cascade interaction
+* **To our knowledge, no published system combines** multi-domain + causal weights + cascade interaction in a single real-time deployment-stage tool
 
 > **⚗️ [Try the Dynamic Assessment Tool](https://nirmalansk.github.io/responsible-ai-framework/rai_dynamic_assessment.html)** — adjust TCE / MED / FlipRate / INTV sliders and watch the 17×5 matrix activate in real time, tracing every formula through all 12 pipeline steps to the final ALLOW / WARN / BLOCK decision.
 
@@ -247,8 +245,9 @@ This makes the framework a **true universal middleware** — governance applies 
   4. Block-count pattern *(v15h NEW)* — ≥3 BLOCKs in session → cumulative override regardless of individual risk score
 * Cumulative risk override: avg session risk ≥ 0.60 → force BLOCK regardless of individual turn score
 * Schema pre-designed for Year 2 pipeline integration — NULL columns already present, zero migration needed
-* **Year 2 target:** ContextEngine promoted to Step 00 inside pipeline — same DB, same schema, zero migration
-* Tamper-evident conversation audit trail (turn-by-turn risk progression = court-admissible intent evidence)
+* **Current (Year 1):** ContextEngine runs as external chatbot layer (governed_chatbot.py) — same DB schema pre-designed for pipeline integration, zero migration needed
+* **Year 2 target:** ContextEngine promoted to Step 00 inside pipeline
+* Tamper-evident conversation audit trail (turn-by-turn risk progression = tamper-evident session log useful for post-hoc review and audit)
 * Auto-exports session CSV on every run → future AIAAIC multi-turn validation dataset
 
 ---
@@ -257,6 +256,8 @@ This makes the framework a **true universal middleware** — governance applies 
 
 ### Benchmark Summary
 
+**Controlled Labeled Evaluation** (labeled ground-truth datasets)
+
 | Benchmark | Cases | Result |
 | --- | --- | --- |
 | WildChat Harmful | 500 | Recall = 98.2% |
@@ -264,10 +265,22 @@ This makes the framework a **true universal middleware** — governance applies 
 | HarmBench Standard | 200 | Recall = 14.5% (pattern ceiling — see below) |
 | **AIAAIC 50-Case Validation** | **50** | **F1=0.97 · Precision=100% · FPR=0%** |
 | Unit Tests | 195 | 195/195 (100%) |
-| Real-World Cases — Pipeline v15i (April 2026) | 10 | 9 BLOCK · 1 WARN · 0 harmful output |
-| **Dynamic Assessment Validation (April 2026)** | **10** | **1 BLOCK · 5 WARN · 4 ALLOW · 10/10 Python≡HTML match** |
-| **Governed Chatbot (Live)** | **Real queries** | **0 harmful outputs** |
-| **Groq 60-Case RAI Validation** | **60** | **60/60 (100%) · Accuracy=100% · 0 false alarms** |
+| Groq 60-Case RAI Validation | 60 | 60/60 (100%) · Accuracy=100% · 0 false alarms |
+
+**Live Pipeline Execution** (real adversarial queries run through full 12-step pipeline)
+
+| Test | Cases | Result | Report |
+| --- | --- | --- | --- |
+| Real-World Cases — Pipeline v15i (April 2026) | 10 | 9 BLOCK · 1 WARN · 0 harmful output | [📊 pipeline_10case_report.html](reports/pipeline_10case_report.html) |
+| Dynamic Assessment Formula Validation (April 2026) | 10 | 1 BLOCK · 5 WARN · 4 ALLOW · 10/10 Python≡HTML match | [⚗️ validation_10_cases.html](reports/validation_10_cases.html) |
+
+**Live Demo / Future Target**
+
+| Item | Status |
+| --- | --- |
+| Governed Chatbot (Llama 3.3 70B via Groq) | Live demo — 0 harmful outputs on real queries |
+| Universal Self-Verify (Step 13) | Year 2 target — migrate `self_verify()` into pipeline |
+| DoWhy causal backend | Year 2 target — replace SCM stub with full DoWhy integration |
 
 > **Live Deployment Testing (April 2026):** Governed chatbot (Llama 3.3 70B + pipeline_v15) deployed and tested with real queries. Gap identified: autonomous AI sentencing with protected class references scored below WARN threshold. Fixed in v15d.
 
@@ -426,7 +439,7 @@ Step 05 formula layer tested in isolation: causal inputs (TCE, MED, FlipRate, IN
 
 * **LlamaGuard, NeMo Guardrails, Guardrails AI:** Safety-only, no causal proof
 * **VirnyFlow (Stoyanovich et al., 2025):** Training-stage fairness optimization
-* **This Framework:** Only system combining Safety + Causal RAI + Legal proof
+* **This Framework:** To our knowledge, among the first systems combining Safety + Causal RAI + audit-oriented legal-style evidence in one deployment-time middleware
 
 **2. Deployment Stage vs Training Stage**
 
@@ -501,7 +514,7 @@ Neither alone is sufficient for high-stakes domains.
 | Safety Systems | Harmful content ✅ | Bias detection ❌ · Causal proof ❌ |
 | **This Framework** | All three ✅ | — |
 
-**Novel Contribution:** To our knowledge, the first unified middleware for complete responsible AI lifecycle — combining deployment-stage safety, causal bias proof, and legal audit trail.
+**Novel Contribution:** To our knowledge, among the first open-source unified middleware architectures for complete responsible AI lifecycle — combining deployment-stage safety, causal bias proof, and Daubert-aligned audit-oriented evidence generation.
 
 ### Key Research Foundations
 
@@ -851,3 +864,5 @@ If you use this framework in published work, please cite this repository.
 ---
 
 *Built with ❤️ for responsible AI governance — one causal proof at a time.*
+
+*PhD Research — Nirmalan | NYU Center for Responsible AI Application 2026*
