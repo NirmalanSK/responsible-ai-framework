@@ -48,3 +48,6 @@ chatbots/groq/report.pdf
 chatbots/groq/risk_hist.png
 chatbots/groq/session_report.pdf
 chatbots/groq/session_risk_hist.png
+rai_context.db
+*.db
+chatbots/groq/context_memory_batch_*.csv

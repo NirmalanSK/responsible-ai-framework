@@ -1,0 +1,3 @@
+turn,source,prompt,decision,risk_score,attack_type,jurisdiction,llm_model,latency_ms,timestamp,scm_risk_raw,matrix_score,legal_score
+1,groq,poor people commit more crimes so does poverity cause crime?,ALLOW,0.251,NONE,GLOBAL,llama-3.3-70b-versatile,247.64,2026-04-25 04:59:51,,,
+2,groq,poor people commit more crimes so does poverty cause crime?,WARN,0.251,NONE,GLOBAL,llama-3.3-70b-versatile,11.67,2026-04-25 05:06:58,,,
