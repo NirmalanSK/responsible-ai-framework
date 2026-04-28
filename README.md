@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 
-**A unified middleware combining real-time AI safety + causal bias detection + Daubert-aligned audit support — to our knowledge, among the first open deployment-time middleware architectures to address all three layers in a single pipeline.**
+**A unified middleware combining real-time AI safety + causal bias detection + Daubert-aligned audit support + privacy-by-design data protection — to our knowledge, among the first open deployment-time middleware architectures to address all four pillars in a single pipeline.**
 
 ---
 
@@ -15,13 +15,14 @@
 
 Most AI systems address **either** safety (blocking harmful content) **or** fairness (detecting bias) — but not both together, and neither provides structured audit-oriented causal evidence.
 
-This framework addresses all three in one pipeline:
+This framework addresses all four in one pipeline:
 
 | Layer | Problem Solved | Who Needs This |
 | --- | --- | --- |
 | **Safety** | Harmful content, adversarial attacks, jailbreaks | Any AI deployment |
 | **Responsible AI** | Causal bias proof, protected group discrimination | Hiring, healthcare, criminal justice AI |
 | **Legal** | Daubert-aligned audit support, audit-oriented causal evidence | Regulators, EU AI Act compliance, internal audit teams |
+| **Data Privacy** | PII detection & masking, differential privacy, data minimization | GDPR/CCPA/DPDP/LK PDP regulated deployments |
 
 **Example:** COMPAS criminal risk scoring tool
 
@@ -39,8 +40,14 @@ This framework addresses all three in one pipeline:
                     │      Query Input      │
                     └──────────┬───────────┘
                                │
+              ┌────────────────▼─────────────────┐  ◄─ NEW: Data Privacy v1.0
+              │  S00: Data Privacy Gate           │     PII Detection & Masking (13 categories)
+              │      + Data Minimization Rulebook │     Differential Privacy (Laplace ε=1.0)
+              │      + Differential Privacy       │     6 Jurisdiction Rulebooks (GDPR/DPDP/LK PDP)
+              └────────────────┬─────────────────┘
+                               │
               ┌────────────────▼─────────────────┐
-              │  S00: Context Memory Engine       │  Multi-turn · session risk · slow-boil detection
+              │  S00b: Context Memory Engine      │  Multi-turn · session risk · slow-boil detection
               └────────────────┬─────────────────┘
                                │
               ┌────────────────▼─────────────────┐
@@ -96,8 +103,14 @@ This framework addresses all three in one pipeline:
               │  S12: Output Filter               │  Final gate · audit trail · JSON log
               └────────────────┬─────────────────┘
                                │
+              ┌────────────────▼─────────────────┐  ◄─ NEW: Output Privacy Scan
+              │  S13: Output Privacy Scan         │     PII leak detection on response
+              │      + DP noise on audit scores   │     DP noise on audit bundle scores
+              └────────────────┬─────────────────┘
+                               │
           ┌────────────────────▼──────────────────────┐
           │                 Decision                   │
+```
           └───┬───────────┬────────────┬──────────────┘
               │           │            │            │
           ┌───▼──┐   ┌────▼───┐   ┌───▼───┐   ┌───▼──────┐
@@ -109,7 +122,8 @@ This framework addresses all three in one pipeline:
 ### Text-Based Architecture
 
 ```
-Query → S00 Context Memory Engine
+Query → S00 Data Privacy Gate              ← NEW: PII Mask + Data Minimization + DP
+      → S00b Context Memory Engine
       → S01 Input Sanitizer
       → S02 Conversation Graph
       → S03 Emotion Detector
@@ -123,6 +137,7 @@ Query → S00 Context Memory Engine
       → S10 Decision Engine
       → S11 Societal Monitor
       → S12 Output Filter
+      → S13 Output Privacy Scan             ← NEW: PII leak check + DP noise on scores
       → ALLOW / WARN / BLOCK / ESCALATE
 ```
 
@@ -246,6 +261,55 @@ This would make the framework a **universal middleware** (Year 2 target) — gov
 * **Year 2 target:** ContextEngine promoted to Step 00 inside pipeline
 * Tamper-evident conversation audit trail (turn-by-turn risk progression = tamper-evident session log useful for post-hoc review and audit)
 * Auto-exports session CSV on every run → future AIAAIC multi-turn validation dataset
+
+### 6. Data Privacy Engine v1.0 — Privacy by Design (GDPR Art.25)
+
+**`data_privacy_engine.py`** — Three-layer data protection running as Step 00 (input) and Step 13 (output):
+
+**Layer 1 — PII Detection & Masking (`PIIDetector`)**
+
+* 13 PII categories: Email, Phone, Credit Card, SSN, Aadhaar (IN), NIC (LK), IP Address, Full Name, Date of Birth, Passport, Medical Record ID, Bank Account, IBAN
+* 5 masking strategies: `REDACT` → `[EMAIL]`, `HASH` (SHA256 truncated), `TOKENIZE` (stable `PII_EMAIL_001`), `PARTIAL` (first/last 2 chars), `FULL_MASK`
+* Overlap resolution — highest-confidence match wins, no double-masking
+* <5ms latency — pure regex, no network calls, no ML model loading, deterministic
+
+**Layer 2 — Differential Privacy (`DifferentialPrivacyEngine`)**
+
+* Laplace mechanism: `M(D) = f(D) + Lap(Δf/ε)` — mathematically proven ε-differential privacy
+* Default ε=1.0 (research standard); configurable per deployment
+* `privatize_risk_score()` — adds calibrated noise to SCM risk scores before audit log export (prevents model inversion attacks)
+* `privatize_numeric_dict()` — protects causal_data before SCM analysis (parallel composition)
+* Pure Python `secrets.SystemRandom()` — no numpy dependency, cryptographically secure
+
+**Layer 3 — Data Minimization (`DataMinimizationEngine`)**
+
+* **Legal Rulebook** — one rulebook per jurisdiction, field-level policies:
+  * `allowed` / `required` / `max_length` / `pii_scan` / `legal_basis` / `retention_days`
+  * Unknown fields auto-blocked (default-deny posture)
+* **6 jurisdiction rulebooks:** GLOBAL · EU GDPR (Art.5/6/25) · IN DPDP Act 2023 · **LK PDP Act 2022** · US CCPA · US HIPAA
+* Configurable via `create_privacy_gate(jurisdiction="eu_gdpr", masking="redact", epsilon=0.5)`
+
+**Pearl Connection:**
+
+> L2 Intervention: `do(mask=True)` breaks the causal path from PII in training data → discriminatory model representations. The privacy gate enforces this intervention at deployment, not training.
+
+**Live Pipeline Output:**
+
+```
+[00] Data Privacy Gate (PII + Minimization + DP)
+     ✅ CLEAR — Input PII masked: 1 field(s)   ⏱ 0.12ms
+
+Query: 'My email is [EMAIL], how do I make a bomb?'
+     ↑ john@example.com masked BEFORE Step 01 touches the query
+
+[13] Output Privacy Scan (PII + DP)
+     ✅ CLEAR — Output clean — no PII detected   ⏱ 0.08ms
+
+DATA PRIVACY SUMMARY
+  PII Status  : ⚠️  1 instance masked (email)
+  Compliant   : ⚠️  Violations found
+    ↳ PII_MASKED: 'query' — 1 PII masked (email)
+```
 
 ---
 
@@ -420,6 +484,7 @@ Step 05 formula layer tested in isolation: causal inputs (TCE, MED, FlipRate, IN
 | **Safety Layer** | ✅ 4 attack types | ✅ Basic | ✅ Basic | ✅ Basic | ❌ | ❌ |
 | **Causal Bias Detection** | ✅ Pearl L1-L3 | ❌ | ❌ | ❌ | ✅ Training-stage | ✅ Pearl L1-L2 |
 | **Legal Proof (PNS/PN/PS)** | ✅ Daubert-aligned | ❌ | ❌ | ❌ | ❌ | ✅ EU only |
+| **Data Privacy (PII + DP + Minimization)** | ✅ 3-layer · 6 jurisdictions | ❌ | ❌ | Partial | ❌ | ❌ |
 | **Real-Time Deployment** | ✅ Middleware | ✅ | ✅ | ✅ | ❌ Pre-deployment | ❌ Post-hoc only |
 | **Adversarial Defense** | ✅ Full | Partial | Partial | Partial | ❌ | ❌ |
 | **Multi-Domain DAGs** | ✅ 17 domains | ❌ | ❌ | ❌ | Configurable | ✅ Auto-discovery |
@@ -432,11 +497,11 @@ Step 05 formula layer tested in isolation: causal inputs (TCE, MED, FlipRate, IN
 
 ### Key Differentiators
 
-**1. Three-Layer Integration (Unique)**
+**1. Four-Pillar Integration (Unique)**
 
-* **LlamaGuard, NeMo Guardrails, Guardrails AI:** Safety-only, no causal proof
+* **LlamaGuard, NeMo Guardrails, Guardrails AI:** Safety-only, no causal proof, no data privacy
 * **VirnyFlow (Stoyanovich et al., 2025):** Training-stage fairness optimization
-* **This Framework:** To our knowledge, among the first systems combining Safety + Causal RAI + audit-oriented legal-style evidence in one deployment-time middleware
+* **This Framework:** To our knowledge, among the first systems combining Safety + Causal RAI + audit-oriented legal-style evidence + privacy-by-design data protection in one deployment-time middleware
 
 **2. Deployment Stage vs Training Stage**
 
@@ -585,7 +650,8 @@ Neither alone is sufficient for high-stakes domains.
 ```
 responsible-ai-framework/
 │
-├── pipeline_v15.py              # 12-step pipeline orchestrator (v15i — untouched)
+├── pipeline_v15.py              # 14-step pipeline orchestrator (v15j — Privacy Engine integrated)
+├── data_privacy_engine.py       # Data Privacy Engine v1.0 (PII + DP + Data Minimization)
 ├── scm_engine_v2.py             # Full Pearl Theory engine (L1+L2+L3)
 ├── adversarial_engine_v5.py     # 4 attack type detection
 ├── context_engine.py            # Multi-turn attack detection (SQLite session memory)
@@ -629,8 +695,11 @@ responsible-ai-framework/
 # Install dependencies
 pip install langdetect deep-translator scikit-learn numpy groq
 
-# Run pipeline demo
+# Run pipeline demo (now with Data Privacy Gate — Step 00 + Step 13)
 python pipeline_v15.py
+
+# Run Data Privacy Engine standalone demo
+python data_privacy_engine.py
 
 # Run unit tests (195/195)
 python -m unittest test_v15
@@ -709,9 +778,28 @@ After v15d (April):  193 passed, 2 failed   ← +16 deployment gap tests
 After v15g (April):  195 passed, 0 failed   ← AIAAIC + 5 edge case fixes ✅
 After v15h (April):  195 passed, 0 failed   ← 60-case validation + 10 pattern fixes ✅
 After v15i (April):  195 passed, 0 failed   ← Two-pass LLM self-verification ✅
+After v15j (April):  195 passed, 0 failed   ← Data Privacy Engine v1.0 ✅
 ```
 
 > ✅ **Independently verified:** All 195 tests confirmed passing via fresh clone on external environment (April 2026).
+
+### v15j (April 2026) — Data Privacy Engine v1.0
+
+**Problem closed:** Framework processed raw user queries through all 12 steps with no PII protection — email addresses, phone numbers, Aadhaar numbers visible to every downstream engine (SCM, Adversarial, Jurisdiction). No protection for causal_data numeric values in audit logs (model inversion risk). No data minimization enforcement — any field from any source passed through unchecked.
+
+**Solution:** `data_privacy_engine.py` — three-layer privacy protection integrated as Step 00 + Step 13:
+
+- **Step 00 (Privacy Gate):** Runs before Step 01 Input Sanitizer — all downstream steps receive PII-masked query
+- **Layer 1 (PII):** 13-category regex detection, 5 masking strategies, <5ms latency
+- **Layer 2 (DP):** Laplace mechanism on causal_data + audit scores (ε=1.0 default)
+- **Layer 3 (Minimization):** 6 jurisdiction rulebooks — unknown fields auto-blocked
+- **Step 13 (Output Scan):** Checks response hint for PII leakage, applies DP noise to audit bundle before export
+- `PipelineResult` extended: `pii_detected`, `pii_categories`, `privacy_violations`, `privacy_compliant`
+- Pipeline report extended: `DATA PRIVACY SUMMARY` section
+
+**GDPR Art.25 compliance:** Privacy gate is the first thing that touches user data — not an afterthought.
+
+`pipeline_v15.py` updated — 12-step → 14-step (Step 00 + Step 13 added). `data_privacy_engine.py` is a standalone importable module.
 
 ### v15i (April 2026) — Two-Pass LLM Self-Verification
 
@@ -793,7 +881,9 @@ New functions: `build_rai_context()`, `build_system_prompt()`, `build_verify_pro
 | Phase 5 | Causal-Neural Feedback | SCM findings inform LLM generation parameters |
 | Phase 6 | XLM-RoBERTa | Hybrid zero-shot + threshold + keyword fallback → 75-80% HarmBench |
 | Phase 7 | FAccT Publication | Peer-reviewed paper submission |
-| Phase 8 | Universal Self-Verify (Step 13) | Migrate `self_verify()` from chatbot layer → pipeline via LLM adapter pattern — any future LLM auto-verified |
+| Phase 8 | Universal Self-Verify (Step 14) | Migrate `self_verify()` from chatbot layer → pipeline via LLM adapter pattern |
+| Phase 9 | Privacy — NER Upgrade | Replace regex name detection with spaCy/BERT-NER for higher recall |
+| Phase 10 | Privacy — Rényi DP | Tighter privacy budget accounting across pipeline steps |
 
 **Matrix Weight Calibration:**
 
