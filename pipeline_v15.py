@@ -60,6 +60,17 @@ from adversarial_engine_v5 import (
     AdversarialDefenseEngine, AttackType, DefenseAction,
 )
 
+# ── Data Privacy Engine (v1.0) ────────────────────────────────────────────
+# Step 00: PII Masking + Data Minimization + Differential Privacy
+from data_privacy_engine import (
+    Step00_PrivacyGate,
+    Step12b_OutputPrivacyScan,
+    PrivacyGateResult,
+    PrivacyJurisdiction,
+    MaskingStrategy,
+    create_privacy_gate,
+)
+
 MATRIX_AVAILABLE = True
 
 
@@ -440,6 +451,12 @@ class PipelineResult:
     # Output
     sanitized_response_hint: str = ""
     audit_bundle  : dict = field(default_factory=dict)
+
+    # Data Privacy (Step 00 + Step 12b)
+    pii_detected      : int  = 0         # Count of PII instances masked in input
+    pii_categories    : list = field(default_factory=list)  # e.g. ["email", "phone"]
+    privacy_violations: list = field(default_factory=list)  # Rulebook violations
+    privacy_compliant : bool = True      # False if any minimization violations
 
 
 # ══════════════════════════════════════════════════════
@@ -2547,6 +2564,17 @@ class ResponsibleAIPipeline:
     """
 
     def __init__(self):
+        # ── Step 00: Data Privacy Gate ────────────────────────────
+        # Runs BEFORE Step 01 — PII masking + data minimization + DP
+        # Jurisdiction defaults to GLOBAL; override via run() if needed
+        self.s00 = Step00_PrivacyGate(
+            jurisdiction     = PrivacyJurisdiction.GLOBAL,
+            masking_strategy = MaskingStrategy.REDACT,
+            dp_epsilon       = 1.0,
+        )
+        self.s00_output_scan = Step12b_OutputPrivacyScan(
+            masking_strategy = MaskingStrategy.REDACT,
+        )
         self.s01 = Step01_InputSanitizer()
         self.s02 = Step02_ConversationGraph()
         self.s03 = Step03_EmotionDetector()
@@ -2593,6 +2621,47 @@ class ResponsibleAIPipeline:
             log.warning("Rate limit blocked", extra={"query_id": query_id})
             return self._early_exit(query_id, inp, steps, t_start,
                                     FinalDecision.BLOCK, rate_msg)
+
+        # ── Step 00 — Data Privacy Gate ───────────────────
+        # PII Masking + Data Minimization + Differential Privacy
+        # Must run BEFORE Step 01 — Step 01 receives already-masked query
+        privacy_gate_result: Optional[PrivacyGateResult] = None
+        try:
+            masked_query, privacy_gate_result = self.s00.run(
+                query        = inp.query,
+                conversation = inp.conversation,
+                causal_data  = inp.causal_data,
+                user_id      = inp.user_id,
+            )
+            r00 = StepResult(
+                step_num  = 0,
+                step_name = "Data Privacy Gate (PII + Minimization + DP)",
+                passed    = True,
+                signal    = privacy_gate_result.signal,
+                detail    = privacy_gate_result.detail,
+                latency_ms= privacy_gate_result.latency_ms,
+            )
+            # Replace query with PII-masked version for all downstream steps
+            inp = PipelineInput(
+                query        = masked_query,
+                conversation = inp.conversation,
+                jurisdiction = inp.jurisdiction,
+                user_id      = inp.user_id,
+                causal_data  = inp.causal_data,
+            )
+        except Exception as e:
+            # Privacy gate failure → fail-safe: continue with original query
+            # but log the error prominently
+            r00 = StepResult(
+                step_num  = 0,
+                step_name = "Data Privacy Gate (PII + Minimization + DP)",
+                passed    = True,
+                signal    = "WARN",
+                detail    = f"Privacy gate error (fail-safe mode): {e}",
+                latency_ms= 0.0,
+            )
+            log.warning("Privacy gate failed", extra={"query_id": query_id, "error": str(e)})
+        steps.append(r00)
 
         # ── Step 01 ───────────────────────────────────────
         try:
@@ -2736,6 +2805,34 @@ class ResponsibleAIPipeline:
             r12 = StepResult(12,"Output Filter",True,"CLEAR",f"Error:{e}",0.0)
         steps.append(r12)
 
+        # ── Step 12b — Output Privacy Scan ────────────────
+        # Scan final response for PII leakage + DP noise on audit scores
+        try:
+            clean_hint, clean_bundle, r12b_detail = self.s00_output_scan.run(
+                result.sanitized_response_hint,
+                result.audit_bundle,
+            )
+            result.sanitized_response_hint = clean_hint
+            result.audit_bundle            = clean_bundle
+            r12b = StepResult(
+                step_num  = 13,   # 12b shown as step 13 in trace
+                step_name = "Output Privacy Scan (PII + DP)",
+                passed    = True,
+                signal    = "CLEAR",
+                detail    = r12b_detail,
+                latency_ms= 0.0,
+            )
+        except Exception as e:
+            r12b = StepResult(13,"Output Privacy Scan",True,"WARN",f"Error:{e}",0.0)
+        steps.append(r12b)
+
+        # ── Attach privacy summary to result ──────────────
+        if privacy_gate_result is not None:
+            result.pii_detected       = privacy_gate_result.pii_count
+            result.pii_categories     = list(privacy_gate_result.pii_categories)
+            result.privacy_violations = privacy_gate_result.privacy_violations
+            result.privacy_compliant  = (privacy_gate_result.compliance_status == "COMPLIANT")
+
         result.total_ms = round((time.perf_counter() - t_start) * 1000, 2)
 
         log.info("Pipeline complete", extra={
@@ -2835,6 +2932,21 @@ class ResponsibleAIPipeline:
         print(f"  VAC Triggered  : {'YES ⚠️' if result.vac_triggered else 'No'}")
         print(f"  Tier           : {result.tier}")
         print(f"  Total Latency  : {result.total_ms}ms")
+
+        # ── Privacy Summary ───────────────────────────────
+        print(f"\n{'─' * W}")
+        print(f"  DATA PRIVACY SUMMARY")
+        print(f"{'─' * W}")
+        pii_status = (
+            f"⚠️  {result.pii_detected} instances masked "
+            f"({', '.join(result.pii_categories)})"
+            if result.pii_detected > 0 else "✅ No PII detected"
+        )
+        print(f"  PII Status     : {pii_status}")
+        print(f"  Compliant      : {'✅ Yes' if result.privacy_compliant else '⚠️  Violations found'}")
+        if result.privacy_violations:
+            for v in result.privacy_violations[:3]:  # show max 3
+                print(f"    ↳ {v}")
 
         if result.sanitized_response_hint:
             print(f"\n  Response Hint  : \"{result.sanitized_response_hint}\"")
