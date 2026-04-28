@@ -813,16 +813,19 @@ class PromptInjectionDetector:
         for i, pattern in enumerate(self.ENCODING_PATTERNS):
             m = re.search(pattern, text)  # case-sensitive for encoding
             # FIX: len > 10 was excluding short unicode patterns (e.g. "іgnore" = 6 chars)
-            # Base64 pattern (i==0) still needs length check — others do not
-            min_len = 10 if i == 0 else 1
+            # Base64 block regex is at ENCODING_PATTERNS[1] — it needs the length gate.
+            # FIX v15k: was 'i == 0' (keyword pattern) — corrected to 'i == 1' (base64 block).
+            min_len = 10 if i == 1 else 1
             if m and len(m.group()) >= min_len:
 
                 # ── BASE64 FIX ────────────────────────────────────────
-                # Pattern index 0 = base64-like string
+                # ENCODING_PATTERNS[1] = base64-like string regex
                 # Problem: "AAAAAA...600 chars" is valid base64 (null bytes)
                 # Fix: decode and check if harmful content exists in decoded text
                 # If decoded = null bytes / gibberish → NOT an attack
-                if i == 0:  # base64 pattern
+                # FIX v15k: index was 'i == 0' (wrong — that's the keyword pattern).
+                #           Corrected to 'i == 1' (the actual base64 block regex).
+                if i == 1:  # base64 block pattern: [A-Za-z0-9+/]{12,}={0,2}
                     import base64 as _b64, math as _math
                     _flagged = False
                     candidate = m.group().strip()
@@ -1087,7 +1090,14 @@ class AdversarialDefenseEngine:
         # v15g: Surgical re-enable — direct override patterns only (high confidence)
         # False positive fix: skip low-confidence + educational context queries
         # Year 2: Replace with SBERT semantic injection detection
-        inj_signal = self.injection.analyze(current)
+        #
+        # FIX v15k: Run injection scan on ORIGINAL (un-normalized) message.
+        # Evasion normalization lowercases text → corrupts base64 payloads →
+        # decoded check silently fails → real base64 injections are missed (FN).
+        # Direct override phrase check below uses current_message.lower() safely.
+        inj_signal = self.injection.analyze(
+            Message(content=current_message, turn=current.turn)
+        )
         injection_score_raw = inj_signal.confidence if inj_signal else 0.0
 
         # Direct override phrases — always BLOCK regardless of context
@@ -1107,7 +1117,7 @@ class AdversarialDefenseEngine:
             "bypass your filters",
             "override your guidelines",
         ]
-        q_lower = current.content.lower()
+        q_lower = current_message.lower()  # FIX v15k: use current_message not current.content
         has_direct_override = any(phrase in q_lower for phrase in DIRECT_OVERRIDE_PHRASES)
 
         if has_direct_override:

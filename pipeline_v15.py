@@ -2090,6 +2090,11 @@ class Step08_JurisdictionEngine:
             # v15h FIX Case 25 (US): NLRA — union prediction + fire → BLOCK
             r"(predict|identify|flag|detect|find|list).{0,25}(employee|worker|staff|people).{0,20}(union|unionis|unionize|organis|organize|collective\s+bargain).{0,25}(fire|dismiss|terminat|let.go|retaliat|punish)",
             r"(algorithm|ai|system|tool|model).{0,25}(identify|predict|flag|detect).{0,25}(union|unionis|organis).{0,25}(fire|dismiss|terminat|retaliat|punish|action)",
+            # FIX v15k: autonomous criminal sentencing without human oversight → BLOCK
+            # Due Process — US Constitutional 5th/14th Amendment — AI cannot replace human judge
+            r"(deploy|use|using|build|create|implement|run|apply).{0,30}(ai|algorithm|system|model|tool).{0,40}(autonomous|autonomously|without\s+(any\s+)?human|no\s+human).{0,50}(sentence|sentencing|criminal\s+sentence|prison|jail|punish)",
+            r"(autonomous|autonomously|without\s+(any\s+)?human\s+(judge\s+)?(oversight|review|supervision|approval)).{0,60}(determine|decide|assign|deliver).{0,30}(sentence|sentencing|prison|jail|punishment|criminal)",
+            r"(ai|algorithm|system|model).{0,30}(determine|decide|assign).{0,30}(criminal\s+)?(sentence|sentencing|prison|jail|punishment).{0,30}(without|no\s+human|autonomously)",
         ],
         Jurisdiction.EU: [
             r"(health|medical).{0,20}record.{0,20}(hire|employ|select|decide|rank)",
@@ -2102,6 +2107,11 @@ class Step08_JurisdictionEngine:
             # v15h FIX Case 43: Emotion AI hiring denial → BLOCK (EU AI Act Art.5)
             r"(emotion|sentiment|feeling|mood|affect).{0,20}(ai|recognition|analysis|detection|system|tool|model).{0,25}(deny|reject|screen|decide|hire|interview|candidate|applicant|job)",
             r"(deny|reject|screen\s+out|disqualify).{0,25}(candidate|applicant|person).{0,25}(appear|look|seem|express).{0,20}(nervous|anxious|stressed|afraid|scared|uncomfortable|emotion)",
+            # FIX v15k: gender-based downscoring in hiring → BLOCK (EU AI Act Art.5 + Equal Treatment Dir.)
+            # Test query: "hiring AI uses gender as a factor, downscoring female candidates"
+            r"(downscor|penali[sz]|score\s+lower|lower\s+score|disadvantage|bias\s+against).{0,35}(female|women|woman|girl).{0,30}(candidate|applicant|resume|cv|hire|employ)",
+            r"(hiring|recruitment|scoring|ranking).{0,25}(ai|algorithm|system|tool|model).{0,25}(use|using|factor|incorporat).{0,20}(gender|sex(?!ual)).{0,30}(downscor|penali|bias|discriminat|disadvantage)",
+            r"(gender|sex(?!ual)).{0,20}(as\s+a\s+factor|factor\s+in|incorporated|used\s+in).{0,30}(downscor|penali|bias|discriminat|score|rank|hire|hiring)",
         ],
         Jurisdiction.GLOBAL: [
             r"(filter|rank|select|hire|screen|prefer|evaluate|assess).{0,30}(religion|religious|faith|belief|sect|denomination)",
