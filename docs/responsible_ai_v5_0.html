@@ -1943,9 +1943,9 @@ if RCT evidence exists:
   <!-- YEAR 1 -->
   <div class="yc" style="border-left-color:var(--green)">
     <h3>✅ Year 1 — Foundation (COMPLETE)</h3>
-    <div style="font-size:.6rem;color:var(--green);font-family:'JetBrains Mono',monospace;margin-bottom:.5rem;">STATUS: DONE — Last updated April 2026 (v15g)</div>
+    <div style="font-size:.6rem;color:var(--green);font-family:'JetBrains Mono',monospace;margin-bottom:.5rem;">STATUS: DONE — Last updated April 2026 (v15k)</div>
     <ul>
-      <li>12-Step Pipeline (pipeline_v15) — <span style="color:var(--green)">195/195 tests ✅</span></li>
+      <li>14-Stage Pipeline (pipeline_v15k, S00–S13) — <span style="color:var(--green)">195/195 tests ✅</span></li>
       <li>SCM Engine v2 — Full Pearl Theory (L1+L2+L3) ✅</li>
       <li>Adversarial Engine v5 — 4 attack types + skimming + suicide variants ✅</li>
       <li>Sparse Causal Activation Matrix 17×5 ✅</li>
@@ -1964,6 +1964,17 @@ if RCT evidence exists:
       <li style="color:var(--green)">Defensive intent early-exit — prevent/detect queries pass correctly (v15g) ✅</li>
       <li style="color:var(--green)">Fake news article generation → BLOCK (v15g) ✅</li>
       <li style="color:var(--green)">195/195 tests passing — 100% ✅</li>
+      <li style="color:var(--green)"><b>60-Case Groq Validation (v15h)</b> — 50/60 → 60/60 (100%) after 10 pattern fixes ✅</li>
+      <li style="color:var(--green)">ContextEngine Signal 4: ≥3 BLOCKs in session → cumulative override (v15h) ✅</li>
+      <li style="color:var(--green)">LLM Explained Governance — pipeline findings passed as context to Llama 3.3 70B (v15h) ✅</li>
+      <li style="color:var(--green)"><b>Two-Pass LLM Self-Verification (v15i)</b> — draft + self_verify() audit on every output ✅</li>
+      <li style="color:var(--green)">BLOCK decisions audited: risk score / VAC / attack evidence checked before finalising (v15i) ✅</li>
+      <li style="color:var(--green)"><b>Data Privacy Engine v1.0 (v15j)</b> — Step 00 PII Gate + Step 13 Output Scan ✅</li>
+      <li style="color:var(--green)">13-category PII detection · Laplace DP (ε=1.0) · 6 jurisdiction minimization rulebooks (v15j) ✅</li>
+      <li style="color:var(--green)"><b>Injection FP Fix (v15k)</b> — base64 index mismatch corrected, CASE_07 (Student Dropout) → ALLOW ✅</li>
+      <li style="color:var(--green)">Evasion normalization bug fixed — injection.analyze() now runs on original message (v15k) ✅</li>
+      <li style="color:var(--green)">US/EU jurisdiction patterns added — autonomous sentencing (Due Process) + gender downscoring (AI Act Art.5) (v15k) ✅</li>
+      <li style="color:var(--green)">Pipeline upgraded to 14 stages (S00–S13) — full Privacy + Output Scan coverage (v15j/v15k) ✅</li>
     </ul>
 
     <div style="background:rgba(0,255,157,.05);border:1px solid rgba(0,255,157,.2);border-radius:8px;padding:.7rem;margin-top:.6rem;">
@@ -1988,6 +1999,54 @@ if RCT evidence exists:
         <b style="color:var(--text)">Overall F1:</b> <span style="color:var(--green)">0.97 · Precision: 100% · FPR: 0%</span><br>
         <b style="color:var(--text)">Avg latency:</b> 3.2ms · <b style="color:var(--text)">False alarms:</b> <span style="color:var(--green)">Zero</span><br>
         <b style="color:var(--yellow)">Gaps found + fixed:</b> Facial recognition covert tracking · Prompt injection WARN→BLOCK · Defensive intent FP · Fake news generation
+      </div>
+    </div>
+
+    <div style="background:rgba(56,182,255,.05);border:1px solid rgba(56,182,255,.25);border-radius:8px;padding:.7rem;margin-top:.6rem;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.56rem;color:var(--cyan);margin-bottom:.4rem;">📊 60-CASE GROQ VALIDATION (v15h — April 2026)</div>
+      <div style="font-size:.6rem;color:var(--muted);line-height:1.8;">
+        <b style="color:var(--text)">Test set:</b> 60 adversarial queries via live Groq API (Llama 3.3 70B)<br>
+        <b style="color:var(--text)">Result:</b> <span style="color:var(--green)">50/60 (83%) → 10 pattern fixes → 60/60 (100%) ✅</span><br>
+        <b style="color:var(--text)">10 patterns added:</b> NCII deepfake nudes · doxxing · mental health record misuse · fentanyl authority spoof · academic framing opioid · session consolidation drug lab · EU age discrimination · US/EU union prediction · EU emotion AI hiring · GDPR education FP<br>
+        <b style="color:var(--text)">New feature:</b> ContextEngine Signal 4 — ≥3 BLOCKs in session → cumulative override regardless of individual risk score<br>
+        <b style="color:var(--text)">LLM Governance:</b> Pipeline findings (SCM, Matrix, attack type, risk%) passed as LLM context → decision-specific explanation every output
+      </div>
+    </div>
+
+    <div style="background:rgba(0,255,157,.05);border:1px solid rgba(0,255,157,.2);border-radius:8px;padding:.7rem;margin-top:.6rem;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.56rem;color:var(--green);margin-bottom:.4rem;">🔄 TWO-PASS LLM SELF-VERIFICATION (v15i — April 2026)</div>
+      <div style="font-size:.6rem;color:var(--muted);line-height:1.8;">
+        <b style="color:var(--text)">Problem:</b> LLM explanations were unverified — could misrepresent SCM/Matrix findings or soften a BLOCK to WARN<br>
+        <b style="color:var(--text)">Pass 1:</b> Draft explanation generated using decision-specific system prompt grounded in pipeline findings<br>
+        <b style="color:var(--text)">Pass 2:</b> <code style="background:rgba(0,255,157,.1);padding:.1rem .3rem;border-radius:3px;">self_verify()</code> — LLM audits its own draft against full RAI context (SCM, Matrix, attack type, risk score)<br>
+        <b style="color:var(--text)">BLOCK audit:</b> Should this be WARN? Risk score / VAC / attack evidence checked before finalising<br>
+        <b style="color:var(--yellow)">Output tag:</b> ✓ self-verified <i>or</i> 🔄 self-verified+revised — full auditability
+      </div>
+    </div>
+
+    <div style="background:rgba(255,165,0,.05);border:1px solid rgba(255,165,0,.25);border-radius:8px;padding:.7rem;margin-top:.6rem;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.56rem;color:var(--orange);margin-bottom:.4rem;">🔒 DATA PRIVACY ENGINE v1.0 (v15j — April 2026)</div>
+      <div style="font-size:.6rem;color:var(--muted);line-height:1.8;">
+        <b style="color:var(--text)">Problem:</b> Raw queries passed through all 14 steps with no PII protection — email, phone, Aadhaar visible to SCM/Adversarial/Jurisdiction engines<br>
+        <b style="color:var(--text)">Step 00 (Privacy Gate):</b> Runs before Step 01 Input Sanitiser — all downstream steps receive PII-masked query<br>
+        <b style="color:var(--text)">Layer 1 (PII):</b> 13-category regex detection · 5 masking strategies · &lt;5ms latency<br>
+        <b style="color:var(--text)">Layer 2 (DP):</b> Laplace mechanism on causal_data + audit scores (ε=1.0 default)<br>
+        <b style="color:var(--text)">Layer 3 (Minimisation):</b> 6 jurisdiction rulebooks — unknown fields auto-blocked<br>
+        <b style="color:var(--text)">Step 13 (Output Scan):</b> Checks response hint for PII leakage, applies DP noise to audit bundle before export<br>
+        <b style="color:var(--yellow)">Standard:</b> GDPR Art.25 Privacy by Design — first deployment-layer RAI framework with built-in DP
+      </div>
+    </div>
+
+    <div style="background:rgba(255,69,96,.05);border:1px solid rgba(255,69,96,.25);border-radius:8px;padding:.7rem;margin-top:.6rem;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.56rem;color:var(--red);margin-bottom:.4rem;">🔧 INJECTION FP FIX + JURISDICTION ADDITIONS (v15k — April 2026)</div>
+      <div style="font-size:.6rem;color:var(--muted);line-height:1.8;">
+        <b style="color:var(--text)">Bug 1 (FP):</b> <code style="background:rgba(255,69,96,.1);padding:.1rem .3rem;border-radius:3px;">ENCODING_PATTERNS[1]</code> base64 regex entropy-gated at wrong index (i==0 → should be i==1). Any word ≥12 chars (e.g., <i>scholarships, first-generation</i>) → 0.70 injection confidence → false BLOCK. CASE_07 Student Dropout affected.<br>
+        <b style="color:var(--text)">Bug 2 (FN):</b> injection.analyze() ran on evasion-normalised (lowercased) message — base64 is case-sensitive → real injections missed<br>
+        <b style="color:var(--text)">Fix:</b> Index corrected in 2 places + injection scan now on original message<br>
+        <b style="color:var(--text)">Jurisdiction gaps closed:</b><br>
+        &nbsp;&nbsp;• US: autonomous criminal sentencing without human oversight (5th/14th Amendment Due Process)<br>
+        &nbsp;&nbsp;• EU: gender-based downscoring in hiring (EU AI Act Art.5 + Equal Treatment Directive)<br>
+        <b style="color:var(--green)">CASE_07 result:</b> BLOCK → <span style="color:var(--green)">ALLOW ✅</span> (correctly resolved)
       </div>
     </div>
   </div>
@@ -3040,7 +3099,7 @@ def decide_tier(query, context, emotion):<br>
 </div>
 
 <div class="note">
-  <span class="g">v5.0 Year 1 Complete = Sparse Causal Activation Matrix (17×5 central node cascade) + Uncertainty Scorer Step04b (OOD detection, 10 grey-area patterns) + scm_engine_v2 (Full Pearl: PNS/PN/PS, NDE/NIE, 17 DAGs, Legal Score) + pipeline_v15g (195/195 tests) + adversarial_engine_v5 (nerve-agent patterns fixed)</span><br>
+  <span class="g">v5.0 Year 1 Complete = Sparse Causal Activation Matrix (17×5 central node cascade) + Uncertainty Scorer Step04b (OOD detection, 10 grey-area patterns) + scm_engine_v2 (Full Pearl: PNS/PN/PS, NDE/NIE, 17 DAGs, Legal Score) + pipeline_v15k (195/195 tests · 14 stages S00–S13) + adversarial_engine_v5 (injection FP fixed) + data_privacy_engine v1.0 (GDPR Art.25) + Two-Pass LLM Self-Verification + 60-Case Groq Validation (100%)</span><br>
   <span class="g">v4.5 = v4.4 + Tiered Scanning (70% faster · zero safety compromise · continuous red-teaming outside VAC)</span><br>
   <span style="color:#ff6b35">Living System: Query-level (12 steps) + System-level (Open Category) + Security-level (Adversarial)</span><br>
   <span class="p">SCM = Expert Witness · Matrix = Judge · Rules replace subjective with empirical</span><br>
