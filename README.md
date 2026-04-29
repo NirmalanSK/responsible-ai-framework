@@ -654,6 +654,7 @@ responsible-ai-framework/
 ├── scm_engine_v2.py             # Full Pearl Theory engine (L1+L2+L3)
 ├── adversarial_engine_v5.py     # 4 attack type detection
 ├── context_engine.py            # Multi-turn attack detection (SQLite session memory)
+├── output_verifier.py           # Two-pass LLM self-verification — model-agnostic (Year 2: S14 pipeline integration)
 ├── test_v15.py                  # 195 unit tests (195/195 passing — 100%)
 ├── requirements.txt             # Dependencies
 │
