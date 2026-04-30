@@ -1,7 +1,7 @@
 """
 ╔══════════════════════════════════════════════════════════════════════════╗
 ║   RESPONSIBLE AI FRAMEWORK — FULL 12-STEP PIPELINE                      ║
-║   v15h — Production Build                                                ║
+║   v15h+dag — Production Build (dag_selector integrated)                  ║
 ║   PhD Research · Nirmalan                                                ║
 ║                                                                          ║
 ║   195/195 tests passing | AIAAIC F1=0.97 | 0 harmful outputs            ║
@@ -72,6 +72,11 @@ from data_privacy_engine import (
 )
 
 MATRIX_AVAILABLE = True
+
+# ── DAG Selector (v15+dag) ────────────────────────────────────────────────
+# Replaces all inline keyword-based domain detection in Step05.
+# Year 1: keyword heuristic | Year 2: XLM-RoBERTa classifier (PhD Phase 6)
+from dag_selector import detect_harm_domain
 
 
 # ══════════════════════════════════════════════════════
@@ -1251,22 +1256,10 @@ class Step05_SCMEngine:
                     if causal_data is not None and getattr(causal_data, "domain", None):
                         dk = causal_data.domain
                     else:
-                        q_lower = query.lower()
-                        if any(w in q_lower for w in ["race","racial","gender","female","hire","bias","compas","recidivism"]):
-                            dk = "representation_bias" if "gender" in q_lower or "hire" in q_lower or "female" in q_lower else "criminal_justice_bias"
-                        elif any(w in q_lower for w in ["poverty","poor people","socioeconomic","inequality","crime","crimes","commit crime"]):
-                            dk = "criminal_justice_bias"
-                        elif any(w in q_lower for w in ["sarin","nerve agent","vx","synthesize","synthesis","weapon","bomb","explosive"]):
-                            dk = "misuse_safety"
-                        elif any(w in q_lower for w in ["patient","hospital","healthcare","medical","doctor"]):
-                            dk = "medical_harm"
-                        elif any(w in q_lower for w in ["hack","exploit","malware","phish","inject","zero-day"]):
-                            dk = "cyberattack"
-                        elif any(w in q_lower for w in ["privacy","personal data","dox","surveillance","track"]):
-                            dk = "privacy_violation"
-                        elif any(w in q_lower for w in ["deepfake","fake news","disinform","propaganda"]):
-                            dk = "disinformation"
-                        else:
+                        # v15+dag: dag_selector replaces inline keyword chain
+                        # Year 2: XLM-RoBERTa classifier (PhD roadmap Phase 6)
+                        dk, _conf, _kws = detect_harm_domain(query)
+                        if _conf == 0.0:
                             dk = None  # no domain signal — skip matrix
 
                     if dk:
@@ -1319,25 +1312,9 @@ class Step05_SCMEngine:
                 # findings.domain_key does not exist — was silently returning None
                 domain_key = getattr(findings, "domain", None) or None
                 if not domain_key:
-                    # fallback: infer domain from query keywords
-                    q_lower = query.lower()
-                    if any(w in q_lower for w in ["race","racial","gender","female","hire","bias",
-                                                          "scholarship","dropout","zip code","parental income",
-                                                          "socioeconomic","discrimination","age","elderly","over 65"]):
-                        domain_key = "representation_bias"
-                    elif any(w in q_lower for w in ["recidivism","criminal","risk score","compas","sentencing","prison",
-                                                          "poverty","poor people","crime","crimes","commit crime","inequality"]):
-                        domain_key = "criminal_justice_bias"
-                    elif any(w in q_lower for w in ["sarin","nerve agent","vx","weapon","synthesize","synthesis"]):
-                        domain_key = "misuse_safety"
-                    elif any(w in q_lower for w in ["patient","hospital","healthcare","medical"]):
-                        domain_key = "medical_harm"
-                    elif any(w in q_lower for w in ["hack","exploit","malware","phish"]):
-                        domain_key = "cyberattack"
-                    elif any(w in q_lower for w in ["privacy","personal data","dox","surveillance"]):
-                        domain_key = "privacy_violation"
-                    else:
-                        domain_key = "misuse_safety"
+                    # v15+dag: dag_selector replaces all inline keyword chains
+                    # Year 2: XLM-RoBERTa classifier (PhD roadmap Phase 6)
+                    domain_key, _conf, _kws = detect_harm_domain(query)
                 
                 activation = activate_matrix(domain_key, findings.tce, 
                                              Severity.CRITICAL if findings.tce >= 10 
@@ -1414,26 +1391,31 @@ class Step05_SCMEngine:
         """
         Year 1: Infer approximate causal findings from query keywords.
         Year 2: Replace with DoWhy auto-computation from real data.
+
+        v15+dag: domain detection delegated to dag_selector.detect_harm_domain().
+        Causal values (tce, med, flip, intv) still use conservative defaults per tier —
+        these are statistical estimates, not detected from text.
         """
-        q = query.lower()
-        # High-risk domains → higher causal effect
-        if any(w in q for w in ["weapon", "explosive", "synthesize", "hack"]):
+        domain, _conf, _kws = detect_harm_domain(query)
+
+        # Conservative causal values by risk tier
+        # High-harm domains (misuse, cyberattack, physical) → higher TCE
+        HIGH_HARM = {"misuse_safety", "cyberattack", "physical_violence",
+                     "child_safety", "drug_trafficking", "medical_harm"}
+        BIAS_DOMAINS = {"representation_bias", "criminal_justice_bias",
+                        "healthcare_bias", "financial_fraud"}
+
+        if domain in HIGH_HARM:
             return CausalFindings(tce=15.0, med=65.0, flip=25.0,
-                                  intv=50.0, rct=False, domain="misuse_safety",
+                                  intv=50.0, rct=False, domain=domain,
                                   _query=query)
-        elif any(w in q for w in ["medication", "legal", "financial", "hire"]):
-            return CausalFindings(tce=6.0,  med=45.0, flip=12.0,
-                                  intv=30.0, rct=False, domain="representation_bias",
-                                  _query=query)
-        # v15h fix: socioeconomic/poverty/crime — protected group causal path
-        elif any(w in q for w in ["poverty", "poor", "crime", "crimes",
-                                   "socioeconomic", "inequality", "criminal"]):
-            return CausalFindings(tce=9.0,  med=55.0, flip=18.0,
-                                  intv=35.0, rct=False, domain="criminal_justice_bias",
+        elif domain in BIAS_DOMAINS:
+            return CausalFindings(tce=9.0, med=55.0, flip=18.0,
+                                  intv=35.0, rct=False, domain=domain,
                                   _query=query)
         else:
             import dataclasses
-            f = dataclasses.replace(self.DEFAULT_FINDINGS, _query=query)
+            f = dataclasses.replace(self.DEFAULT_FINDINGS, domain=domain, _query=query)
             return f
 
 
