@@ -1398,14 +1398,25 @@ class Step05_SCMEngine:
         """
         domain, _conf, _kws = detect_harm_domain(query)
 
-        # Conservative causal values by risk tier
-        # High-harm domains (misuse, cyberattack, physical) → higher TCE
+        # v15+dag FP fix: conf=0.0 means detect_harm_domain returned the
+        # DEFAULT fallback "misuse_safety" — no real keyword matched.
+        # Using HIGH_HARM tce=15.0 for this case caused 12 false positives
+        # ("Newton's laws", "suicide prevention research", "protect privacy" etc.)
+        # Fix: conf=0.0 → DEFAULT_FINDINGS (same as pre-dag_selector behaviour)
+        if _conf == 0.0:
+            import dataclasses
+            return dataclasses.replace(self.DEFAULT_FINDINGS, _query=query)
+
+        # Confirmed domain match — use domain-appropriate causal values.
+        # HIGH_HARM: primary keyword match on weapons/medical/cyber etc.
+        # BIAS_DOMAINS: discrimination / fairness domains
         HIGH_HARM = {"misuse_safety", "cyberattack", "physical_violence",
                      "child_safety", "drug_trafficking", "medical_harm"}
         BIAS_DOMAINS = {"representation_bias", "criminal_justice_bias",
                         "healthcare_bias", "financial_fraud"}
 
-        if domain in HIGH_HARM:
+        if _conf == 1.0 and domain in HIGH_HARM:
+            # Primary keyword confirmed — use high TCE
             return CausalFindings(tce=15.0, med=65.0, flip=25.0,
                                   intv=50.0, rct=False, domain=domain,
                                   _query=query)
@@ -1414,9 +1425,9 @@ class Step05_SCMEngine:
                                   intv=35.0, rct=False, domain=domain,
                                   _query=query)
         else:
+            # Secondary match (conf=0.6) or non-HIGH_HARM domain → conservative
             import dataclasses
-            f = dataclasses.replace(self.DEFAULT_FINDINGS, domain=domain, _query=query)
-            return f
+            return dataclasses.replace(self.DEFAULT_FINDINGS, domain=domain, _query=query)
 
 
 class Step06_SHAPProxy:

@@ -36,6 +36,38 @@ from typing import Tuple
 
 # Import DAG library from SCM engine
 from scm_engine_v2 import DOMAIN_DAGS, HarmDAG
+import re as _re
+
+
+# ═══════════════════════════════════════════════════════════════════
+# EDUCATIONAL / DEFENSIVE CONTEXT OVERRIDE
+# ═══════════════════════════════════════════════════════════════════
+# Queries matching these patterns return conf=0.0 regardless of keyword hits.
+# Prevents FPs on educational/protective/professional queries.
+# Year 2: Replace with XLM-RoBERTa intent classifier (PhD Phase 6).
+
+_EDUCATIONAL_OVERRIDE = [
+    # Child safety EDUCATION (not exploitation)
+    _re.compile(r"(child|children).{0,40}(development|psycholog|stage|parent|internet.safety|online.safety|teach|learn|age.appropriate)", _re.I),
+    _re.compile(r"(teach|explain|educate|guide).{0,30}(child|children|kid|minor)", _re.I),
+    # First aid / minor injury (not harm intent)
+    _re.compile(r"(treat|treatment|first.aid|home.remedy|care.for).{0,30}(burn|wound|cut|injury|minor)", _re.I),
+    _re.compile(r"minor.{0,20}(burn|cut|injury|wound|scratch|ache)", _re.I),
+    # Suicide/self-harm PREVENTION in research or professional context
+    _re.compile(r"(research|study|statistics|prevention|strategy|strategies|social.work|therapist|professional|education).{0,50}(suicide|self.harm)", _re.I),
+    _re.compile(r"(suicide|self.harm).{0,50}(prevention|research|strategy|strategies|social.work|awareness|education)", _re.I),
+    # Drug POLICY / harm reduction (not synthesis)
+    _re.compile(r"(history|policy|harm.reduction|public.health|research|awareness|education).{0,40}(drug|narcotic|substance)", _re.I),
+    _re.compile(r"(drug|substance).{0,40}(policy|history|prohibition|harm.reduction|awareness|education)", _re.I),
+    # Cybersecurity CAREER / education (not attack)
+    _re.compile(r"(career|certif|skill|qualification|professional|job|become).{0,40}(cybersecurity|cyber.security|security.professional|ethical.hack)", _re.I),
+    _re.compile(r"(cybersecurity|cyber.security).{0,40}(career|job|professional|certif|skill|learn|study|course)", _re.I),
+    # Mental health WELLNESS (not crisis)
+    _re.compile(r"(evidence.based|improve|positive|well.?being|tip|strategy|strategies).{0,40}(mental.health|wellbeing|wellness)", _re.I),
+    # Privacy PROTECTION (not violation)
+    _re.compile(r"(protect|secure|safeguard|improve|how.to.protect).{0,20}(my.privacy|your.privacy|privacy.online|personal.data)", _re.I),
+    _re.compile(r"privacy.{0,30}(protection|tip|best.practice|improve|secure|online)", _re.I),
+]
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -293,15 +325,24 @@ def detect_harm_domain(query: str) -> Tuple[str, float, list[str]]:
         1.0 = primary keyword matched (strong signal)
         0.6 = only secondary keyword matched (weak signal)
         0.0 = no match → fallback to "misuse_safety"
+              OR educational/defensive context detected (override)
 
-    Year 1: Keyword heuristic.
+    Year 1: Keyword heuristic + educational override patterns.
     Year 2: Replace with XLM-RoBERTa embedding classifier trained
             on AIAAIC incident database (PhD roadmap Phase 6).
 
-    Priority: child_safety > misuse_safety > domain-specific
+    Priority: educational_override → child_safety → misuse_safety → domain-specific
     (checked in DOMAIN_KEYWORDS dict order, which is priority-ordered)
     """
     q = query.lower()
+
+    # ── Educational / Defensive context override (v15+dag FP fix) ──
+    # If query is clearly educational, protective, or professional,
+    # return conf=0.0 even if keywords match. This prevents false positives
+    # on "child development", "minor burn", "suicide prevention research" etc.
+    for pattern in _EDUCATIONAL_OVERRIDE:
+        if pattern.search(query):
+            return "misuse_safety", 0.0, []
 
     best_domain    = "misuse_safety"   # safe default
     best_confidence = 0.0
