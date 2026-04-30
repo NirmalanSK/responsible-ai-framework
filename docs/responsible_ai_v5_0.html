@@ -240,7 +240,7 @@ td:first-child{text-align:left;font-weight:600;font-size:.6rem;}
 
 <div class="hdr">
   <h1>🛡️ Responsible AI Framework</h1>
-  <p>9-Component Architecture · Judea Pearl SCM Engine · Auto-Calibrating Matrix</p>
+  <p>14-Stage Pipeline (S00–S13) · Judea Pearl SCM Engine · Auto-Calibrating 17×5 Matrix · Data Privacy Engine</p>
   <div class="ver">
     <span class="vbadge" style="background:rgba(0,255,157,.1);color:var(--green);border:1px solid rgba(0,255,157,.25)">v5.0 — Research-Ready Prototype</span>
     <span class="vbadge" style="background:rgba(0,255,157,.1);color:var(--cyan);border:1px solid rgba(34,211,238,.25)">+ Tiered Scanning</span>
@@ -287,6 +287,7 @@ td:first-child{text-align:left;font-weight:600;font-size:.6rem;}
   <div class="tab" onclick="show('deploy',this)">🔗 Deployment Layer</div>
   <div class="tab" onclick="show('evalmetrics',this)">📐 Eval Metrics</div>
   <div class="tab" onclick="show('llmgov',this)">💬 LLM Governance</div>
+  <div class="tab" onclick="show('repofiles',this)">📁 File Architecture</div>
 </div>
 
 <!-- ══════════════ SPARSE CAUSAL ACTIVATION MATRIX ══════════════ -->
@@ -1673,7 +1674,6 @@ if RCT evidence exists:
 <!-- Adversarial Robustness outer wrapper -->
 <div class="arl-outer">
   <div class="arl-lbl">🛡️ ADVERSARIAL ROBUSTNESS LAYER — Continuous Background Process · Updates defenses before attackers strike</div>
-
   <div class="arl-jobs">
     <div class="arl-job">
       <div class="arl-job-title">⚔️ Red Teaming</div>
@@ -1688,7 +1688,6 @@ if RCT evidence exists:
       <div class="arl-job-desc">If attack succeeds → identify which step failed → patch → push update to Open Category.</div>
     </div>
   </div>
-
   <div class="arl-arrow">
     <div class="arl-arrow-line"></div>
     <span>continuously updates defenses inside ↓</span>
@@ -1704,45 +1703,114 @@ if RCT evidence exists:
   </div>
   <div class="flow">
 
-    <div class="blk b-bl" style="position:relative"><div class="sn">STEP 1</div>
-      <div class="bl">Entry point</div>
+    <!-- ── ENTRY ── -->
+    <div class="blk b-bl" style="position:relative">
+      <div class="sn">ENTRY POINT</div>
+      <div class="bl">Query Input</div>
       <div class="bt">📥 Incoming Question</div>
-      <div class="bd">Raw input — unfiltered. Full 12-component pipeline activates. Protected by outer Adversarial Robustness Layer that continuously updates defenses.</div>
-      <span class="btag">RAW INPUT</span></div>
+      <div class="bd">Raw input — unfiltered. Full 14-stage pipeline (S00–S13) activates. Protected by outer Adversarial Robustness Layer that continuously updates defenses.</div>
+      <span class="btag">RAW INPUT</span>
+    </div>
+
+    <div class="arr"><div class="al" style="background:#f97316"></div>
+      <div class="ah" style="border-top:6px solid #f97316"></div>
+      <div class="alb" style="color:#f97316">PII masking first</div></div>
+
+    <!-- ── S00 Data Privacy Gate ── -->
+    <div class="blk" style="border-color:#f97316;background:rgba(249,115,22,.05);position:relative">
+      <div class="sn">S00 · NEW ★</div>
+      <div class="bl">Data Privacy Gate</div>
+      <div class="bt" style="color:#f97316">🔒 Data Privacy Engine v1.0 <span class="ntag ntag-new">NEW</span></div>
+      <div class="bd">
+        Runs <b>before all other steps</b> — all downstream stages receive PII-masked query.<br><br>
+        <span style="color:#f97316;font-family:'JetBrains Mono',monospace;font-size:.6rem">Layer 1 (PII)</span> <span style="font-size:.63rem;color:var(--muted)">13-category regex detection · 5 masking strategies · &lt;5ms latency</span><br>
+        <span style="color:#f97316;font-family:'JetBrains Mono',monospace;font-size:.6rem">Layer 2 (DP)</span> <span style="font-size:.63rem;color:var(--muted)">Laplace mechanism on causal_data + audit scores (ε=1.0)</span><br>
+        <span style="color:#f97316;font-family:'JetBrains Mono',monospace;font-size:.6rem">Layer 3 (Min)</span> <span style="font-size:.63rem;color:var(--muted)">6 jurisdiction rulebooks — GDPR / DPDP / LK PDP — unknown fields auto-blocked</span>
+      </div>
+      <span class="btag" style="background:rgba(249,115,22,.1);color:#f97316">GDPR Art.25 PRIVACY BY DESIGN</span>
+    </div>
 
     <div class="arr"><div class="al" style="background:var(--cyan)"></div>
       <div class="ah" style="border-top:6px solid var(--cyan)"></div>
-      <div class="alb" style="color:var(--cyan)">conversation memory</div></div>
+      <div class="alb" style="color:var(--cyan)">session memory</div></div>
 
-    <div class="blk b-cy" style="position:relative"><div class="sn">STEP 2</div>
-      <div class="bl">Conversation Memory</div>
+    <!-- ── S00b Context Memory ── -->
+    <div class="blk b-cy" style="position:relative">
+      <div class="sn">S00b</div>
+      <div class="bl">Context Memory Engine</div>
       <div class="bt">🧵 Conversation Graph</div>
-      <div class="bd">Full history tracking. Intent Drift · Information Accumulation · Context Poisoning. Prevents Task Decomposition Attacks.</div>
-      <span class="btag">FULL CONTEXT → EMOTION DETECTOR</span></div>
-
-    <div class="arr"><div class="al" style="background:#fb7185"></div>
-      <div class="ah" style="border-top:6px solid #fb7185"></div>
-      <div class="alb" style="color:#fb7185">user emotional state</div></div>
-
-    <div class="blk" style="border-color:#fb7185;background:rgba(251,113,133,.04);position:relative"><div class="sn">STEP 3 · NEW — PATH 4</div>
-      <div class="bl">Human-AI Interaction Layer</div>
-      <div class="bt" style="color:#fb7185">💭 Emotional Context Detector <span class="ntag ntag-new">NEW</span></div>
-      <div class="bd">NLP-based emotion classification — detects user's <b>emotional state</b> (vulnerable, stressed, curious, adversarial) from language patterns. Vulnerable user → careful+empathetic response. Adversarial → firm boundaries. Same question, right response for each person. Directly addresses Path 4 gap.</div>
-      <span class="btag" style="background:rgba(251,113,133,.1);color:#fb7185">PATH 4 — VULNERABILITY AWARE</span></div>
+      <div class="bd">Multi-turn session tracking. Intent Drift · Information Accumulation · Context Poisoning · Slow-boil escalation detection. 4 escalation signals — slope, spike, harm type accumulation, ≥3 BLOCKs → cumulative override. Prevents Task Decomposition Attacks.</div>
+      <span class="btag">FULL CONTEXT → INPUT SANITIZER</span>
+    </div>
 
     <div class="arr"><div class="al" style="background:var(--blue)"></div>
       <div class="ah" style="border-top:6px solid var(--blue)"></div>
-      <div class="alb" style="color:var(--blue)">context + emotion → classifier</div></div>
+      <div class="alb" style="color:var(--blue)">normalized input</div></div>
 
-    <div class="blk b-sc" style="position:relative"><div class="sn">STEP 4 · UPGRADED</div>
-      <div class="bl">Input Filter + SCM + Tier Decision</div>
-      <div class="bt">🔍 Situation Classifier + SCM Engine + Tier Router <span class="ntag ntag-upg">UPGRADED</span></div>
-      <div class="bd">Judea Pearl 3-Level causal reasoning. 5 rules auto-calibrate matrix. Now also acts as <b>Tier Router</b> — in ~20ms decides which scan level to activate:<br><br>
-        <span style="color:#00ff9d;font-family:'JetBrains Mono',monospace;font-size:.6rem">■ TIER 1 Light</span> <span style="font-size:.63rem;color:var(--muted)">risk &lt;0.3 → Steps 2,4,7,9,10 only (~150ms)</span><br>
-        <span style="color:#ffe566;font-family:'JetBrains Mono',monospace;font-size:.6rem">■ TIER 2 Medium</span> <span style="font-size:.63rem;color:var(--muted)">risk 0.3–0.7 → +Emotion,Jurisdiction,SHAP (~350ms)</span><br>
-        <span style="color:#ff4560;font-family:'JetBrains Mono',monospace;font-size:.6rem">■ TIER 3 Deep</span> <span style="font-size:.63rem;color:var(--muted)">risk &gt;0.7 → All 12 steps + Adversarial (~600ms)</span>
+    <!-- ── S01 Input Sanitizer ── -->
+    <div class="blk b-bl" style="position:relative">
+      <div class="sn">S01</div>
+      <div class="bl">Input Sanitizer</div>
+      <div class="bt">🧹 Unicode Normalizer + Multilingual</div>
+      <div class="bd">Unicode normalization · multilingual support · evasion pattern detection. Obfuscated inputs (homoglyphs, lookalikes) normalized before downstream analysis. Injection scan runs on <b>original</b> message (not normalized) — v15k fix.</div>
+      <span class="btag">NORMALIZED INPUT</span>
+    </div>
+
+    <div class="arr"><div class="al" style="background:var(--cyan)"></div>
+      <div class="ah" style="border-top:6px solid var(--cyan)"></div>
+      <div class="alb" style="color:var(--cyan)">session drift</div></div>
+
+    <!-- ── S02 Conversation Graph ── -->
+    <div class="blk b-cy" style="position:relative">
+      <div class="sn">S02</div>
+      <div class="bl">Conversation Graph</div>
+      <div class="bt">📊 Session Drift · Escalation History</div>
+      <div class="bd">Full conversation history analysis. Detects session-level escalation: benign queries gradually becoming harmful. Escalation score fed to Tier Router. Tracks topic drift, information accumulation attacks.</div>
+      <span class="btag">DRIFT SCORE → TIER ROUTER</span>
+    </div>
+
+    <div class="arr"><div class="al" style="background:#fb7185"></div>
+      <div class="ah" style="border-top:6px solid #fb7185"></div>
+      <div class="alb" style="color:#fb7185">emotional state</div></div>
+
+    <!-- ── S03 Emotion Detector ── -->
+    <div class="blk" style="border-color:#fb7185;background:rgba(251,113,133,.04);position:relative">
+      <div class="sn">S03 · PATH 4</div>
+      <div class="bl">Emotion Detector</div>
+      <div class="bt" style="color:#fb7185">💭 Emotional Context Detector</div>
+      <div class="bd">NLP-based emotion classification — detects user's emotional state (vulnerable, stressed, curious, adversarial) from language patterns. Vulnerable user → careful + empathetic response. Adversarial → firm boundaries. Same question, right response for each person.</div>
+      <span class="btag" style="background:rgba(251,113,133,.1);color:#fb7185">PATH 4 — VULNERABILITY AWARE</span>
+    </div>
+
+    <div class="arr"><div class="al" style="background:var(--blue)"></div>
+      <div class="ah" style="border-top:6px solid var(--blue)"></div>
+      <div class="alb" style="color:var(--blue)">context + emotion → tier</div></div>
+
+    <!-- ── S04 Tier Router ── -->
+    <div class="blk b-sc" style="position:relative">
+      <div class="sn">S04</div>
+      <div class="bl">Tier Router</div>
+      <div class="bt">⚡ Tiered Scanning — Tier 1 / 2 / 3</div>
+      <div class="bd">In ~20ms decides which scan depth to activate:<br><br>
+        <span style="color:#00ff9d;font-family:'JetBrains Mono',monospace;font-size:.6rem">■ TIER 1 Light</span> <span style="font-size:.63rem;color:var(--muted)">risk &lt;0.3 → fast path (~150ms)</span><br>
+        <span style="color:#ffe566;font-family:'JetBrains Mono',monospace;font-size:.6rem">■ TIER 2 Medium</span> <span style="font-size:.63rem;color:var(--muted)">risk 0.3–0.7 → + Jurisdiction + SHAP (~350ms)</span><br>
+        <span style="color:#ff4560;font-family:'JetBrains Mono',monospace;font-size:.6rem">■ TIER 3 Deep</span> <span style="font-size:.63rem;color:var(--muted)">risk &gt;0.7 → all 14 stages + Adversarial (~600ms)</span>
       </div>
-      <span class="btag">CAUSAL ANALYSIS · TIER ROUTING</span></div>
+      <span class="btag">TIER ROUTING</span>
+    </div>
+
+    <div class="arr"><div class="al" style="background:var(--yellow)"></div>
+      <div class="ah" style="border-top:6px solid var(--yellow)"></div>
+      <div class="alb" style="color:var(--yellow)">confidence score</div></div>
+
+    <!-- ── S04b Uncertainty Scorer ── -->
+    <div class="blk b-ye" style="position:relative">
+      <div class="sn">S04b · NEW</div>
+      <div class="bl">Uncertainty Scorer</div>
+      <div class="bt" style="color:var(--yellow)">🎯 OOD Detection <span class="ntag ntag-new">NEW</span></div>
+      <div class="bd">Out-of-distribution detection. If model confidence &lt;0.20 → ESCALATE to human expert regardless of other scores. Prevents the framework from making high-stakes decisions on queries it cannot reliably classify.</div>
+      <span class="btag" style="background:rgba(255,229,102,.1);color:var(--yellow)">CONFIDENCE &lt; 0.20 → ESCALATE</span>
+    </div>
 
     <div class="bi">
       <div class="lane" style="color:var(--scm)"><div style="font-size:.48rem;margin-bottom:2px">SCM FINDINGS</div>
@@ -1751,6 +1819,7 @@ if RCT evidence exists:
         <div class="ll" style="background:var(--green)"></div><div class="lu" style="border-bottom:5px solid var(--green)"></div></div>
     </div>
 
+    <!-- ── S05 SCM Engine ── -->
     <div class="smap">
       <div class="smb">SHARED CORE — SCM Auto-Calibrated · 17×5 Causal Matrix</div>
       <div style="font-size:.76rem;font-weight:700;color:var(--green);text-align:center;margin-bottom:.25rem;">🗺 17 × 5 Matrix — Weights Auto-Updated by SCM</div>
@@ -1759,96 +1828,215 @@ if RCT evidence exists:
         <div class="rp" style="background:rgba(255,229,102,.07);color:var(--yellow);border-color:var(--yellow)">MIDDLE · MEDIUM</div>
         <div class="rp" style="background:rgba(107,127,163,.08);color:var(--muted);border-color:var(--muted)">OUTER · WEAK</div>
       </div>
-      <div style="font-size:.64rem;color:var(--muted);text-align:center;line-height:1.5;">85 cells · Weights no longer subjective — empirically set by 5 SCM rules · Cascade: P1→P2→P5</div>
+      <div style="font-size:.64rem;color:var(--muted);text-align:center;line-height:1.5;">85 cells · Weights empirically set by 5 SCM rules · Cascade: P1→P2→P5</div>
     </div>
 
-    <div class="bi">
-      <div class="lane" style="color:var(--green)"><div style="font-size:.48rem;margin-bottom:2px">UNKNOWN FLAG</div>
-        <div class="ll" style="background:var(--green)"></div><div class="ld" style="border-top:5px solid var(--green)"></div></div>
-      <div class="lane" style="color:#a8ff78"><div style="font-size:.48rem;margin-bottom:2px">NEW CATEGORY</div>
-        <div class="ll" style="background:#a8ff78"></div><div class="lu" style="border-bottom:5px solid #a8ff78"></div></div>
+    <div class="blk b-sc" style="position:relative">
+      <div class="sn">S05 · PEARL L1+L2+L3</div>
+      <div class="bl">SCM Engine v2</div>
+      <div class="bt">🔬 Sparse Causal Activation Matrix 17×5</div>
+      <div class="bd">Full Judea Pearl Causality. L1 (Association) → L2 (Intervention / do-calculus / Backdoor / Frontdoor) → L3 (Counterfactual / NDE / NIE / PNS / PN / PS bounds). Daubert Legal Admissibility Score. 5 rules auto-calibrate 17×5 matrix weights in real-time.</div>
+      <span class="btag">CAUSAL PROOF · DAUBERT SCORE</span>
     </div>
 
-    <div class="blk" style="border-color:#a8ff78;background:rgba(168,255,120,.03);position:relative"><div class="sn">STEP 5</div>
-      <div class="bl">Dynamic Extension</div>
-      <div class="bt" style="color:#a8ff78">🌐 Open Category Layer</div>
-      <div class="bd">Unknown problems → anomaly detection → closest category → expert review (3+) → Update Gateway → matrix grows. Graceful failure always.</div>
-      <span class="btag" style="background:rgba(168,255,120,.1);color:#a8ff78">EVOLVING · GRACEFUL FAILURE</span></div>
+    <div class="arr"><div class="al" style="background:var(--blue)"></div>
+      <div class="ah" style="border-top:6px solid var(--blue)"></div>
+      <div class="alb" style="color:var(--blue)">feature attribution</div></div>
 
-    <div class="arr"><div class="al" style="background:#60a5fa"></div>
-      <div class="ah" style="border-top:6px solid #60a5fa"></div>
-      <div class="alb" style="color:#60a5fa">jurisdiction check</div></div>
-
-    <div class="blk" style="border-color:#60a5fa;background:rgba(96,165,250,.04);position:relative"><div class="sn">STEP 6 · NEW — PATH 3</div>
-      <div class="bl">Policy & Governance Layer</div>
-      <div class="bt" style="color:#60a5fa">⚖️ Jurisdiction Policy Engine <span class="ntag ntag-new">NEW</span></div>
-      <div class="bd">Detects user's <b>jurisdiction</b> (EU, US, India, Global) and loads relevant regulations. EU AI Act → mandatory bias audits. US NIST → risk-based framework. India IT Act → local compliance. When jurisdictions conflict → Value Alignment Core universal ethics wins. Directly addresses Path 3 gap.</div>
-      <span class="btag" style="background:rgba(96,165,250,.1);color:#60a5fa">PATH 3 — JURISDICTION AWARE</span></div>
-
-    <div class="arr"><div class="al" style="background:var(--purple)"></div>
-      <div class="ah" style="border-top:6px solid var(--purple)"></div>
-      <div class="alb" style="color:var(--purple)">risk flags + jurisdiction → AI</div></div>
-
-    <div class="blk b-pu" style="position:relative"><div class="sn">STEP 7</div>
-      <div class="bl">Core processing</div>
-      <div class="bt">🧠 AI Brain + GraphRAG</div>
-      <div class="bd">Generates answer with full causal risk context, emotional awareness, jurisdiction compliance. GraphRAG retrieves real-time guidelines. Strictly within Value Alignment Core.</div>
-      <span class="btag">GENERATE ANSWER</span></div>
-
-    <div class="arr"><div class="al" style="background:#f472b6"></div>
-      <div class="ah" style="border-top:6px solid #f472b6"></div>
-      <div class="alb" style="color:#f472b6">explain AI reasoning</div></div>
-
-    <div class="blk" style="border-color:#f472b6;background:rgba(244,114,182,.04);position:relative"><div class="sn">STEP 8 · NEW — PATH 1</div>
+    <!-- ── S06 SHAP/LIME ── -->
+    <div class="blk b-bl" style="position:relative">
+      <div class="sn">S06 · PATH 1</div>
       <div class="bl">Interpretability Layer</div>
-      <div class="bt" style="color:#f472b6">🔭 SHAP/LIME Explainability Engine <span class="ntag ntag-new">NEW</span></div>
-      <div class="bd">Opens AI's "black box." <b>SHAP</b>: which features contributed how much to this decision? <b>LIME</b>: local approximation explaining this specific answer. Output Filter now checks not just WHAT AI said but WHY — catches bias in reasoning, not just output text. Directly addresses Path 1 gap.</div>
-      <span class="btag" style="background:rgba(244,114,182,.1);color:#f472b6">PATH 1 — EXPLAINABLE AI</span></div>
-
-    <div class="arr"><div class="al" style="background:var(--orange)"></div>
-      <div class="ah" style="border-top:6px solid var(--orange)"></div>
-      <div class="alb" style="color:var(--orange)">answer + explanation → verify</div></div>
-
-    <div class="blk b-or" style="position:relative"><div class="sn">STEP 9 · UPGRADED</div>
-      <div class="bl">Output Filter</div>
-      <div class="bt">🔎 Compliance Verifier <span class="ntag ntag-upg">UPGRADED</span></div>
-      <div class="bd">Now receives SHAP/LIME explanation — verifies not just WHAT AI said but WHY. Checks answer against SCM-calibrated matrix outward direction. Catches bias in reasoning, not just output words.</div>
-      <span class="btag">MAP → OUTWARD · VERIFY + EXPLAIN</span></div>
+      <div class="bt">📊 SHAP / LIME Proxy <span class="ntag ntag-new">NEW</span></div>
+      <div class="bd">Feature attribution — identifies WHICH features in the query drove the risk score. SHAP explanation passed downstream to Output Filter for verification. "Not just WHAT the AI decided but WHY." Directly addresses Path 1 gap.</div>
+      <span class="btag">PATH 1 — EXPLAINABILITY</span>
+    </div>
 
     <div class="arr"><div class="al" style="background:var(--red)"></div>
       <div class="ah" style="border-top:6px solid var(--red)"></div>
-      <div class="alb" style="color:var(--red)">compliance → decision</div></div>
+      <div class="alb" style="color:var(--red)">attack detection</div></div>
 
-    <div class="blk b-rd" style="position:relative"><div class="sn">STEP 10</div>
+    <!-- ── S07 Adversarial Defense ── -->
+    <div class="blk b-rd" style="position:relative">
+      <div class="sn">S07</div>
+      <div class="bl">Adversarial Defense Layer</div>
+      <div class="bt">⚔️ 4 Attack Types</div>
+      <div class="bd">
+        <span style="color:var(--red);font-family:'JetBrains Mono',monospace;font-size:.6rem">Prompt Injection</span> <span style="font-size:.63rem;color:var(--muted)">base64 · encoded payloads · instruction override</span><br>
+        <span style="color:var(--red);font-family:'JetBrains Mono',monospace;font-size:.6rem">Authority Spoof</span> <span style="font-size:.63rem;color:var(--muted)">"I am a researcher / doctor / admin"</span><br>
+        <span style="color:var(--red);font-family:'JetBrains Mono',monospace;font-size:.6rem">Role-play Jailbreak</span> <span style="font-size:.63rem;color:var(--muted)">DAN · fictional wrapper · character bypass</span><br>
+        <span style="color:var(--red);font-family:'JetBrains Mono',monospace;font-size:.6rem">Obfuscation</span> <span style="font-size:.63rem;color:var(--muted)">homoglyphs · l33t speak · spacing tricks</span>
+      </div>
+      <span class="btag">ADVERSARIAL DETECTION</span>
+    </div>
+
+    <div class="arr"><div class="al" style="background:var(--purple)"></div>
+      <div class="ah" style="border-top:6px solid var(--purple)"></div>
+      <div class="alb" style="color:var(--purple)">jurisdiction check</div></div>
+
+    <!-- ── S08 Jurisdiction Engine ── -->
+    <div class="blk" style="border-color:var(--purple);background:rgba(167,139,250,.04);position:relative">
+      <div class="sn">S08 · PATH 3</div>
+      <div class="bl">Jurisdiction Engine</div>
+      <div class="bt" style="color:var(--purple)">⚖️ US / EU / India / Global Rule Sets <span class="ntag ntag-new">NEW</span></div>
+      <div class="bd">Region-specific legal compliance. EU AI Act Art.5 (prohibited AI practices, gender/age discrimination). US 5th/14th Amendment Due Process (autonomous criminal sentencing). India / Sri Lanka LK PDP. v15k additions: autonomous sentencing + gender downscoring patterns.</div>
+      <span class="btag" style="background:rgba(167,139,250,.1);color:var(--purple)">PATH 3 — LEGAL COMPLIANCE</span>
+    </div>
+
+    <div class="arr"><div class="al" style="background:var(--green)"></div>
+      <div class="ah" style="border-top:6px solid var(--green)"></div>
+      <div class="alb" style="color:var(--green)">ethics check</div></div>
+
+    <!-- ── S09 VAC Ethics ── -->
+    <div class="blk b-sc" style="position:relative">
+      <div class="sn">S09</div>
+      <div class="bl">VAC Ethics Check</div>
+      <div class="bt">🚫 Absolute Violation Categories</div>
+      <div class="bd">Value Alignment Core check — immovable ethical floor. CBRN weapons · CSAM · targeted violence · absolute prohibitions. No layer above can override a VAC block. Checked after jurisdiction so legal context is available.</div>
+      <span class="btag">ABSOLUTE FLOOR — NO OVERRIDE</span>
+    </div>
+
+    <div class="arr"><div class="al" style="background:var(--red)"></div>
+      <div class="ah" style="border-top:6px solid var(--red)"></div>
+      <div class="alb" style="color:var(--red)">risk aggregation</div></div>
+
+    <!-- ── S10 Decision Engine ── -->
+    <div class="blk b-rd" style="position:relative">
+      <div class="sn">S10</div>
       <div class="bl">Decision Engine</div>
       <div class="bt">⚖️ Rule-based + RL + Cascade Decision Tree</div>
-      <div class="bd">Hard rules = ethical floor. RL adjusts above floor. Receives input from ALL 4 new layers — emotional context, jurisdiction, SHAP proof, societal signal. Cascade: P1 critical → auto-alert P2/P5. All decisions explainable.</div>
-      <span class="btag">WARN / BLOCK / ALLOW</span></div>
+      <div class="bd">Hard rules = ethical floor. RL adjusts above floor. Receives input from ALL layers — emotional context, jurisdiction, SHAP proof, causal scores, adversarial findings. Cascade: P1 critical → auto-alert P2/P5. All decisions explainable via audit trail.</div>
+      <span class="btag">WARN / BLOCK / ALLOW / ESCALATE</span>
+    </div>
 
     <div class="arr"><div class="al" style="background:#a3e635"></div>
       <div class="ah" style="border-top:6px solid #a3e635"></div>
-      <div class="alb" style="color:#a3e635">societal impact check</div></div>
+      <div class="alb" style="color:#a3e635">societal impact</div></div>
 
-    <div class="blk" style="border-color:#a3e635;background:rgba(163,230,53,.04);position:relative"><div class="sn">STEP 11 · NEW — PATH 5</div>
-      <div class="bl">Population-Level Monitoring</div>
-      <div class="bt" style="color:#a3e635">🌍 Societal Impact Monitor <span class="ntag ntag-new">NEW</span></div>
-      <div class="bd">Aggregates patterns across millions of queries using <b>differential privacy</b>. If 70%+ WARN/BLOCK decisions affect one demographic → automatic system-level bias alert. Weekly trend reports. Triggers retraining when drift detected. Individual privacy preserved. Directly addresses Path 5 gap.</div>
-      <span class="btag" style="background:rgba(163,230,53,.1);color:#a3e635">PATH 5 — POPULATION LEVEL</span></div>
+    <!-- ── S11 Societal Monitor ── -->
+    <div class="blk" style="border-color:#a3e635;background:rgba(163,230,53,.04);position:relative">
+      <div class="sn">S11 · PATH 5</div>
+      <div class="bl">Societal Monitor</div>
+      <div class="bt" style="color:#a3e635">🌍 Population-Level Harm Signal <span class="ntag ntag-new">NEW</span></div>
+      <div class="bd">Aggregates patterns across sessions using differential privacy. If 70%+ WARN/BLOCK decisions affect one demographic → system-level bias alert. Weekly trend reports. Triggers retraining on drift. Individual privacy preserved. Stub → full implementation Year 3.</div>
+      <span class="btag" style="background:rgba(163,230,53,.1);color:#a3e635">PATH 5 — POPULATION LEVEL · STUB → YEAR 3</span>
+    </div>
+
+    <div class="arr"><div class="al" style="background:var(--green)"></div>
+      <div class="ah" style="border-top:6px solid var(--green)"></div>
+      <div class="alb" style="color:var(--green)">final gate</div></div>
+
+    <!-- ── S12 Output Filter ── -->
+    <div class="blk b-sc" style="position:relative">
+      <div class="sn">S12</div>
+      <div class="bl">Output Filter</div>
+      <div class="bt">🔎 Compliance Verifier + Audit Trail</div>
+      <div class="bd">Final gate — verifies not just WHAT the AI said but WHY (receives SHAP explanation from S06). Checks answer against SCM-calibrated matrix outward direction. Catches bias in reasoning, not just output words. Generates JSON audit log for every decision.</div>
+      <span class="btag">AUDIT TRAIL · JSON LOG</span>
+    </div>
+
+    <div class="arr"><div class="al" style="background:#f97316"></div>
+      <div class="ah" style="border-top:6px solid #f97316"></div>
+      <div class="alb" style="color:#f97316">output privacy scan</div></div>
+
+    <!-- ── S13 Output Privacy Scan ── -->
+    <div class="blk" style="border-color:#f97316;background:rgba(249,115,22,.05);position:relative">
+      <div class="sn">S13 · NEW ★</div>
+      <div class="bl">Output Privacy Scan</div>
+      <div class="bt" style="color:#f97316">🔍 PII Leak Detection + DP Noise <span class="ntag ntag-new">NEW</span></div>
+      <div class="bd">Checks response hint for PII leakage before output. Applies Laplace DP noise to audit bundle scores before export. Ensures the framework's own audit trail doesn't leak sensitive data. Mirrors S00 — Privacy by Design both input and output.</div>
+      <span class="btag" style="background:rgba(249,115,22,.1);color:#f97316">OUTPUT PRIVACY · DP NOISE ON AUDIT SCORES</span>
+    </div>
 
     <div class="arr"><div class="al" style="background:var(--green)"></div>
       <div class="ah" style="border-top:6px solid var(--green)"></div>
       <div class="alb" style="color:var(--green)">verified output</div></div>
 
-    <div class="blk b-ye" style="position:relative"><div class="sn">STEP 12</div>
-      <div class="bl">Final Output</div>
-      <div class="bt">✅ Responsible Output</div>
-      <div class="bd">Passed all 12 components. Causal proof + explainable reasoning + jurisdiction compliant + emotionally appropriate + societal impact tracked. Universal middleware — wraps any AI.</div>
-      <span class="btag">DELIVERED · FULLY EXPLAINED</span></div>
+    <!-- ── DECISION ── -->
+    <div class="blk b-ye" style="position:relative">
+      <div class="sn">DECISION</div>
+      <div class="bl">Final Decision</div>
+      <div class="bt">✅ Responsible Output — ALLOW / WARN / BLOCK / ESCALATE</div>
+      <div class="bd">Passed all 14 stages (S00–S13). Causal proof + explainable reasoning + jurisdiction compliant + emotionally appropriate + privacy protected + societal impact tracked. Universal middleware — wraps any AI system.</div>
+      <span class="btag">DELIVERED · FULLY EXPLAINED · PRIVACY PRESERVED</span>
+    </div>
+
   </div>
 </div>
 </div>
 <!-- end Adversarial Robustness outer wrapper -->
 </div>
+
+<!-- ── TWO-PASS LLM INTEGRATION ── -->
+<div style="max-width:820px;margin:1.6rem auto 0;font-family:'JetBrains Mono',monospace;">
+  <div style="border:1px solid var(--border);border-radius:10px;padding:1.3rem;background:rgba(0,0,0,.2);">
+    <div style="font-size:.58rem;color:var(--cyan);letter-spacing:.1em;margin-bottom:1rem;">// LLM INTEGRATION — TWO-PASS EXPLAINED GOVERNANCE</div>
+
+    <div style="font-size:.6rem;color:var(--muted);margin-bottom:1rem;line-height:1.7;">
+      The pipeline (S00–S13) and the chatbot layer are <span style="color:var(--text);">architecturally separate.</span>
+      <b style="color:var(--text);">pipeline_v15.py</b> produces ALLOW/WARN/BLOCK/ESCALATE + structured findings.
+      The chatbot layer receives this decision and passes it to an LLM in a two-pass architecture.
+    </div>
+
+    <!-- Two-pass diagram -->
+    <div style="display:flex;gap:.8rem;justify-content:center;align-items:flex-start;margin-bottom:1rem;flex-wrap:wrap;">
+      <div style="border:1px solid var(--blue);border-radius:8px;padding:.8rem 1.1rem;text-align:center;min-width:200px;background:rgba(56,182,255,.04);">
+        <div style="font-size:.6rem;color:var(--blue);font-weight:700;margin-bottom:.3rem;">Pass 1 — Draft Generation</div>
+        <div style="font-size:.55rem;color:var(--muted);line-height:1.7;">Decision-specific system prompt<br>LLM generates human-readable<br>explanation of WHY this decision</div>
+      </div>
+      <div style="font-size:1.2rem;color:var(--muted);padding-top:1.5rem;">→</div>
+      <div style="border:1px solid var(--green);border-radius:8px;padding:.8rem 1.1rem;text-align:center;min-width:200px;background:rgba(0,255,157,.04);">
+        <div style="font-size:.6rem;color:var(--green);font-weight:700;margin-bottom:.3rem;">Pass 2 — Self-Verification</div>
+        <div style="font-size:.55rem;color:var(--muted);line-height:1.7;">LLM audits its own draft against<br>SCM/Matrix values · risk score<br>APPROVED ✓ or REVISED 🔄</div>
+      </div>
+    </div>
+
+    <!-- Verification table -->
+    <table style="width:100%;border-collapse:collapse;font-size:.56rem;margin-bottom:1rem;">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border);">
+          <th style="text-align:left;padding:.4rem .6rem;color:var(--cyan);">Decision</th>
+          <th style="text-align:left;padding:.4rem .6rem;color:var(--cyan);">Self-Verification Checks</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid rgba(255,255,255,.05);">
+          <td style="padding:.4rem .6rem;color:var(--red);font-weight:700;">BLOCK</td>
+          <td style="padding:.4rem .6rem;color:var(--muted);">Is BLOCK correct or should this be WARN? Risk score / VAC / attack type. Explanation accurate? No harmful hints leaked?</td>
+        </tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,.05);">
+          <td style="padding:.4rem .6rem;color:var(--yellow);font-weight:700;">WARN</td>
+          <td style="padding:.4rem .6rem;color:var(--muted);">Correlation≠Causation confusion? Jurisdiction addressed? Protected group bias in response?</td>
+        </tr>
+        <tr style="border-bottom:1px solid rgba(255,255,255,.05);">
+          <td style="padding:.4rem .6rem;color:var(--blue);font-weight:700;">ESCALATE</td>
+          <td style="padding:.4rem .6rem;color:var(--muted);">Expert type correct (medical/legal/financial)? Interim guidance safe?</td>
+        </tr>
+        <tr>
+          <td style="padding:.4rem .6rem;color:var(--green);font-weight:700;">ALLOW</td>
+          <td style="padding:.4rem .6rem;color:var(--muted);">Factual accuracy? Protected group bias? Response complete?</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Terminal output sample -->
+    <div style="background:rgba(0,0,0,.35);border-radius:7px;padding:.8rem;font-size:.55rem;color:var(--muted);line-height:2;border:1px solid rgba(255,255,255,.06);">
+      <div style="color:var(--green);margin-bottom:.3rem;"># Live terminal output</div>
+      <div><span style="color:var(--red);">[BLOCK]</span> risk=32.8% | 450ms | <span style="color:var(--green);">✓ self-verified</span></div>
+      <div style="color:var(--muted);">🚫 BLOCKED — This query was blocked because...</div>
+      <div style="margin-top:.4rem;"><span style="color:var(--yellow);">[WARN]</span> risk=25.1% | 680ms | <span style="color:var(--yellow);">🔄 self-verified+revised</span></div>
+      <div style="color:var(--muted);">[🔄 Self-verified — revised: correlation-causation confusion detected]</div>
+    </div>
+
+    <!-- Year 2 note -->
+    <div style="margin-top:.8rem;font-size:.54rem;color:var(--muted);border-top:1px solid var(--border);padding-top:.7rem;line-height:1.7;">
+      <span style="color:var(--yellow);">Year 2 target:</span> Migrate <code style="background:rgba(255,229,102,.1);padding:.1rem .3rem;border-radius:3px;color:var(--yellow);">self_verify()</code> into pipeline as universal Step S13b via LLM adapter pattern —
+      making governance LLM-agnostic (ClaudeAdapter / GPTAdapter / GemmaAdapter).
+      Currently chatbot-layer-specific: <span style="color:var(--green);">governed_chatbot.py → Groq ✅</span> · <span style="color:var(--cyan);">gemini_governed_chatbot.py → Gemini ✅</span>
+    </div>
+  </div>
+</div>
+
 
 <!-- ══════════════ MATRIX ══════════════ -->
 <div id="matrix" class="panel">
@@ -5230,7 +5418,142 @@ hfCalc();
   </div>
 
 </div>
+
 </div><!-- /llmgov panel -->
+
+<div id="repofiles" class="panel">
+<div style="max-width:780px;margin:0 auto;font-family:'JetBrains Mono',monospace;">
+
+  <!-- Header -->
+  <div style="text-align:center;margin-bottom:1.4rem;">
+    <div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;margin-bottom:.3rem;">RESPONSIBLE AI FRAMEWORK v5.0</div>
+    <div style="font-size:1rem;font-weight:700;color:var(--cyan);">📁 Repository File Architecture</div>
+    <div style="font-size:.6rem;color:var(--muted);margin-top:.3rem;">github.com/NirmalanSK/responsible-ai-framework · Last updated: April 2026 (v15k)</div>
+  </div>
+
+  <!-- File Tree -->
+  <div style="border:1px solid var(--border);border-radius:10px;padding:1.4rem;background:rgba(0,0,0,.25);overflow-x:auto;">
+    <div style="font-size:.58rem;color:var(--green);letter-spacing:.1em;margin-bottom:1rem;">// REPOSITORY STRUCTURE — 46 FILES</div>
+    <pre style="font-size:.58rem;color:var(--text);line-height:1.9;margin:0;white-space:pre;">responsible-ai-framework/
+│
+├── <span style="color:var(--cyan);">pipeline_v15.py</span>              <span style="color:var(--muted);"># 14-stage pipeline orchestrator (S00–S13) · v15k · injection FP fix</span>
+├── <span style="color:var(--cyan);">data_privacy_engine.py</span>       <span style="color:var(--muted);"># Data Privacy Engine v1.0 · PII + DP(ε=1.0) + 6-jurisdiction minimization</span>
+├── <span style="color:var(--cyan);">scm_engine_v2.py</span>             <span style="color:var(--muted);"># Full Pearl Theory engine · L1+L2+L3 · NDE/NIE · PNS/PN/PS bounds</span>
+├── <span style="color:var(--cyan);">adversarial_engine_v5.py</span>     <span style="color:var(--muted);"># 4 attack types · prompt injection · authority spoof · role-play · obfuscation</span>
+├── <span style="color:var(--cyan);">context_engine.py</span>            <span style="color:var(--muted);"># Multi-turn attack detection · SQLite session memory · 4 escalation signals</span>
+├── <span style="color:var(--cyan);">test_v15.py</span>                  <span style="color:var(--green);">195/195 tests passing (100%) ✅</span>
+├── requirements.txt             <span style="color:var(--muted);"># langdetect · deep-translator · scikit-learn · numpy · groq</span>
+├── README.md                    <span style="color:var(--muted);"># Full framework documentation + NIST/ISO/IEEE standards comparison</span>
+├── LICENSE
+│
+├── <span style="color:var(--purple);">chatbots/</span>
+│   ├── groq/
+│   │   ├── <span style="color:var(--cyan);">governed_chatbot.py</span>          <span style="color:var(--muted);"># Groq + Llama 3.3 70B · two-pass self-verified governance (v15i)</span>
+│   │   ├── groq_test_cases.csv          <span style="color:var(--muted);"># 60-case RAI validation set</span>
+│   │   └── context_memory_*.csv         <span style="color:var(--green);"># ContextEngine session turns · multi-turn proof ✅</span>
+│   └── gemini/
+│       ├── <span style="color:var(--cyan);">gemini_governed_chatbot.py</span>   <span style="color:var(--muted);"># Gemini 2.0 Flash · two-pass self-verified governance</span>
+│       └── gemini_test_cases.csv
+│
+├── <span style="color:var(--yellow);">evaluation/</span>
+│   ├── <span style="color:var(--cyan);">evaluation_metrics.py</span>        <span style="color:var(--muted);"># Precision/Recall/F1/FPR · 8 harm categories · research-grade</span>
+│   ├── <span style="color:var(--cyan);">batch_runner.py</span>              <span style="color:var(--muted);"># CSV batch runner for pipeline</span>
+│   ├── <span style="color:var(--cyan);">analyze_simulation.py</span>        <span style="color:var(--muted);"># AIAAIC precision/recall/F1 analysis</span>
+│   ├── aiaaic_style_test_cases.csv      <span style="color:var(--muted);"># 50 AIAAIC-aligned adversarial queries</span>
+│   ├── AIAAIC_50Case_TestReport.md      <span style="color:var(--muted);"># Full 50-case analysis report</span>
+│   ├── groq_60case_report.pdf           <span style="color:var(--green);">Groq 60-case validation · 50/60 → 60/60 (100%) ✅</span>
+│   ├── groq_60case_risk_hist.png        <span style="color:var(--muted);"># SCM risk score distribution histogram</span>
+│   └── simulation_report.md
+│
+└── <span style="color:var(--blue);">docs/</span>
+    ├── <span style="color:var(--cyan);">responsible_ai_v5_0.html</span>     <span style="color:var(--muted);"># ← YOU ARE HERE · Interactive dashboard (29 tabs)</span>
+    ├── framework_explanation.html       <span style="color:var(--muted);"># Pearl→Matrix link · 14-stage pipeline · Step 05 trace</span>
+    ├── rai_dynamic_assessment.html      <span style="color:var(--muted);"># Live sliders → 17×5 matrix activation + 14-stage trace</span>
+    ├── pipeline_10case_report_v15k.html <span style="color:var(--muted);"># 10-case full pipeline trace · 7B · 2W · 1A</span>
+    ├── validation_10_cases.html         <span style="color:var(--muted);"># Dynamic assessment formula validation · 10/10 Python≡HTML</span>
+    ├── RAI_v15b_5Case_LiveReport.docx   <span style="color:var(--muted);"># CASE_01–05 live pipeline (5/5 BLOCK)</span>
+    ├── RAI_v15e_5Case_Report_v2.docx    <span style="color:var(--muted);"># CASE_06–10 Qwen-verified (3B · 2W)</span>
+    ├── theory_vs_implementation_full_trace.md
+    ├── phd_math_proofs.pdf              <span style="color:var(--muted);"># Formal mathematical proofs</span>
+    └── phd_math_proofs.tex             <span style="color:var(--muted);"># LaTeX source</span></pre>
+  </div>
+
+  <!-- Key Stats Row -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-top:1rem;">
+    <div style="border:1px solid rgba(0,255,157,.25);border-radius:8px;padding:.8rem;text-align:center;background:rgba(0,255,157,.04);">
+      <div style="font-size:1.1rem;font-weight:700;color:var(--green);">195/195</div>
+      <div style="font-size:.52rem;color:var(--muted);margin-top:.2rem;">Unit Tests Passing</div>
+    </div>
+    <div style="border:1px solid rgba(56,182,255,.25);border-radius:8px;padding:.8rem;text-align:center;background:rgba(56,182,255,.04);">
+      <div style="font-size:1.1rem;font-weight:700;color:var(--cyan);">14 Stages</div>
+      <div style="font-size:.52rem;color:var(--muted);margin-top:.2rem;">Pipeline (S00–S13)</div>
+    </div>
+    <div style="border:1px solid rgba(255,200,0,.25);border-radius:8px;padding:.8rem;text-align:center;background:rgba(255,200,0,.04);">
+      <div style="font-size:1.1rem;font-weight:700;color:var(--yellow);">60/60</div>
+      <div style="font-size:.52rem;color:var(--muted);margin-top:.2rem;">Groq Validation (100%)</div>
+    </div>
+    <div style="border:1px solid rgba(167,139,250,.25);border-radius:8px;padding:.8rem;text-align:center;background:rgba(167,139,250,.04);">
+      <div style="font-size:1.1rem;font-weight:700;color:var(--purple);">46 Files</div>
+      <div style="font-size:.52rem;color:var(--muted);margin-top:.2rem;">Repository Total</div>
+    </div>
+  </div>
+
+  <!-- Quick Commands -->
+  <div style="border:1px solid var(--border);border-radius:10px;padding:1.2rem;margin-top:1rem;">
+    <div style="font-size:.58rem;color:var(--cyan);letter-spacing:.1em;margin-bottom:.8rem;">// QUICK START COMMANDS</div>
+    <pre style="font-size:.56rem;color:var(--muted);line-height:2;margin:0;"><span style="color:var(--green);"># Install dependencies</span>
+pip install langdetect deep-translator scikit-learn numpy groq
+
+<span style="color:var(--green);"># Run full pipeline demo (14 stages active)</span>
+python pipeline_v15.py
+
+<span style="color:var(--green);"># Run all 195 unit tests</span>
+python -m unittest test_v15
+
+<span style="color:var(--green);"># Research-grade evaluation metrics</span>
+python evaluation/evaluation_metrics.py
+python evaluation/evaluation_metrics.py --category bias
+python evaluation/evaluation_metrics.py --report --json
+
+<span style="color:var(--green);"># Governed chatbot — Groq (Llama 3.3 70B)</span>
+export GROQ_API_KEY="your-key"
+python chatbots/groq/governed_chatbot.py
+
+<span style="color:var(--green);"># Governed chatbot — Gemini 2.0 Flash</span>
+export GEMINI_API_KEY="your-key"
+python chatbots/gemini/gemini_governed_chatbot.py --mode chat</pre>
+  </div>
+
+  <!-- Three-Pillar Lifecycle -->
+  <div style="border:1px solid rgba(167,139,250,.25);border-radius:10px;padding:1.2rem;margin-top:1rem;background:rgba(167,139,250,.03);">
+    <div style="font-size:.58rem;color:var(--purple);letter-spacing:.1em;margin-bottom:.8rem;">// AI LIFECYCLE — THREE-PILLAR POSITIONING</div>
+    <div style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;">
+      <div style="border:1px solid var(--blue);border-radius:8px;padding:.6rem 1rem;text-align:center;flex:1;min-width:150px;">
+        <div style="font-size:.62rem;color:var(--blue);font-weight:700;">🔬 VirnyFlow</div>
+        <div style="font-size:.5rem;color:var(--muted);margin-top:.2rem;">Training-time fairness</div>
+        <div style="font-size:.48rem;color:var(--muted);">bias audit at model build</div>
+      </div>
+      <div style="font-size:1rem;color:var(--muted);">→</div>
+      <div style="border:1px solid var(--cyan);border-radius:8px;padding:.6rem 1rem;text-align:center;flex:1;min-width:150px;">
+        <div style="font-size:.62rem;color:var(--cyan);font-weight:700;">💡 SafeNudge</div>
+        <div style="font-size:.5rem;color:var(--muted);margin-top:.2rem;">Generation-time safety</div>
+        <div style="font-size:.48rem;color:var(--muted);">fairness-aware nudging</div>
+      </div>
+      <div style="font-size:1rem;color:var(--muted);">→</div>
+      <div style="border:1px solid var(--green);border-radius:8px;padding:.6rem 1rem;text-align:center;flex:1;min-width:150px;background:rgba(0,255,157,.04);">
+        <div style="font-size:.62rem;color:var(--green);font-weight:700;">⚙️ This Framework</div>
+        <div style="font-size:.5rem;color:var(--muted);margin-top:.2rem;">Deployment-time middleware</div>
+        <div style="font-size:.48rem;color:var(--green);">Safety + RAI + Legal unified ✅</div>
+      </div>
+    </div>
+    <div style="font-size:.53rem;color:var(--muted);margin-top:.7rem;text-align:center;">
+      Thesis: <span style="color:var(--text);">"Responsible AI as Middleware: A Unified Pipeline for Safety, Privacy, Fairness, and Compliance"</span>
+    </div>
+  </div>
+
+</div>
+</div><!-- /repofiles panel -->
+
 
 </body>
 </html>
