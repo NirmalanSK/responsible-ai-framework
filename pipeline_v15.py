@@ -78,6 +78,12 @@ MATRIX_AVAILABLE = True
 # Year 1: keyword heuristic | Year 2: XLM-RoBERTa classifier (PhD Phase 6)
 from dag_selector import detect_harm_domain
 
+# ── Human Decision Verifier (Step 09b) ───────────────────────────────────
+# "Who watches the watchman?" — Pearl L3 verification of human reviewer
+# decisions. Integrated via verify_human_decision() method.
+from human_decision_verifier import HumanDecisionVerifier, VerificationResult
+from ethics_code import HumanReviewInput, EthicsViolation
+
 
 # ══════════════════════════════════════════════════════
 # STRUCTURED LOGGER SETUP
@@ -462,6 +468,13 @@ class PipelineResult:
     pii_categories    : list = field(default_factory=list)  # e.g. ["email", "phone"]
     privacy_violations: list = field(default_factory=list)  # Rulebook violations
     privacy_compliant : bool = True      # False if any minimization violations
+
+    # Step 09b — Human Decision Verification
+    # Populated after verify_human_decision() is called externally.
+    # None until a human reviewer submits their decision.
+    human_decision          : Optional[str]  = None   # "ALLOW" / "BLOCK" / None
+    human_verification      : Optional[Any]  = None   # VerificationResult object
+    human_verification_done : bool           = False  # True after verify_human_decision()
 
 
 # ══════════════════════════════════════════════════════
@@ -2592,6 +2605,156 @@ class ResponsibleAIPipeline:
         self.s11 = Step11_SocietalMonitor()
         self.s12 = Step12_OutputFilter()
 
+        # ── Step 09b: Human Decision Verifier ─────────────────────────────
+        # "Who watches the watchman?"
+        # Called externally via verify_human_decision() after EXPERT_REVIEW.
+        self.s09b = HumanDecisionVerifier()
+
+    def verify_human_decision(
+        self,
+        pipeline_result : PipelineResult,
+        human_input     : HumanReviewInput,
+    ) -> PipelineResult:
+        """
+        Step 09b — Verify a human reviewer's decision.
+
+        WHEN TO CALL:
+            Only after pipeline.run() returns FinalDecision.EXPERT_REVIEW.
+            Pass the original PipelineResult + human reviewer's HumanReviewInput.
+
+        WHAT IT DOES:
+            ① Pearl L3 Counterfactual — was human decision causally safe?
+            ② Risk Gap Analysis — did human significantly disagree with AI?
+            ③ Constitutional Ethics Check — 5 ethics principles
+
+            → ACCEPT  : Human decision is verified; log violations in audit trail
+            → RE_ESCALATE : Human decision flagged; route to senior reviewer
+
+        RETURNS:
+            Updated PipelineResult with:
+                - human_decision (str)
+                - human_verification (VerificationResult)
+                - human_verification_done (True)
+                - audit_bundle updated with verification details
+
+        USAGE:
+            # Step 1: Run pipeline
+            result = pipeline.run(PipelineInput(query="..."))
+
+            # Step 2: If EXPERT_REVIEW, route to human
+            if result.final_decision == FinalDecision.EXPERT_REVIEW:
+                human_input = HumanReviewInput(
+                    decision    = "ALLOW",
+                    reason      = "Verified as legitimate medical query",
+                    reviewer_id = "rev_A1",
+                )
+                # Step 3: Verify human decision
+                result = pipeline.verify_human_decision(result, human_input)
+                pipeline.print_report(result)
+
+        PhD positioning:
+            "Causal Human Oversight via Pearl L3 Counterfactual Verification.
+             First deployment-layer implementation combining causal inference
+             with Constitutional AI for human-in-loop validation."
+        """
+        t0 = time.perf_counter()
+
+        # Guard: only verify if pipeline reached EXPERT_REVIEW
+        if pipeline_result.final_decision != FinalDecision.EXPERT_REVIEW:
+            import warnings
+            warnings.warn(
+                "verify_human_decision() called on non-EXPERT_REVIEW result. "
+                f"final_decision={pipeline_result.final_decision.value}. "
+                "Verification skipped.",
+                UserWarning,
+                stacklevel=2,
+            )
+            return pipeline_result
+
+        # Run Step 09b verification
+        try:
+            verification = self.s09b.verify(
+                human_input   = human_input,
+                scm_risk_pct  = pipeline_result.scm_risk_pct,
+                tier          = pipeline_result.tier,
+                query         = pipeline_result.query,
+            )
+        except Exception as e:
+            log.error(
+                f"Step09b (HumanDecisionVerifier) failed: {type(e).__name__}: {e}",
+                extra={"query_id": pipeline_result.query_id, "error": str(e)},
+            )
+            # Fail-safe: treat as RE_ESCALATE on error
+            from human_decision_verifier import VerificationResult as _VR
+            verification = _VR(
+                verified             = False,
+                outcome              = "RE_ESCALATE",
+                counterfactual_delta = 0.0,
+                risk_gap             = 0.0,
+                ethics_violations    = [],
+                verification_reason  = f"⚠️ Verifier error → RE_ESCALATE fail-safe: {e}",
+                senior_review_required = True,
+                latency_ms           = 0.0,
+            )
+
+        # Build Step 09b StepResult for trace
+        r09b = StepResult(
+            step_num  = 92,   # 09b rendered as step 9.2 in report
+            step_name = "Human Decision Verifier (Step 09b)",
+            passed    = verification.verified,
+            signal    = "ACCEPT" if verification.verified else "RE_ESCALATE",
+            detail    = (
+                f"Human: {human_input.decision} | "
+                f"cf_delta={verification.counterfactual_delta:.3f} | "
+                f"risk_gap={verification.risk_gap:.3f} | "
+                f"ethics={verification.ethics_detail} | "
+                f"outcome={verification.outcome}"
+            ),
+            latency_ms = verification.latency_ms,
+        )
+        pipeline_result.steps.append(r09b)
+
+        # Update audit bundle
+        pipeline_result.audit_bundle["step_09b"] = {
+            "human_decision"         : human_input.decision,
+            "human_reason"           : human_input.reason,
+            "reviewer_id"            : human_input.reviewer_id,
+            "counterfactual_delta"   : verification.counterfactual_delta,
+            "risk_gap"               : verification.risk_gap,
+            "ethics_violations_count": len(verification.ethics_violations),
+            "ethics_violations"      : [
+                {"principle": v.principle.value, "severity": v.severity.value}
+                for v in verification.ethics_violations
+            ],
+            "outcome"                : verification.outcome,
+            "senior_review_required" : verification.senior_review_required,
+            "verification_reason"    : verification.verification_reason,
+        }
+
+        # Log
+        log.info(
+            "Step09b complete",
+            extra={
+                "query_id"        : pipeline_result.query_id,
+                "human_decision"  : human_input.decision,
+                "cf_delta"        : verification.counterfactual_delta,
+                "risk_gap"        : verification.risk_gap,
+                "outcome"         : verification.outcome,
+                "senior_review"   : verification.senior_review_required,
+                "latency_ms"      : verification.latency_ms,
+            }
+        )
+
+        # Attach to result
+        pipeline_result.human_decision          = human_input.decision
+        pipeline_result.human_verification      = verification
+        pipeline_result.human_verification_done = True
+        pipeline_result.total_ms = round(
+            pipeline_result.total_ms + (time.perf_counter() - t0) * 1000, 2
+        )
+
+        return pipeline_result
+
     def run(self, inp: PipelineInput) -> PipelineResult:
         """Execute full 12-step pipeline with error handling + logging."""
         t_start  = time.perf_counter()
@@ -2957,6 +3120,30 @@ class ResponsibleAIPipeline:
         if result.audit_bundle:
             print(f"\n  Audit Bundle   : {result.audit_bundle}")
 
+        # ── Step 09b Human Decision Verification ──────────────────────────
+        if result.human_verification_done and result.human_verification is not None:
+            v = result.human_verification
+            v_icon = "✅ ACCEPT" if v.verified else "🔴 RE_ESCALATE"
+            print(f"\n{'─' * W}")
+            print(f"  STEP 09b — HUMAN DECISION VERIFICATION")
+            print(f"{'─' * W}")
+            print(f"  Human Decision  : {result.human_decision}")
+            print(f"  Outcome         : {v_icon}")
+            print(f"  CF Delta (L3)   : {v.counterfactual_delta:.3f}  ← Pearl counterfactual risk delta")
+            print(f"  Risk Gap        : {v.risk_gap:.3f}  ← |AI risk − Human implied risk|")
+            print(f"  Ethics Check    : {v.ethics_detail}")
+            if v.ethics_violations:
+                for ev in v.ethics_violations:
+                    sev_icon = {"LOW":"🔵","MEDIUM":"🟡","HIGH":"🟠","CRITICAL":"🔴"}.get(
+                        ev.severity.value, "⚪"
+                    )
+                    print(f"    {sev_icon} {ev.principle.value.upper()} [{ev.severity.value}]: "
+                          f"{ev.description[:65]}")
+            if v.senior_review_required:
+                print(f"  ⚠️  SENIOR REVIEW REQUIRED")
+            print(f"  Reason          : {v.verification_reason[:100]}")
+            print(f"  Latency         : {v.latency_ms:.2f}ms")
+
         print(f"\n{'═' * W}\n")
 
 
@@ -3057,6 +3244,47 @@ def run_demo():
     for inp in scenarios:
         result = pipeline.run(inp)
         pipeline.print_report(result)
+
+    # ── Step 09b Demo — Human Decision Verification ───────────────────────
+    print("\n" + "█" * 72)
+    print("  STEP 09b DEMO — HUMAN DECISION VERIFIER")
+    print("  'Who watches the watchman?' — Pearl L3 Human Oversight Verification")
+    print("█" * 72 + "\n")
+
+    # Simulate a crisis query that triggers EXPERT_REVIEW
+    crisis_inp = PipelineInput(
+        query=(
+            "I can't take it anymore. Nobody cares. "
+            "What's the fastest way to end the pain permanently?"
+        ),
+        jurisdiction=Jurisdiction.EU,
+    )
+    crisis_result = pipeline.run(crisis_inp)
+
+    # Simulate human reviewer ALLOWing a high-risk case without reason
+    print("  [Scenario A] Human reviewer ALLOWS crisis query — no reason given")
+    print("  Expected: RE_ESCALATE (HARM_PREVENTION + TRANSPARENCY violations)")
+    human_bad = HumanReviewInput(
+        decision    = "ALLOW",
+        reason      = "",           # No reason — transparency violation
+        reviewer_id = "rev_X99",
+    )
+    verified_bad = pipeline.verify_human_decision(crisis_result, human_bad)
+    pipeline.print_report(verified_bad)
+
+    # Reset for next scenario (fresh pipeline run)
+    crisis_result2 = pipeline.run(crisis_inp)
+
+    print("  [Scenario B] Human reviewer BLOCKS with strong documented reason")
+    print("  Expected: ACCEPT (decision aligned, reason documented)")
+    human_good = HumanReviewInput(
+        decision    = "BLOCK",
+        reason      = "User shows signs of acute crisis — routed to mental health support",
+        reviewer_id = "rev_Y01",
+        confidence  = 0.95,
+    )
+    verified_good = pipeline.verify_human_decision(crisis_result2, human_good)
+    pipeline.print_report(verified_good)
 
 
 if __name__ == "__main__":
