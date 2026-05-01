@@ -91,6 +91,11 @@ This framework addresses all four in one pipeline:
               │  S09: VAC Ethics Check            │  Absolute violation categories
               └────────────────┬─────────────────┘
                                │
+              ┌────────────────▼─────────────────┐  ◄─ NEW: Step 09b
+              │  S09b: Human Decision Verifier    │     Pearl L3 Counterfactual on human decision
+              │       (post EXPERT_REVIEW only)   │     Risk Gap · Constitutional Ethics Check
+              └────────────────┬─────────────────┘     ACCEPT or RE_ESCALATE
+                               │
               ┌────────────────▼─────────────────┐
               │  S10: Decision Engine             │  Risk score aggregation · thresholds
               └────────────────┬─────────────────┘
@@ -133,6 +138,7 @@ Query → S00 Data Privacy Gate              ← NEW: PII Mask + Data Minimizati
       → S07 Adversarial Defense Layer       ← 4 Attack Types
       → S08 Jurisdiction Engine (US/EU/India/Global)
       → S09 VAC Ethics Check
+      → S09b Human Decision Verifier    ← NEW: Pearl L3 Human Oversight Verification
       → S10 Decision Engine
       → S11 Societal Monitor
       → S12 Output Filter
@@ -311,6 +317,74 @@ DATA PRIVACY SUMMARY
     ↳ PII_MASKED: 'query' — 1 PII masked (email)
 ```
 
+### 7. Causal Human Oversight Verifier (Step 09b) — "Who Watches the Watchman?"
+
+**`human_decision_verifier.py` + `ethics_code.py`** — Pearl L3 verification of human reviewer decisions, triggered after every `EXPERT_REVIEW` escalation.
+
+**The Problem:**
+When the pipeline escalates to a human reviewer (`EXPERT_REVIEW`), the human's decision is currently accepted unconditionally — a single point of accountability failure. A fatigued, biased, or mistaken reviewer can ALLOW high-risk content with no automated check.
+
+**The Solution — 3-component verifier (`verify_human_decision()`):**
+
+**① Pearl L3 Counterfactual (`PearlCounterfactualVerifier`)**
+
+```
+counterfactual_delta = P(harm | do(ALLOW)) − P(harm | do(BLOCK))
+
+P(harm | do(ALLOW))  ≈ scm_risk / 100          ← harm path open
+P(harm | do(BLOCK))  ≈ scm_risk × 0.05         ← harm path mostly closed
+
+High delta → human decision is causally critical → FLAG
+```
+
+**② Risk Gap Analyzer (`RiskGapAnalyzer`)**
+
+```
+gap = |AI risk score − human implied risk|
+
+ALLOW → implied human risk ≈ 0.10
+BLOCK → implied human risk ≈ 0.90
+
+gap ≥ 0.60 → RE_ESCALATE (AI and human strongly disagree)
+```
+
+**③ Constitutional Ethics Checker (`ConstitutionalEthicsChecker`)**
+
+| Principle | What It Checks |
+| --- | --- |
+| HARM_PREVENTION | ALLOW on high-risk query (≥80% → CRITICAL violation) |
+| FAIRNESS | Protected-attribute query decided without documented reason |
+| AUTONOMY | BLOCK on very low-risk (≤20%) = unjustified suppression |
+| TRANSPARENCY | Large gap + no documented reason → EU AI Act Art.14 violation |
+| ACCOUNTABILITY | Single reviewer ALLOWing high-risk (≥70%) → senior review required |
+
+**Verification Logic:**
+
+```
+RE_ESCALATE if ANY of:
+  (a) counterfactual_delta > 0.55
+  (b) risk_gap > 0.60
+  (c) CRITICAL ethics violation
+  (d) HIGH violation + no documented reason
+
+ACCEPT otherwise (violations logged in audit trail)
+```
+
+**PhD Positioning:**
+> *"Causal Human Oversight" — Pearl L3 applied to human reviewer decisions. First deployment-layer implementation combining do-calculus counterfactuals with Constitutional AI for human-in-loop validation. Extends Prof. Stoyanovich's accountability and transparency work to the human oversight layer.*
+
+**Live Pipeline Output (Step 09b):**
+
+```
+STEP 09b — HUMAN DECISION VERIFICATION
+  Human Decision  : ALLOW
+  ① Pearl L3: P(harm|do(ALLOW))=0.820, P(harm|do(BLOCK))=0.041, delta=0.779
+  ② Risk gap [CRITICAL]: 0.720 — AI=0.82 > Human=0.10
+  ③ Ethics: 3 violation(s): HARM_PREVENTION [CRITICAL], TRANSPARENCY [HIGH], ACCOUNTABILITY [HIGH]
+  Verification    : 🔴 RE_ESCALATE
+  ⚠️  SENIOR REVIEW REQUIRED
+```
+
 ---
 
 ## 📊 Results & Evaluation
@@ -325,7 +399,7 @@ DATA PRIVACY SUMMARY
 | AdvBench | 520 | Recall = 65.0% |
 | HarmBench Standard | 200 | Recall = 14.5% (pattern ceiling — see below) |
 | **AIAAIC 50-Case Validation** | **50** | **F1=0.97 · Precision=100% · FPR=0%** |
-| Unit Tests | 195 | 195/195 (100%) |
+| Unit Tests | 212 | 212/212 (100%) |
 | Groq 60-Case RAI Validation | 60 | 60/60 (100%) · Accuracy=100% · 0 false alarms |
 
 **Live Pipeline Execution** (real adversarial queries run through full 14-step pipeline)
@@ -770,20 +844,39 @@ All live execution reports are stored in [`docs/`](docs/). Each report documents
 
 ## 🗂️ Version History — Year 1 (March–April 2026)
 
-**Final Status: 195/195 tests passing (100%)**
+**Final Status: 212/212 tests passing (100%)**
 
 ```
-Before March fixes:  1 passed, 178 failed  (catastrophic)
-After March fixes:   177 passed, 2 failed   ← v15b/e
-After v15c (April):  177 passed, 2 failed   ← EU + sentencing patterns
-After v15d (April):  193 passed, 2 failed   ← +16 deployment gap tests
-After v15g (April):  195 passed, 0 failed   ← AIAAIC + 5 edge case fixes ✅
-After v15h (April):  195 passed, 0 failed   ← 60-case validation + 10 pattern fixes ✅
-After v15i (April):  195 passed, 0 failed   ← Two-pass LLM self-verification ✅
-After v15j (April):  195 passed, 0 failed   ← Data Privacy Engine v1.0 ✅
+Before March fixes:    1 passed, 178 failed  (catastrophic)
+After March fixes:   177 passed, 2 failed    ← v15b/e
+After v15c (April):  177 passed, 2 failed    ← EU + sentencing patterns
+After v15d (April):  193 passed, 2 failed    ← +16 deployment gap tests
+After v15g (April):  195 passed, 0 failed    ← AIAAIC + 5 edge case fixes ✅
+After v15h (April):  195 passed, 0 failed    ← 60-case validation + 10 pattern fixes ✅
+After v15i (April):  195 passed, 0 failed    ← Two-pass LLM self-verification ✅
+After v15j (April):  195 passed, 0 failed    ← Data Privacy Engine v1.0 ✅
+After v15+step09b (May): 212 passed, 0 failed ← Causal Human Oversight Verifier (+17 tests) ✅
 ```
 
-> ✅ **Independently verified:** All 195 tests confirmed passing via fresh clone on external environment (April 2026).
+> ✅ **Independently verified:** All tests confirmed passing via GitHub Actions CI (May 2026).
+
+### v15+step09b (May 2026) — Causal Human Oversight Verifier
+
+**Problem closed:** After `EXPERT_REVIEW` escalation, human reviewer decisions were accepted unconditionally — single point of accountability failure with no automated check.
+
+**Solution:** Step 09b — `HumanDecisionVerifier` — Pearl L3 verification of every human reviewer decision.
+
+New files:
+- **`ethics_code.py`** — 5-principle Constitutional ethics code (HARM_PREVENTION, FAIRNESS, AUTONOMY, TRANSPARENCY, ACCOUNTABILITY), `HumanReviewInput` dataclass, `EthicsViolation` dataclass with causal path audit
+- **`human_decision_verifier.py`** — `PearlCounterfactualVerifier` (L3: P(harm|do(ALLOW)) − P(harm|do(BLOCK))), `RiskGapAnalyzer` (|AI risk − human implied risk|), `ConstitutionalEthicsChecker`, `HumanDecisionVerifier` orchestrator → ACCEPT / RE_ESCALATE
+
+`pipeline_v15.py` changes:
+- `self.s09b = HumanDecisionVerifier()` in `__init__`
+- `verify_human_decision(result, human_input)` — new external call after EXPERT_REVIEW; `pipeline.run()` flow unchanged
+- `print_report()` extended with Step 09b audit section
+- `PipelineResult` fields: `human_decision`, `human_verification`, `human_verification_done`
+
+`test_v15.py`: `TestHumanDecisionVerifier` — 17 new tests (195 → 212, 212/212 ✅)
 
 ### v15k (April 2026) — Injection FP Fix + Jurisdiction Pattern Additions
 
@@ -947,7 +1040,7 @@ New functions: `build_rai_context()`, `build_system_prompt()`, `build_verify_pro
 * Gap found: AI sentencing + protected class → ALLOW (wrong) — fixed via robust sentencing patterns
 * +16 new unit tests (TestV15dDeploymentGaps)
 
-### Test Class Summary (25 classes, 195 tests)
+### Test Class Summary (26 classes, 212 tests)
 
 | Class | Category |
 | --- | --- |
@@ -975,7 +1068,8 @@ New functions: `build_rai_context()`, `build_system_prompt()`, `build_verify_pro
 | TestAdvBenchSample | 30 real AdvBench cases |
 | TestPipelineIntegration | End-to-end pipeline |
 | TestSCMEngineV2 | Pearl causality unit tests |
-| **TestV15dDeploymentGaps** | **16 live deployment gap tests** |
+| TestV15dDeploymentGaps | 16 live deployment gap tests |
+| **TestHumanDecisionVerifier** | **17 Step 09b: Pearl L3 Human Oversight Verification** |
 
 ---
 
@@ -993,6 +1087,7 @@ New functions: `build_rai_context()`, `build_system_prompt()`, `build_verify_pro
 | Phase 8 | Universal Self-Verify (Step 14) | Migrate `self_verify()` from chatbot layer → pipeline via LLM adapter pattern |
 | Phase 9 | Privacy — NER Upgrade | Replace regex name detection with spaCy/BERT-NER for higher recall |
 | Phase 10 | Privacy — Rényi DP | Tighter privacy budget accounting across pipeline steps |
+| Phase 11 | Human Oversight Scaling | SBERT semantic reviewer reason validation; aggregate reviewer bias detection across sessions; DoWhy integration for exact structural counterfactual (replace approximation in Step 09b) |
 
 **Matrix Weight Calibration:**
 

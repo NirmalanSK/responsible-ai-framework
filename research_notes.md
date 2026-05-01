@@ -15,7 +15,7 @@ LAYER 1 — SAFETY (Steps 01, 04b, 07, 09):
   What: Harmful content detection, adversarial attack defense
   Who does this: Claude, GPT (built-in)
   Our addition: Adversarial engine (4 attack types + academic/fictional/symbolic wrappers)
-  Evidence: 195/195 tests passing (100%), 0/10 harmful output
+  Evidence: 212/212 tests passing (100%), 0/10 harmful output
 
 LAYER 2 — RESPONSIBLE AI (Steps 05, 06, 08, 11):
   What: Causal bias detection, protected group discrimination proof
@@ -810,7 +810,7 @@ Extended: Full technical plan added April 2026
   Month 8-9:  Validation
                 Amazon TCE ± 3% tolerance check
                 COMPAS flip rate ± 5% tolerance check
-                test_v15.py: verify 195/195 still passing
+                test_v15.py: verify 212/212 still passing
 
   Month 9:    FAccT/AIES paper draft begin
                 "Data-Driven SCM for Real-Time AI Safety"
@@ -4256,3 +4256,166 @@ coverage flagged as Year 2 improvement (DoWhy Phase 4).
   pipeline_v15.py:
     + _infer_findings(): conf==0.0 → return DEFAULT_FINDINGS
     + HIGH_HARM path: conf==1.0 required (not just any conf)
+
+## 🔧 SESSION LOG — May 2026 (v15+step09b — Causal Human Oversight Verifier)
+
+### Feature Built: Step 09b — Human Decision Verifier
+
+**Problem identified:**
+  After EXPERT_REVIEW escalation, human reviewer decisions were accepted
+  unconditionally — single point of accountability failure. A fatigued,
+  biased, or mistaken reviewer could ALLOW high-risk content with zero
+  automated check.
+
+  "Who watches the watchman?" — independently identified April 2026.
+  This session: implementation.
+
+**Solution: 3-component verifier — verify_human_decision()**
+
+### Component 1: PearlCounterfactualVerifier (Pearl L3)
+
+  Question: "If human had made the OPPOSITE decision, would harm change?"
+
+  Formal:
+    counterfactual_delta = P(harm | do(D=ALLOW)) − P(harm | do(D=BLOCK))
+
+  Approximation (Year 1 structural):
+    P(harm | do(ALLOW))  = scm_risk_pct / 100          ← harm path open
+    P(harm | do(BLOCK))  = scm_risk_pct × 0.05         ← 95% path closure
+    Tier amplifier: Tier1 ×1.20, Tier2 ×1.00, Tier3 ×0.80
+
+  Interpretation:
+    delta < 0.20  → human decision barely changes harm path
+    delta 0.20–0.40 → moderate causal impact
+    delta > 0.55  → RE_ESCALATE trigger (causally critical)
+
+  Year 2: Replace approximation with DoWhy structural causal model
+  (PhD Phase 4 — same interface, zero pipeline changes at migration).
+
+  PhD defense note:
+    "do(ALLOW) opens the harm path; do(BLOCK) closes it to 5% residual
+     (user may find alternative source). Conservative = intellectually honest."
+
+### Component 2: RiskGapAnalyzer
+
+  gap = |AI risk score − human implied risk|
+
+  ALLOW decision → implied human risk ≈ 0.10 (reviewer believes low risk)
+  BLOCK decision → implied human risk ≈ 0.90 (reviewer believes high risk)
+
+  Thresholds:
+    gap < 0.35  → ALIGNED — no issue
+    gap 0.35–0.50 → WARN — document
+    gap 0.50–0.60 → HIGH FLAG — reason required
+    gap > 0.60  → CRITICAL → RE_ESCALATE trigger
+
+  PhD contribution:
+    Gap distribution across N reviews → reviewer calibration score.
+    Systematic high gaps in one direction → reviewer training needed.
+    Future: Aggregate bias detection across sessions.
+
+### Component 3: ConstitutionalEthicsChecker (5 principles)
+
+  Analogous to Anthropic Constitutional AI (Bai et al., 2022)
+  but applied to the HUMAN oversight layer — not the model layer.
+
+  HARM_PREVENTION:
+    ALLOW + risk ≥ 80% → CRITICAL violation
+    ALLOW + risk ≥ 65% → HIGH violation
+    ALLOW + risk ≥ 50% → MEDIUM violation
+    BLOCK + risk < 15% → LOW (over-restriction)
+
+  FAIRNESS:
+    Protected-attribute keywords in query + no reason → MEDIUM violation
+    Prevents implicit bias in reviewer decisions
+
+  AUTONOMY:
+    BLOCK + risk < 20% → unjustified suppression → MEDIUM violation
+    "User autonomy must be respected unless harm exceeds threshold"
+
+  TRANSPARENCY:
+    risk_gap ≥ 0.35 + no documented reason → HIGH violation
+    EU AI Act Article 14: human oversight must be documentable
+
+  ACCOUNTABILITY:
+    ALLOW + risk ≥ 70% OR cf_delta ≥ 0.50 → HIGH violation
+    Single reviewer approving high-risk = single point of failure
+    → senior_review_required = True
+
+### Orchestrator: HumanDecisionVerifier
+
+  RE_ESCALATE if ANY of:
+    (a) counterfactual_delta > 0.55
+    (b) risk_gap > 0.60
+    (c) CRITICAL ethics violation
+    (d) HIGH violation + no documented reason (has_reason = False)
+
+  ACCEPT otherwise — violations logged in audit_bundle for aggregate analysis.
+
+  Senior review if ACCOUNTABILITY or HARM_PREVENTION violation at HIGH/CRITICAL.
+
+### Files Created
+
+  ethics_code.py:
+    - EthicsPrinciple enum (5 principles)
+    - ViolationSeverity enum (LOW/MEDIUM/HIGH/CRITICAL)
+    - EthicsViolation dataclass (principle + severity + description + causal_path)
+    - EthicsCode class (full rule set with thresholds, EU AI Act references)
+    - HumanReviewInput dataclass (decision + reason + reviewer_id + implied_risk property)
+
+  human_decision_verifier.py:
+    - PearlCounterfactualVerifier
+    - RiskGapAnalyzer
+    - ConstitutionalEthicsChecker
+    - HumanDecisionVerifier (orchestrates all 3)
+    - VerificationResult dataclass (full audit bundle output)
+    - Self-test: 5 scenarios covering RE_ESCALATE + ACCEPT paths
+
+  pipeline_v15.py (3 surgical changes):
+    - imports: + HumanDecisionVerifier, VerificationResult, HumanReviewInput
+    - __init__: + self.s09b = HumanDecisionVerifier()
+    - verify_human_decision(result, human_input): new external method
+      - Guard: only runs on EXPERT_REVIEW results
+      - Fail-safe: error → RE_ESCALATE (never silently pass)
+      - Appends StepResult to result.steps (step_num=92 = "9.2")
+      - Populates audit_bundle["step_09b"] with full trace
+      - Updates human_decision, human_verification, human_verification_done
+    - print_report(): + Step 09b section with violation icons
+    - PipelineResult: + human_decision, human_verification, human_verification_done fields
+
+  test_v15.py:
+    + HDV_AVAILABLE guard (import-safe — @skipUnless)
+    + TestHumanDecisionVerifier class (17 tests):
+        ① HumanReviewInput: invalid decision raises, implied_risk ALLOW/BLOCK, has_reason
+        ② CF delta: high risk ALLOW > threshold, low risk < threshold
+        ③ Risk gap: large on high-risk ALLOW, small on aligned BLOCK
+        ④ Ethics: HARM_PREVENTION critical, TRANSPARENCY no-reason, ACCOUNTABILITY single-reviewer
+        ⑤ Orchestrator: RE_ESCALATE (high risk + no reason), ACCEPT (medium + reason), ACCEPT (safe)
+        ⑥ Pipeline integration: verify_human_decision() end-to-end
+
+### Test Result
+
+  195 → 212 (+17)
+  212/212 passing ✅ (GitHub Actions CI confirmed)
+
+### PhD Defense Value
+
+  Year 1 contribution:
+    "Human-in-loop oversight with Pearl L3 causal verification.
+     Extends Constitutional AI from model-layer to deployment-layer.
+     First system to apply do-calculus to human reviewer decisions."
+
+  Examiner Q: "How do you know the human reviewer is correct?"
+  Answer: "Step 09b verifies every reviewer decision using Pearl L3
+           counterfactuals, risk gap analysis, and 5-principle ethics code.
+           CRITICAL violations or gap > 0.60 → RE_ESCALATE to senior review.
+           The audit_bundle provides a tamper-evident reviewer accountability trail."
+
+  Connection to Prof. Stoyanovich:
+    - VirnyFlow (training) → SafeNudge (generation) → our framework (deployment)
+    - Step 09b directly extends accountability + transparency to the human oversight layer
+    - Year 2: aggregate reviewer bias detection → publishable FAccT contribution
+
+  Year 2 upgrade (DoWhy integration):
+    Replace structural approximation with exact do-calculus on pipeline DAG.
+    Same interface: verify_human_decision() → zero pipeline changes at migration.
