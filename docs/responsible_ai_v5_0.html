@@ -253,7 +253,7 @@ td:first-child{text-align:left;font-weight:600;font-size:.6rem;}
     <span class="vbadge" style="background:rgba(255,229,102,.1);color:var(--yellow);border:1px solid rgba(255,229,102,.25)">+ Sparse Causal Activation Matrix</span>
     <span class="vbadge" style="background:rgba(56,182,255,.1);color:var(--blue);border:1px solid rgba(56,182,255,.25)">+ Uncertainty Scorer S04b</span>
     <span class="vbadge" style="background:rgba(192,132,252,.1);color:var(--purple);border:1px solid rgba(192,132,252,.25)">+ Pearl Full Theory v2</span>
-    <span class="vbadge" style="background:rgba(255,69,96,.1);color:var(--red);border:1px solid rgba(255,69,96,.25)">pipeline_v15h · 195/195 tests</span>
+    <span class="vbadge" style="background:rgba(255,69,96,.1);color:var(--red);border:1px solid rgba(255,69,96,.25)">pipeline_v15+step09b · 212/212 tests</span>
     <span class="vbadge" style="background:rgba(56,182,255,.1);color:var(--blue);border:1px solid rgba(56,182,255,.25)">+ Ablation Study</span>
     <span class="vbadge" style="background:rgba(163,230,53,.1);color:var(--social);border:1px solid rgba(163,230,53,.25)">+ Legal Claims Corrected</span>
     <span class="vbadge" style="background:rgba(0,255,157,.1);color:var(--green);border:1px solid rgba(0,255,157,.25)">Groq 60-case 100%</span>
@@ -329,7 +329,7 @@ td:first-child{text-align:left;font-weight:600;font-size:.6rem;}
   </div>
 
   <!-- Live Results -->
-  <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);margin-bottom:.5rem;">LIVE ACTIVATION RESULTS (pipeline_v15g)</div>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);margin-bottom:.5rem;">LIVE ACTIVATION RESULTS (pipeline_v15k)</div>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;font-size:.6rem;">
     <div style="background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:.7rem;">
       <div style="color:var(--red);font-family:'JetBrains Mono',monospace;margin-bottom:.3rem;">COMPAS Query</div>
@@ -1153,7 +1153,7 @@ function showDAG(key) {
     🔬 ABLATION STUDY — Study 1: Without SCM  |  Study 2: Without Matrix
   </div>
   <div style="font-size:.62rem;color:var(--muted);margin-bottom:1.2rem;">
-    Two independent ablation studies — live Python execution (pipeline_v15.py). Tests: 195/195 passing (100%). 25 test classes including TestV15dDeploymentGaps (16 tests from live chatbot deployment).
+    Two independent ablation studies — live Python execution (pipeline_v15.py). Tests: 212/212 passing (100%). 26 test classes including TestHumanDecisionVerifier (17 tests — Step 09b Pearl L3 Human Oversight) and TestV15dDeploymentGaps (16 tests from live chatbot deployment).
     Study 1: Remove SCM Engine. Study 2: Remove Sparse Matrix. Together proves: neither layer is decorative.
   </div>
 
@@ -1896,6 +1896,19 @@ if RCT evidence exists:
       <span class="btag">ABSOLUTE FLOOR — NO OVERRIDE</span>
     </div>
 
+    <div class="arr"><div class="al" style="background:var(--purple)"></div>
+      <div class="ah" style="border-top:6px solid var(--purple)"></div>
+      <div class="alb" style="color:var(--purple)">human oversight</div></div>
+
+    <!-- ── S09b Human Decision Verifier ── -->
+    <div class="blk" style="border-color:var(--purple);background:rgba(167,139,250,.04);position:relative">
+      <div class="sn" style="color:var(--purple)">S09b</div>
+      <div class="bl" style="color:var(--purple)">Human Decision Verifier</div>
+      <div class="bt" style="color:var(--purple)">👤 Pearl L3 Human Oversight Verification <span class="ntag ntag-new">NEW</span></div>
+      <div class="bd">"Who watches the watchman?" — Triggered only after EXPERT_REVIEW escalation. Verifies human reviewer decision using: ① Pearl L3 Counterfactual: P(harm|do(ALLOW))−P(harm|do(BLOCK)) = cf_delta · ② Risk Gap: |AI risk − human implied risk| · ③ Constitutional Ethics Check (5 principles: HARM_PREVENTION · FAIRNESS · AUTONOMY · TRANSPARENCY · ACCOUNTABILITY). Gap &gt; 0.60 or CRITICAL violation → RE_ESCALATE to senior reviewer.</div>
+      <span class="btag" style="background:rgba(167,139,250,.1);color:var(--purple)">ACCEPT / RE_ESCALATE · AUDIT TRAIL · POST EXPERT_REVIEW ONLY</span>
+    </div>
+
     <div class="arr"><div class="al" style="background:var(--red)"></div>
       <div class="ah" style="border-top:6px solid var(--red)"></div>
       <div class="alb" style="color:var(--red)">risk aggregation</div></div>
@@ -1963,9 +1976,7 @@ if RCT evidence exists:
 
   </div>
 </div>
-</div>
 <!-- end Adversarial Robustness outer wrapper -->
-</div>
 
 <!-- ── TWO-PASS LLM INTEGRATION ── -->
 <div style="max-width:820px;margin:1.6rem auto 0;font-family:'JetBrains Mono',monospace;">
@@ -2035,6 +2046,8 @@ if RCT evidence exists:
       Currently chatbot-layer-specific: <span style="color:var(--green);">governed_chatbot.py → Groq ✅</span> · <span style="color:var(--cyan);">gemini_governed_chatbot.py → Gemini ✅</span>
     </div>
   </div>
+</div>
+</div>
 </div>
 
 
@@ -2131,9 +2144,9 @@ if RCT evidence exists:
   <!-- YEAR 1 -->
   <div class="yc" style="border-left-color:var(--green)">
     <h3>✅ Year 1 — Foundation (COMPLETE)</h3>
-    <div style="font-size:.6rem;color:var(--green);font-family:'JetBrains Mono',monospace;margin-bottom:.5rem;">STATUS: DONE — Last updated April 2026 (v15k)</div>
+    <div style="font-size:.6rem;color:var(--green);font-family:'JetBrains Mono',monospace;margin-bottom:.5rem;">STATUS: DONE — Last updated May 2026 (v15+step09b)</div>
     <ul>
-      <li>14-Stage Pipeline (pipeline_v15k, S00–S13) — <span style="color:var(--green)">195/195 tests ✅</span></li>
+      <li>14-Stage Pipeline (pipeline_v15+step09b, S00–S13 + Step 09b) — <span style="color:var(--green)">212/212 tests ✅</span></li>
       <li>SCM Engine v2 — Full Pearl Theory (L1+L2+L3) ✅</li>
       <li>Adversarial Engine v5 — 4 attack types + skimming + suicide variants ✅</li>
       <li>Sparse Causal Activation Matrix 17×5 ✅</li>
@@ -2151,7 +2164,6 @@ if RCT evidence exists:
       <li style="color:var(--green)">Facial recognition covert tracking → BLOCK (v15g) ✅</li>
       <li style="color:var(--green)">Defensive intent early-exit — prevent/detect queries pass correctly (v15g) ✅</li>
       <li style="color:var(--green)">Fake news article generation → BLOCK (v15g) ✅</li>
-      <li style="color:var(--green)">195/195 tests passing — 100% ✅</li>
       <li style="color:var(--green)"><b>60-Case Groq Validation (v15h)</b> — 50/60 → 60/60 (100%) after 10 pattern fixes ✅</li>
       <li style="color:var(--green)">ContextEngine Signal 4: ≥3 BLOCKs in session → cumulative override (v15h) ✅</li>
       <li style="color:var(--green)">LLM Explained Governance — pipeline findings passed as context to Llama 3.3 70B (v15h) ✅</li>
@@ -2163,19 +2175,24 @@ if RCT evidence exists:
       <li style="color:var(--green)">Evasion normalization bug fixed — injection.analyze() now runs on original message (v15k) ✅</li>
       <li style="color:var(--green)">US/EU jurisdiction patterns added — autonomous sentencing (Due Process) + gender downscoring (AI Act Art.5) (v15k) ✅</li>
       <li style="color:var(--green)">Pipeline upgraded to 14 stages (S00–S13) — full Privacy + Output Scan coverage (v15j/v15k) ✅</li>
+      <li style="color:var(--green)"><b>dag_selector.py</b> — Dynamic DAG selection: raw prompt → keyword detection → HarmDAG → SCM Engine (v15k) ✅</li>
+      <li style="color:var(--green)"><b>output_verifier.py</b> — self_verify() extracted as model-agnostic module; Year 2: S14 universal pipeline integration ✅</li>
+      <li style="color:var(--purple)"><b>Step 09b: Causal Human Oversight Verifier (v15+step09b)</b> — Pearl L3 counterfactual + Risk Gap + Constitutional Ethics (5 principles) → ACCEPT / RE_ESCALATE ✅</li>
+      <li style="color:var(--purple)">ethics_code.py + human_decision_verifier.py + verify_human_decision() pipeline method (v15+step09b) ✅</li>
+      <li style="color:var(--purple)">TestHumanDecisionVerifier — 17 new tests · 195 → 212/212 (100%) (v15+step09b) ✅</li>
     </ul>
 
     <div style="background:rgba(0,255,157,.05);border:1px solid rgba(0,255,157,.2);border-radius:8px;padding:.7rem;margin-top:.6rem;">
       <div style="font-family:'JetBrains Mono',monospace;font-size:.56rem;color:var(--green);margin-bottom:.4rem;">🤖 GOVERNED CHATBOT — LIVE DEPLOYMENT (April 2026)</div>
       <div style="font-size:.6rem;color:var(--muted);line-height:1.8;">
         <b style="color:var(--text)">Stack:</b> pipeline_v15.py (gateway) + Llama 3.3 70B via Groq (free API)<br>
-        <b style="color:var(--text)">Flow:</b> Every query → 12-step pipeline → BLOCK/WARN/ALLOW → LLM responds only if ALLOW<br>
+        <b style="color:var(--text)">Flow:</b> Every query → 14-stage pipeline (S00–S13) → BLOCK/WARN/ALLOW → LLM responds only if ALLOW<br>
         <b style="color:var(--text)">Live results:</b>
         <span style="color:var(--green)">"What is AI?" → ALLOW (191ms)</span> ·
         <span style="color:var(--red)">"s4r1n synthesis" → BLOCK (5ms)</span> ·
         <span style="color:var(--red)">"AI sentence Black defendant" → BLOCK (5ms)</span><br>
         <b style="color:var(--yellow)">Gap found:</b> AI sentencing + protected class scored 28.6% (below 30% WARN) → was ALLOW → fixed in v15d<br>
-        <b style="color:var(--text)">PhD value:</b> "Synthetic tests: 177/179 → Live deployment found gap #178 → Fixed same session → AIAAIC validation → 195/195 (100%) final."
+        <b style="color:var(--text)">PhD value:</b> "Synthetic tests: 177/179 → Live deployment found gap #178 → Fixed same session → AIAAIC validation → 195/195 → Causal Human Oversight Verifier → 212/212 (100%) final."
       </div>
     </div>
 
@@ -2313,6 +2330,16 @@ if RCT evidence exists:
       </ul>
     </div>
 
+    <div style="background:rgba(56,182,255,.05);border:1px solid rgba(56,182,255,.15);border-radius:6px;padding:.7rem;margin-bottom:.7rem;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--cyan);margin-bottom:.4rem;">PHASE 8 — S14 Universal Self-Verify (Year 2) · output_verifier.py</div>
+      <ul style="font-size:.62rem;color:var(--muted);line-height:1.8;margin:0;padding-left:1rem;">
+        <li><b style="color:var(--text)">Goal:</b> Migrate self_verify() → pipeline as S14 via adapter pattern</li>
+        <li>output_verifier.py extracted as model-agnostic module ✅ (Year 1 complete)</li>
+        <li>ClaudeAdapter / GPTAdapter / GemmaAdapter — governance LLM-agnostic</li>
+        <li><b style="color:var(--text)">Also:</b> dag_selector.py Year 2: keyword heuristic → XLM-RoBERTa embedding classifier</li>
+      </ul>
+    </div>
+
     <div style="background:rgba(0,255,157,.05);border:2px solid rgba(0,255,157,.3);border-radius:10px;padding:.9rem;margin-bottom:.7rem;">
       <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--green);margin-bottom:.5rem;letter-spacing:.08em;">⭐ PHASE 8 — SafeNudge Integration &amp; Fairness Audit (Months 10-12) · DeepSeek + Claude</div>
 
@@ -2327,7 +2354,7 @@ if RCT evidence exists:
         </div>
         <div style="background:rgba(0,255,157,.04);border:1px solid rgba(0,255,157,.15);border-radius:6px;padding:.6rem;">
           <div style="font-family:'JetBrains Mono',monospace;font-size:.54rem;color:var(--green);margin-bottom:.3rem;">Our Framework</div>
-          <div style="font-size:.58rem;color:var(--muted);line-height:1.6;">Operates <b style="color:var(--text)">outside model</b> as middleware<br>12-step pipeline + SCM + audit trail<br>Safety + Fairness + Legal proof</div>
+          <div style="font-size:.58rem;color:var(--muted);line-height:1.6;">Operates <b style="color:var(--text)">outside model</b> as middleware<br>14-stage pipeline (S00–S13) + SCM + audit trail<br>Safety + Fairness + Legal proof</div>
         </div>
       </div>
 
@@ -2410,7 +2437,7 @@ if RCT evidence exists:
         </div>
         <div style="background:rgba(192,132,252,.04);border:1px solid rgba(192,132,252,.15);border-radius:6px;padding:.6rem;">
           <div style="font-family:'JetBrains Mono',monospace;font-size:.54rem;color:var(--purple);margin-bottom:.3rem;">Our Framework</div>
-          <div style="font-size:.58rem;color:var(--muted);line-height:1.6;"><b style="color:var(--text)">Full Pearl L1+L2+L3</b> (PNS/PN/PS)<br>Real-time middleware · US+EU<br>195/195 tests working</div>
+          <div style="font-size:.58rem;color:var(--muted);line-height:1.6;"><b style="color:var(--text)">Full Pearl L1+L2+L3</b> (PNS/PN/PS)<br>Real-time middleware · US+EU<br>212/212 tests working</div>
         </div>
       </div>
 
@@ -2541,7 +2568,6 @@ if RCT evidence exists:
   </div>
 
 </div>
-</div>
 
 <div id="adv" class="panel">
 <div style="max-width:780px;margin:0 auto;font-family:'DM Sans',sans-serif;">
@@ -2600,17 +2626,17 @@ def generate_attack_variants(known_prompt):<br>
         </div>
       </div>
 
-      <div style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--muted);">↓ attack variants sent through 12-step pipeline</div>
+      <div style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--muted);">↓ attack variants sent through 14-stage pipeline (S00–S13)</div>
 
       <div style="display:flex;align-items:flex-start;gap:.7rem;">
         <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:#ff6b35;min-width:60px;padding-top:.1rem;">PHASE 2</div>
         <div style="flex:1;background:rgba(255,107,53,.06);border:1px solid rgba(255,107,53,.2);border-radius:8px;padding:.7rem;">
           <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:#ff6b35;margin-bottom:.3rem;">🔍 VULNERABILITY DETECTION</div>
-          <div style="font-size:.67rem;color:var(--muted);line-height:1.55;margin-bottom:.5rem;">Each attack variant runs through all 12 steps. System logs which steps flagged it, which passed. If harmful output generated → vulnerability confirmed → which step failed identified.</div>
+          <div style="font-size:.67rem;color:var(--muted);line-height:1.55;margin-bottom:.5rem;">Each attack variant runs through all 14 stages (S00–S13). System logs which steps flagged it, which passed. If harmful output generated → vulnerability confirmed → which step failed identified.</div>
           <div style="background:rgba(0,0,0,.5);border-radius:6px;padding:.6rem;font-family:'JetBrains Mono',monospace;font-size:.54rem;color:var(--green);line-height:1.9;">
 # Vulnerability Scanner<br>
 def scan_pipeline(attack_variant):<br>
-&nbsp;&nbsp;results = run_all_12_steps(attack_variant)<br>
+&nbsp;&nbsp;results = run_all_14_stages(attack_variant)<br>
 &nbsp;&nbsp;if results.harmful_output_generated:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;failed_step = find_first_failure(results)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;vulnerability_log.add({<br>
@@ -2722,7 +2748,7 @@ def verify_patch(patch, original_attack):<br>
   <!-- Hero -->
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.2rem;margin-bottom:1.2rem;text-align:center;">
     <div style="font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--green);margin-bottom:.4rem;">⚡ TIERED SCANNING — Risk-Proportionate Processing</div>
-    <div style="font-size:.7rem;color:var(--muted);line-height:1.7;">எல்லா questions-க்கும் 12 steps run ஆகுது இல்ல — risk level பொறுத்து தேவையான steps மட்டும் activate ஆகும்.<br>
+    <div style="font-size:.7rem;color:var(--muted);line-height:1.7;">எல்லா questions-க்கும் 14 stages run ஆகுது இல்ல — risk level பொறுத்து தேவையான steps மட்டும் activate ஆகும்.<br>
     Airport analogy: Domestic passenger → basic scan. International → full scan. Flagged → complete check.</div>
     <div style="display:flex;gap:.4rem;flex-wrap:wrap;justify-content:center;margin-top:.7rem;">
       <span style="padding:.2rem .8rem;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.56rem;border:1px solid var(--green);color:var(--green);background:rgba(0,255,157,.08)">TIER 1 · Light · ~150ms</span>
@@ -2766,7 +2792,7 @@ def verify_patch(patch, original_attack):<br>
       <div style="font-size:.8rem;font-weight:700;color:var(--red);margin-bottom:.4rem;">~600ms · risk &gt; 0.7</div>
       <div style="font-size:.66rem;color:var(--muted);line-height:1.6;margin-bottom:.5rem;">"How to bypass AI safety?" Sensitive political/medical/legal/harmful content.</div>
       <div style="font-family:'JetBrains Mono',monospace;font-size:.56rem;line-height:1.9;">
-        <span style="color:var(--red)">✓</span> All 12 steps active<br>
+        <span style="color:var(--red)">✓</span> All 14 stages active (S00–S13)<br>
         <span style="color:var(--red)">+</span> Step 5 — Open Category<br>
         <span style="color:var(--red)">+</span> Step 11 — Societal Monitor<br>
         <span style="color:var(--red)">+</span> Adversarial Layer check<br>
@@ -2821,7 +2847,7 @@ def decide_tier(query, context, emotion):<br>
       <div id="activeSteps" style="display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.8rem;"></div>
 
       <!-- Latency bar -->
-      <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);margin-bottom:.3rem;">// ESTIMATED LATENCY vs FULL 12-STEP</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);margin-bottom:.3rem;">// ESTIMATED LATENCY vs FULL 14-STAGE</div>
       <div style="background:rgba(255,255,255,.05);border-radius:6px;height:10px;margin-bottom:.2rem;overflow:hidden;">
         <div id="latencyBar" style="height:100%;border-radius:6px;transition:width .6s;"></div>
       </div>
@@ -2835,7 +2861,7 @@ def decide_tier(query, context, emotion):<br>
     <div style="display:flex;justify-content:center;gap:2rem;flex-wrap:wrap;">
       <div>
         <div style="font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:700;color:var(--red)">600ms</div>
-        <div style="font-size:.62rem;color:var(--muted)">Naive 12-step (all queries)</div>
+        <div style="font-size:.62rem;color:var(--muted)">Naive 14-stage (all queries)</div>
       </div>
       <div style="font-size:1.5rem;color:var(--muted);align-self:center">→</div>
       <div>
@@ -2901,9 +2927,9 @@ def decide_tier(query, context, emotion):<br>
       border-radius:10px;border:2px solid;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:.75rem;">
     </div>
 
-    <!-- 12-Step Trace -->
+    <!-- 14-Stage Trace -->
     <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--green);
-      margin-bottom:.7rem;letter-spacing:.08em;">// COMPLETE 12-STEP TRACE — Correct Order</div>
+      margin-bottom:.7rem;letter-spacing:.08em;">// COMPLETE 14-STAGE TRACE (S00–S13) — Correct Order</div>
     <div id="stepTrace" style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem;"></div>
 
     <!-- Final Verdict -->
@@ -3132,9 +3158,9 @@ def decide_tier(query, context, emotion):<br>
   <div style="background:linear-gradient(135deg,rgba(251,146,60,.08),rgba(255,229,102,.06));border:1px solid rgba(251,146,60,.3);border-radius:14px;padding:1.3rem;margin-bottom:1.2rem;">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.8rem;">
       <div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--orange);margin-bottom:.3rem;letter-spacing:.08em;">🧪 SIMULATION MODE — DeepSeek Suggestion · v15g</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--orange);margin-bottom:.3rem;letter-spacing:.08em;">🧪 SIMULATION MODE — DeepSeek Suggestion · v15k</div>
         <div style="font-size:.72rem;color:var(--text);font-weight:600;margin-bottom:.3rem;">Log decisions without enforcing them</div>
-        <div style="font-size:.65rem;color:var(--muted);line-height:1.7;">All queries processed through full 12-step pipeline. Results logged but <b style="color:var(--yellow)">never enforced</b>.<br>Use this to validate framework before production — collect ground truth, tune thresholds, catch false positives.</div>
+        <div style="font-size:.65rem;color:var(--muted);line-height:1.7;">All queries processed through full 14-stage pipeline (S00–S13). Results logged but <b style="color:var(--yellow)">never enforced</b>.<br>Use this to validate framework before production — collect ground truth, tune thresholds, catch false positives.</div>
       </div>
       <!-- Master Toggle -->
       <div style="text-align:center;">
@@ -3287,9 +3313,9 @@ def decide_tier(query, context, emotion):<br>
 </div>
 
 <div class="note">
-  <span class="g">v5.0 Year 1 Complete = Sparse Causal Activation Matrix (17×5 central node cascade) + Uncertainty Scorer Step04b (OOD detection, 10 grey-area patterns) + scm_engine_v2 (Full Pearl: PNS/PN/PS, NDE/NIE, 17 DAGs, Legal Score) + pipeline_v15k (195/195 tests · 14 stages S00–S13) + adversarial_engine_v5 (injection FP fixed) + data_privacy_engine v1.0 (GDPR Art.25) + Two-Pass LLM Self-Verification + 60-Case Groq Validation (100%)</span><br>
+  <span class="g">v5.0 Year 1 Complete = Sparse Causal Activation Matrix (17×5 central node cascade) + Uncertainty Scorer Step04b (OOD detection, 10 grey-area patterns) + scm_engine_v2 (Full Pearl: PNS/PN/PS, NDE/NIE, 17 DAGs, Legal Score) + pipeline_v15+step09b (212/212 tests · 14 stages S00–S13 + Step 09b Human Decision Verifier) + adversarial_engine_v5 (injection FP fixed) + data_privacy_engine v1.0 (GDPR Art.25) + Two-Pass LLM Self-Verification + 60-Case Groq Validation (100%) + Causal Human Oversight Verifier (Pearl L3 + Constitutional Ethics)</span><br>
   <span class="g">v4.5 = v4.4 + Tiered Scanning (70% faster · zero safety compromise · continuous red-teaming outside VAC)</span><br>
-  <span style="color:#ff6b35">Living System: Query-level (12 steps) + System-level (Open Category) + Security-level (Adversarial)</span><br>
+  <span style="color:#ff6b35">Living System: Query-level (14 stages) + System-level (Open Category) + Security-level (Adversarial)</span><br>
   <span class="p">SCM = Expert Witness · Matrix = Judge · Rules replace subjective with empirical</span><br>
   9 Components · 17 Problems · 5 Paths · 3-Level Causal Reasoning · Auto-Calibrating Weights<br>
   <span class="y">"Rules can be hacked. Values cannot — if they are truly internalized."</span>
@@ -3549,7 +3575,7 @@ Data: 100 resumes — 60 male, 40 female, similar qualifications`,
         title:"📥 Incoming Question",
         input:"Recruitment query + 100 resumes as input",
         finding:"Raw input received. High-stakes domain (hiring) detected → Tier 3 activated automatically.",
-        output:"All 12 steps queued." },
+        output:"All 14 stages queued (S00–S13)." },
       { n:2,  active:true,  color:"#22d3ee",
         title:"🧵 Conversation Graph",
         input:"Session history — is this a one-off query or part of a pattern?",
@@ -3632,7 +3658,7 @@ Defendant: Black male, age 24, minor prior offenses`,
       { n:1,  active:true,  color:"#38b6ff", title:"📥 Incoming Question",
         input:"Risk assessment query + defendant profile",
         finding:"Criminal justice domain detected. Race-related features in input. Automatic Tier 3.",
-        output:"All 12 steps activated. High-stakes flag set." },
+        output:"All 14 stages activated (S00–S13). High-stakes flag set." },
       { n:2,  active:true,  color:"#22d3ee", title:"🧵 Conversation Graph",
         input:"Session context — single assessment or pattern of assessments?",
         finding:"Single query. No drift. Context: judicial decision support system. History clean.",
@@ -4357,7 +4383,7 @@ function exportSimCSV() {
 
   <!-- Latency breakdown table -->
   <div class="lat-card">
-    <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--cyan);margin-bottom:.8rem;">📐 LATENCY BREAKDOWN — 12-STEP PIPELINE</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--cyan);margin-bottom:.8rem;">📐 LATENCY BREAKDOWN — 14-STAGE PIPELINE (S00–S13)</div>
     <div style="overflow-x:auto;">
       <table style="width:100%;border-collapse:collapse;font-size:.6rem;">
         <thead>
@@ -4923,8 +4949,8 @@ hfCalc();
 
     <!-- Pipeline -->
     <div style="margin:.4rem auto;max-width:340px;border:1px solid var(--scm);border-radius:8px;padding:.55rem 1rem;background:rgba(139,92,246,.03);">
-      <div style="font-size:.66rem;color:var(--scm);font-weight:700;">Pipeline v15g</div>
-      <div style="font-size:.52rem;color:var(--muted);margin-top:.1rem;">S01→S12 · SCM + Adversarial + VAC · 195/195 tests</div>
+      <div style="font-size:.66rem;color:var(--scm);font-weight:700;">Pipeline v15k</div>
+      <div style="font-size:.52rem;color:var(--muted);margin-top:.1rem;">S01→S12 · SCM + Adversarial + VAC · 212/212 tests</div>
       <div style="margin-top:.4rem;display:flex;gap:.35rem;">
         <span style="font-size:.5rem;background:rgba(139,92,246,.08);color:var(--scm);border-radius:4px;padding:.1rem .3rem;">Pearl L1–L3</span>
         <span style="font-size:.5rem;background:rgba(139,92,246,.08);color:var(--scm);border-radius:4px;padding:.1rem .3rem;">17×5 Matrix</span>
@@ -5411,6 +5437,8 @@ hfCalc();
     <div style="display:flex;flex-direction:column;gap:.4rem;font-size:.58rem;color:var(--muted);line-height:1.7;">
       <div><span style="color:var(--green);">✅</span> pipeline_v15.py — untouched. All changes at chatbot layer only.</div>
       <div><span style="color:var(--green);">✅</span> Harmful queries never reach LLM as answer prompts — only as "explain why blocked".</div>
+      <div><span style="color:var(--cyan);">✅</span> output_verifier.py — self_verify() extracted as standalone model-agnostic module (Year 2: S14).</div>
+      <div><span style="color:var(--cyan);">✅</span> dag_selector.py — bridges raw prompt → HarmDAG → SCM Engine domain selection.</div>
       <div><span style="color:var(--green);">✅</span> Same SCM + Matrix + Pearl analysis that governs decisions also governs explanations.</div>
       <div><span style="color:var(--green);">✅</span> Works for both Groq (Llama 3.3 70B) and Gemini (gemini-2.0-flash).</div>
       <div><span style="color:var(--scm);">→</span> This is the "external causal + matrix → additional reasoning → better response" architecture.</div>
@@ -5436,12 +5464,16 @@ hfCalc();
     <div style="font-size:.58rem;color:var(--green);letter-spacing:.1em;margin-bottom:1rem;">// REPOSITORY STRUCTURE — 46 FILES</div>
     <pre style="font-size:.58rem;color:var(--text);line-height:1.9;margin:0;white-space:pre;">responsible-ai-framework/
 │
-├── <span style="color:var(--cyan);">pipeline_v15.py</span>              <span style="color:var(--muted);"># 14-stage pipeline orchestrator (S00–S13) · v15k · injection FP fix</span>
+├── <span style="color:var(--cyan);">pipeline_v15.py</span>              <span style="color:var(--muted);"># 14-stage pipeline orchestrator (S00–S13) · v15+step09b · verify_human_decision()</span>
+├── <span style="color:var(--cyan);">human_decision_verifier.py</span>   <span style="color:var(--purple);"># Step 09b · Pearl L3 Counterfactual + Risk Gap + Constitutional Ethics · NEW ✨</span>
+├── <span style="color:var(--cyan);">ethics_code.py</span>               <span style="color:var(--purple);"># 5-principle ethics code · HumanReviewInput · EthicsViolation · NEW ✨</span>
+├── <span style="color:var(--cyan);">dag_selector.py</span>              <span style="color:var(--muted);"># Dynamic DAG selection · keyword→domain→HarmDAG · Year 2: XLM-RoBERTa</span>
+├── <span style="color:var(--cyan);">output_verifier.py</span>           <span style="color:var(--muted);"># Two-pass self-verify · model-agnostic · Year 2: S14 pipeline integration</span>
 ├── <span style="color:var(--cyan);">data_privacy_engine.py</span>       <span style="color:var(--muted);"># Data Privacy Engine v1.0 · PII + DP(ε=1.0) + 6-jurisdiction minimization</span>
 ├── <span style="color:var(--cyan);">scm_engine_v2.py</span>             <span style="color:var(--muted);"># Full Pearl Theory engine · L1+L2+L3 · NDE/NIE · PNS/PN/PS bounds</span>
 ├── <span style="color:var(--cyan);">adversarial_engine_v5.py</span>     <span style="color:var(--muted);"># 4 attack types · prompt injection · authority spoof · role-play · obfuscation</span>
 ├── <span style="color:var(--cyan);">context_engine.py</span>            <span style="color:var(--muted);"># Multi-turn attack detection · SQLite session memory · 4 escalation signals</span>
-├── <span style="color:var(--cyan);">test_v15.py</span>                  <span style="color:var(--green);">195/195 tests passing (100%) ✅</span>
+├── <span style="color:var(--cyan);">test_v15.py</span>                  <span style="color:var(--green);">212/212 tests passing (100%) ✅</span>
 ├── requirements.txt             <span style="color:var(--muted);"># langdetect · deep-translator · scikit-learn · numpy · groq</span>
 ├── README.md                    <span style="color:var(--muted);"># Full framework documentation + NIST/ISO/IEEE standards comparison</span>
 ├── LICENSE
@@ -5466,7 +5498,7 @@ hfCalc();
 │   └── simulation_report.md
 │
 └── <span style="color:var(--blue);">docs/</span>
-    ├── <span style="color:var(--cyan);">responsible_ai_v5_0.html</span>     <span style="color:var(--muted);"># ← YOU ARE HERE · Interactive dashboard (29 tabs)</span>
+    ├── <span style="color:var(--cyan);">responsible_ai_v5_0.html</span>     <span style="color:var(--muted);"># ← YOU ARE HERE · Interactive dashboard (30 tabs)</span>
     ├── framework_explanation.html       <span style="color:var(--muted);"># Pearl→Matrix link · 14-stage pipeline · Step 05 trace</span>
     ├── rai_dynamic_assessment.html      <span style="color:var(--muted);"># Live sliders → 17×5 matrix activation + 14-stage trace</span>
     ├── pipeline_10case_report_v15k.html <span style="color:var(--muted);"># 10-case full pipeline trace · 7B · 2W · 1A</span>
@@ -5481,7 +5513,7 @@ hfCalc();
   <!-- Key Stats Row -->
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-top:1rem;">
     <div style="border:1px solid rgba(0,255,157,.25);border-radius:8px;padding:.8rem;text-align:center;background:rgba(0,255,157,.04);">
-      <div style="font-size:1.1rem;font-weight:700;color:var(--green);">195/195</div>
+      <div style="font-size:1.1rem;font-weight:700;color:var(--green);">212/212</div>
       <div style="font-size:.52rem;color:var(--muted);margin-top:.2rem;">Unit Tests Passing</div>
     </div>
     <div style="border:1px solid rgba(56,182,255,.25);border-radius:8px;padding:.8rem;text-align:center;background:rgba(56,182,255,.04);">
@@ -5493,7 +5525,7 @@ hfCalc();
       <div style="font-size:.52rem;color:var(--muted);margin-top:.2rem;">Groq Validation (100%)</div>
     </div>
     <div style="border:1px solid rgba(167,139,250,.25);border-radius:8px;padding:.8rem;text-align:center;background:rgba(167,139,250,.04);">
-      <div style="font-size:1.1rem;font-weight:700;color:var(--purple);">46 Files</div>
+      <div style="font-size:1.1rem;font-weight:700;color:var(--purple);">48 Files</div>
       <div style="font-size:.52rem;color:var(--muted);margin-top:.2rem;">Repository Total</div>
     </div>
   </div>
@@ -5507,7 +5539,7 @@ pip install langdetect deep-translator scikit-learn numpy groq
 <span style="color:var(--green);"># Run full pipeline demo (14 stages active)</span>
 python pipeline_v15.py
 
-<span style="color:var(--green);"># Run all 195 unit tests</span>
+<span style="color:var(--green);"># Run all 212 unit tests</span>
 python -m unittest test_v15
 
 <span style="color:var(--green);"># Research-grade evaluation metrics</span>
