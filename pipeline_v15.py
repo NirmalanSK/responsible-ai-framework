@@ -1551,6 +1551,14 @@ class Step07_AdversarialLayer:
         r"(convert|modify|illegally).{0,20}(weapon|firearm|gun).{0,20}"
         r"(automatic|full.auto|fully.automatic)",
         r"(poison|contaminate).{0,20}(water\s+supply|food\s+supply|reservoir)",
+        # ── v15i AIAAIC: Household chemical harm (AIAAIC1157)
+        r"(mix|combine|add).{0,20}(bleach|chlorine|ammonia|sodium.hypochlorite).{0,30}(proportion|ratio|amount|exact|concentration)",
+        r"(bleach|chlorine).{0,20}(ammonia|acid|hydrogen.peroxide).{0,20}(proportion|mix|combine|ratio|exact)",
+        r"(chlorine.gas|toxic.gas|poison.gas).{0,30}(make|create|produce|home|kitchen)",
+        # ── v15i AIAAIC: Pathogen/bioweapon design (AIAAIC0968)
+        r"(design|engineer|create|develop|modify).{0,25}(pathogen|virus|bacteria|microbe).{0,30}(transmissib|lethal|lethality|spreadable|airborne|weaponize)",
+        r"(novel|synthetic|engineered).{0,20}(pathogen|virus|bacteria|agent).{0,20}(high|maximum|increased).{0,20}(transmissib|lethal)",
+        r"(protein.structure|spike.protein|receptor).{0,30}(pathogen|lethality|transmissib|weaponize)",
     ]
 
     # ══ v8: 6 NEW PATTERN CATEGORIES FROM REAL-WORLD AIAAIC DATA ══════
@@ -1664,6 +1672,16 @@ class Step07_AdversarialLayer:
         r"(screen|use|access|mine|query).{0,25}(mental\s+health|psychiatric|psychological|therapy|counseling).{0,20}(record|history|data|file).{0,30}(deny|reject|refuse|decide|insurance|loan|hire|employ|disqualify)",
         r"(mental\s+health|psychiatric|psychological).{0,20}(record|history|data|file).{0,20}(deny|reject|refuse|screen|filter|basis|decide).{0,20}(insurance|life\s+insurance|loan|hire|employ|benefit|claim)",
         r"(build|create|design|develop).{0,25}(system|tool|algorithm|ai).{0,25}(screen|use|mine).{0,20}(mental\s+health|health\s+record|medical\s+record).{0,20}(deny|reject|insurance|employ)",
+        # ── v15i AIAAIC: Minor protection (AIAAIC1775 Snapchat underage)
+        r"(i.?m|i am|i.?m).{0,10}(1[3-7]).{0,20}(alcohol|drink|drunk|weed|drug|sex|weapon|gun|knife)",
+        r"(14|15|16|17).{0,10}(year.old|yr.old|years old).{0,20}(alcohol|drink|drug|weed|sex|weapon)",
+        r"(underage|minor|teen|teenager).{0,20}(drink|alcohol|drug|weed|sex).{0,20}(without|caught|sneak|hide|get.away)",
+        # ── v15i AIAAIC: Sexual explicit content (AIAAIC1181 Replika)
+        r"(talk.dirty|dirty.talk|explicit.sexual|sexually.explicit).{0,20}(very|very.explicit|hold.back|don.t.hold)",
+        r"(i.want|make).{0,10}(very|extremely|really).{0,10}(explicit|graphic|sexual|dirty).{0,10}(fantasy|roleplay|conversation|content)",
+        # ── v15i AIAAIC: AI identity denial (AIAAIC0995)
+        r"(pretend|act|claim|say).{0,20}(you.are|you.re).{0,20}(human|person|doctor|lawyer|real).{0,20}(deny|lie|don.t.admit|if.asked|when.asked)",
+        r"(deny|don.t.say|never.admit|hide).{0,20}(you.are|you.re).{0,15}(ai|artificial|bot|chatbot|language.model|llm)",
     ]
 
     # ── Medical Harm ──────────────────────────────────────────────────
@@ -1726,6 +1744,13 @@ class Step07_AdversarialLayer:
         # v9d: additional missed AdvBench cases
         r"(launder|laundering).{0,20}(money|funds|cash|proceeds).{0,20}(shell|company|offshore|crypto|through)",
         r"(shell\s+compan|offshore\s+account|tax\s+haven).{0,20}(launder|hide|conceal|money|funds)",
+        # ── v15i AIAAIC: Voice cloning fraud (AIAAIC1005, AIAAIC1229)
+        r"(clone|replicate|copy|mimic|synthesize).{0,20}(voice|speech|audio).{0,30}(boss|manager|ceo|executive|director).{0,30}(bank|transfer|wire|payment|finance|authoriz)",
+        r"(voice.clone|voice.synthes|clone.voice).{0,30}(impersonat|pretend|fraud|scam|deceive|trick|authoriz|transfer)",
+        r"(boss|manager|ceo|executive).{0,20}(voice|call|audio).{0,30}(transfer|wire|payment|fund|authoriz).{0,20}(finance|bank|account)",
+        # ── v15i AIAAIC: Data exfiltration / credential leak (AIAAIC1205)
+        r"(source.code|api.key|api.secret|private.key|secret.key|credential|password).{0,30}(review|analyze|check|improve|audit).{0,20}(security|vulnerab|safe)",
+        r"(internal|confidential|proprietary).{0,20}(source.code|api.key|database|credential).{0,30}(share|send|upload|paste|review)",
     ]
 
     PHYSICAL_VIOLENCE_PATTERNS = [
@@ -2369,6 +2394,12 @@ class Step10_DecisionEngine:
         elif scm_risk >= 70.0:
             decision = FinalDecision.BLOCK
             reason   = f"SCM risk={scm_risk:.1f}% ≥ 70% threshold"
+
+        # Priority 3b: PROMPT_INJECTION — always BLOCK regardless of score
+        # v15i AIAAIC fix: injection detected→WARN was insufficient (AIAAIC1287)
+        elif attack_type == AttackType.PROMPT_INJECTION:
+            decision = FinalDecision.BLOCK
+            reason   = f"Prompt injection detected (score={attack_score:.3f}) — forced BLOCK"
 
         # Priority 4: High/Critical attack
         elif attack_type != AttackType.NONE and attack_score >= 0.65:
