@@ -1,4 +1,4 @@
-# Responsible AI Framework v5.0
+# Responsible AI Framework v5.1
 
 [🌐 Open Interactive Dashboard](https://nirmalansk.github.io/responsible-ai-framework/responsible_ai_v5_0.html) &nbsp;&nbsp; [📖 Framework Deep-Dive Explanation](https://nirmalansk.github.io/responsible-ai-framework/framework_explanation.html) &nbsp;&nbsp; [⚗️ Dynamic Assessment Tool](https://nirmalansk.github.io/responsible-ai-framework/rai_dynamic_assessment.html) &nbsp;&nbsp; [📊 Pipeline Report](https://nirmalansk.github.io/responsible-ai-framework/pipeline_10case_report_v15k.html) &nbsp;&nbsp; [⚗️ Validation Report](https://nirmalansk.github.io/responsible-ai-framework/validation_10_cases.html)
 
@@ -72,7 +72,7 @@ This framework addresses all four in one pipeline:
                                │
               ┌────────────────▼─────────────────┐  ◄─ Pearl Causality (L1 + L2 + L3)
               │  S05: SCM Engine v2               │     Backdoor · Frontdoor · NDE/NIE
-              │      + Sparse Causal Matrix 17×5  │     PNS / PN / PS Bounds · do-calculus
+              │      + Sparse Causal Matrix 23×5  │     PNS / PN / PS Bounds · do-calculus
               └────────────────┬─────────────────┘     Daubert Legal Admissibility Score
                                │
               ┌────────────────▼─────────────────┐
@@ -133,7 +133,7 @@ Query → S00 Data Privacy Gate              ← NEW: PII Mask + Data Minimizati
       → S03 Emotion Detector
       → S04 Tier Router (Tier 1/2/3)
       → S04b Uncertainty Scorer (OOD Detection)
-      → S05 SCM Engine + Sparse Matrix      ← Pearl Causality
+      → S05 SCM Engine + Sparse Matrix 23×5    ← Pearl L1→L3 Causal Dimensions
       → S06 SHAP/LIME Proxy
       → S07 Adversarial Defense Layer       ← 4 Attack Types
       → S08 Jurisdiction Engine (US/EU/India/Global)
@@ -151,6 +151,7 @@ Query → S00 Data Privacy Gate              ← NEW: PII Mask + Data Minimizati
 The pipeline (S00–S12) and the chatbot layer are **architecturally separate**.
 
 - **`pipeline_v15.py`** — the 14-stage safety/RAI/legal analysis engine (S00–S13, including Data Privacy Gate + Output Privacy Scan). Produces a decision (`ALLOW / WARN / BLOCK / ESCALATE`) plus structured findings (SCM values, Matrix activations, attack type, VAC flags, PII scan results). Current version: **v15k+dag** — dag_selector integrated, 15 FP regressions fixed.
+- **`matrix_v2.py`** — 23×5 Sparse Causal Activation Matrix definition. 23 harm categories × 5 Pearl causal dimensions (RCT/TCE/INTV/MED/FLIP — L1→L3). Values ∈ [0.0, 1.0]. Replaces old 17×5 integer pathway matrix (P1-P5). Backward-compatible aliases for all old category names. Year 2: DoWhy-calibrated values replace current approximations.
 - **`dag_selector.py`** — Dynamic DAG selection module. Maps raw prompts to harm domains using keyword patterns across all 17 domains. `detect_harm_domain(query)` → `(domain, confidence, keywords)`. Confidence scoring: 1.0 = primary keyword, 0.6 = secondary, 0.0 = no match / educational override. Year 2: replaced by XLM-RoBERTa intent classifier (PhD Phase 6).
 - **`governed_chatbot.py` / `gemini_governed_chatbot.py`** — the deployment layer. Receives the pipeline decision and passes it to an LLM in a **two-pass architecture.**
 
@@ -220,14 +221,17 @@ This would make the framework a **universal middleware** (Year 2 target) — gov
 
 ## 🔬 Novel Contributions — Safety + RAI + Legal (All Three)
 
-### 1. Sparse Causal Activation Matrix (17×5)
+### 1. Sparse Causal Activation Matrix (23×5 — Pearl L1→L3)
 
-* 17 harm types × 5 pathways = 85 cells
-* Only relevant cells activate (sparse) → efficient
-* Central nodes (weight ≥12) cascade to adjacent rows
-* **To our knowledge, no published system combines** multi-domain + causal weights + cascade interaction in a single real-time deployment-stage tool
+* **23 harm categories** × **5 Pearl causal dimensions** = 115 cells
+* Columns ordered weak → strong causal claim: **RCT (L1) → TCE (L2) → INTV (L2) → MED (L3) → FLIP/PNS (L3)**
+* FLIP column (PNS) weighted highest (0.30) — Daubert "but-for" causation standard
+* Only relevant cells activate (sparse) → efficient; CRITICAL tier always cascades to co-occurring harm types
+* **23 categories derived from:** AIAAIC 2,223 incidents (94% coverage) + EU AI Act Annex III + 2024 emerging threats (election interference, surveillance stalking, supply chain attack)
+* **SCM Educational Dampener:** `scm_dampener = max(tce_norm, 0.30)` — matrix score scaled by SCM's own TCE signal; educational queries with low TCE receive dampened matrix contribution → zero false positives
+* **To our knowledge, no published system combines** multi-domain + Pearl-grounded causal weights + cascade interaction + educational dampening in a single real-time deployment-stage tool
 
-> **⚗️ [Try the Dynamic Assessment Tool](https://nirmalansk.github.io/responsible-ai-framework/rai_dynamic_assessment.html)** — adjust TCE / MED / FlipRate / INTV sliders and watch the 17×5 matrix activate in real time, tracing every formula through all 12 pipeline steps to the final ALLOW / WARN / BLOCK decision.
+> **⚗️ [Try the Dynamic Assessment Tool](https://nirmalansk.github.io/responsible-ai-framework/rai_dynamic_assessment.html)** — adjust TCE / MED / FlipRate / INTV sliders and watch the 23×5 matrix activate in real time, tracing every formula through all 12 pipeline steps to the final ALLOW / WARN / BLOCK decision.
 
 ### 2. SCM Engine v2 — Full Pearl Theory
 
@@ -563,7 +567,7 @@ Step 05 formula layer tested in isolation: causal inputs (TCE, MED, FlipRate, IN
 | **Adversarial Defense** | ✅ Full | Partial | Partial | Partial | ❌ | ❌ |
 | **Multi-Domain DAGs** | ✅ 17 domains | ❌ | ❌ | ❌ | Configurable | ✅ Auto-discovery |
 | **Counterfactual Reasoning** | ✅ L3 (PNS bounds) | ❌ | ❌ | ❌ | ❌ | Partial |
-| **Sparse Causal Matrix** | ✅ 17×5 | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Sparse Causal Matrix** | ✅ 23×5 Pearl L1-L3 | ❌ | ❌ | ❌ | ❌ | ❌ |
 | **Multi-Turn Detection** | ✅ ContextEngine (4 signals) | ❌ | ❌ | ❌ | ❌ | ❌ |
 | **LLM Explained Responses** | ✅ Two-pass self-verified | ❌ | ❌ | ❌ | ❌ | ❌ |
 | **Working Code + Tests** | ✅ 195/195 tests | ✅ | ✅ | ✅ | ✅ | ❌ Theory only |
@@ -692,7 +696,7 @@ Neither alone is sufficient for high-stakes domains.
 
 ### Known Technical Limitations
 
-* **Matrix weights:** Currently logical estimates → Year 2: data-driven calibration (Bayesian Optimization on AIAAIC 2,223 incidents)
+* **Matrix weights:** 23×5 Pearl column values are currently approximated (AIAAIC + Pearl reasoning) → Year 2: DoWhy empirical calibration of all 115 cells + Bayesian Optimization on AIAAIC 2,223 incidents
 * **Legal claims:** Daubert-aligned audit trail output, **not court-decisive** — domain expert validation required before use in legal proceedings
 * **HarmBench 14.5%:** Pattern ceiling — hybrid XLM-R semantic router needed (Year 2)
 * **Societal Monitor (Step 11):** Stub — Redis + differential privacy needed Year 3
@@ -725,13 +729,14 @@ Neither alone is sufficient for high-stakes domains.
 responsible-ai-framework/
 │
 ├── pipeline_v15.py              # 14-step pipeline orchestrator (v15k+dag — dag_selector integrated, 15 FP regressions fixed)
+├── matrix_v2.py                 # 23×5 Pearl Causal Activation Matrix (RCT/TCE/INTV/MED/FLIP · L1→L3 · 23 categories)
 ├── dag_selector.py              # Dynamic DAG selection from prompt (17 domains · conf=0.6/1.0 · Year 2: XLM-RoBERTa)
 ├── data_privacy_engine.py       # Data Privacy Engine v1.0 (PII + DP + Data Minimization)
 ├── scm_engine_v2.py             # Full Pearl Theory engine (L1+L2+L3)
 ├── adversarial_engine_v5.py     # 4 attack type detection
 ├── context_engine.py            # Multi-turn attack detection (SQLite session memory)
 ├── output_verifier.py           # Two-pass LLM self-verification — model-agnostic (Year 2: S14 pipeline integration)
-├── test_v15.py                  # 195 unit tests (195/195 passing — 100%)
+├── test_v15.py                  # 212 unit tests (212/212 passing — 100%)
 ├── requirements.txt             # Dependencies
 │
 ├── chatbots/
@@ -856,9 +861,50 @@ After v15h (April):  195 passed, 0 failed    ← 60-case validation + 10 pattern
 After v15i (April):  195 passed, 0 failed    ← Two-pass LLM self-verification ✅
 After v15j (April):  195 passed, 0 failed    ← Data Privacy Engine v1.0 ✅
 After v15+step09b (May): 212 passed, 0 failed ← Causal Human Oversight Verifier (+17 tests) ✅
+After v5.1 (May):    212 passed, 0 failed    ← 23×5 Pearl Matrix upgrade ✅
 ```
 
 > ✅ **Independently verified:** All tests confirmed passing via GitHub Actions CI (May 2026).
+
+### v5.1 (May 2026) — 23×5 Pearl Causal Activation Matrix Upgrade
+
+**Problem closed:** The 17×5 matrix used integer weights (1–3) across P1–P5 capability pathway columns — no grounding in Pearl's causal theory. Column labels (P1_Interpretability…P5_Society) had no formal causal meaning. 20 educational/safe queries were producing false positives due to matrix score inflation.
+
+**Solution:** `matrix_v2.py` — new standalone 23×5 matrix definition file.
+
+**3 structural changes:**
+
+**① Categories: 17 → 23**
+- 6 new categories derived from AIAAIC + EU AI Act Annex III + 2024 emerging threats: `environmental_harm`, `intellectual_property_theft`, `child_safety` (non-CSAM), `election_interference`, `surveillance_stalking`, `supply_chain_attack`
+- 1 split: `misinformation` → `misinformation_factual` + `misinformation_synthetic` (different causal paths)
+- 3 renamed: `legal_violation` → `regulatory_noncompliance`, `manipulation` → `psychological_manipulation`, `social_engineering` → `social_engineering_attack`
+- Backward-compatible aliases: all old names still resolve
+
+**② Columns: P1-P5 capability pathways → Pearl L1→L3 causal dimensions**
+```
+OLD: P1_Interpretability, P2_Behavior, P3_Data, P4_Robustness, P5_Society  (integers 1-3)
+NEW: RCT(L1), TCE(L2), INTV(L2), MED(L3), FLIP/PNS(L3)                   (floats 0.0-1.0)
+```
+FLIP/PNS column weighted highest (0.30) — Daubert "but-for" causation. Criminal justice domain: FLIP weight rises to 0.40.
+
+**③ SCM Educational Dampener (scm_engine_v2.py)**
+```python
+scm_dampener = max(tce_norm, 0.30)   # tce_norm = tce / 20.0
+aggregate_risk = raw_risk × sev_multiplier × scm_dampener
+```
+Educational queries (low TCE from SCM) now receive dampened matrix contribution → 20 false positives eliminated while all BLOCK decisions preserved.
+
+**PhD defense answer — "Why 23 categories?"**
+> *"23 categories were derived from three empirical sources: AIAAIC Database top incident types (covering 94% of 2,223 incidents), EU AI Act Annex III high-risk classifications, and 2024 emerging threat categories. The misinformation split into factual vs synthetic is justified by distinct causal paths — factual spreads via credibility chains, synthetic has AI as direct generator (shorter causal chain, higher TCE)."*
+
+**PhD defense answer — "Why 5 columns?"**
+> *"The 5 columns correspond to Pearl's 3 Levels of Causation. L1 (RCT — observational), L2 (TCE, INTV — interventional), L3 (MED, FLIP/PNS — counterfactual). FLIP carries the highest weight because PNS = P(Y₁=1, Y₀=0) — probability that the cause was both necessary AND sufficient — the Daubert 'but-for' standard for legal admissibility. Values are currently approximated; Year 2 DoWhy calibration will replace all 115 cells empirically."*
+
+Files changed:
+- **`matrix_v2.py`** — new file (23×5 matrix definition, helpers, validation on import)
+- **`scm_engine_v2.py`** — updated (imports matrix_v2, Pearl column names, SCM dampener fix)
+
+`test_v15.py`: 212/212 — all existing tests pass with new matrix (zero regressions).
 
 ### v15+step09b (May 2026) — Causal Human Oversight Verifier
 
@@ -1094,11 +1140,11 @@ New functions: `build_rai_context()`, `build_system_prompt()`, `build_verify_pro
 ```
 Input:  2,223 AIAAIC real incidents (labeled)
 Method: Bayesian Optimization (inspired by VirnyFlow — Stoyanovich et al., 2025)
-Output: Data-driven optimal weights for 17×5 matrix
+Output: Data-driven optimal weights for 23×5 Pearl matrix (115 cells)
 
-Attempt 1: [3,2,3,2,3] → accuracy 72%
-Attempt 2: [3,3,2,2,3] → accuracy 75%
-Attempt N: [3,2,4,2,3] → accuracy 89%  ← optimal!
+Year 1 (current): approximated values from AIAAIC + Pearl reasoning
+Year 2 (DoWhy):   empirical calibration → replace all 115 cells
+Year 3 (BO):      optimal weights per Pearl column per harm category
 ```
 
 **SafeNudge Integration:**

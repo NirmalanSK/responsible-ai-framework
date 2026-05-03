@@ -40,6 +40,18 @@ from enum import Enum
 from typing import Dict, List, Tuple
 from functools import lru_cache
 
+# ── Matrix v2 — 23×5 Pearl Causal Activation Matrix ────────────────
+from matrix_v2 import (
+    MATRIX_23x5,
+    COLUMN_NAMES as PEARL_COLUMNS,   # ["RCT","TCE","INTV","MED","FLIP"]
+    COLUMN_INDEX,
+    SEVERITY_TIERS,
+    get_row,
+    get_severity_tier,
+    compute_weighted_score,
+    resolve_category,
+)
+
 
 # ═══════════════════════════════════════════════════════════════════
 # ENUMS  (carry-over from v1 + new)
@@ -1283,58 +1295,53 @@ if __name__ == "__main__":
 
 # 17×5 weight matrix — [P1, P2, P3, P4, P5]
 # P1=Interpretability, P2=Behavior, P3=Data, P4=Robustness, P5=Society
-CAUSAL_MATRIX = {
-    "Representation_Bias":    [3,2,3,2,3],  # total=13 CENTRAL
-    "Decision_Transparency":  [3,2,2,1,2],  # total=10
-    "Misuse_Safety":          [2,3,2,3,3],  # total=13 CENTRAL
-    "Technical_Safety":       [2,2,2,3,2],  # total=11 | YEAR 2: not yet in DOMAIN_TO_ROW
-                                              # Activated indirectly via Audit_Accountability cascade
-                                              # Year 2: add "technical_safety" domain + DAG
-    "Criminal_Justice_Bias":  [3,2,3,1,2],  # total=11
-    "Healthcare_Bias":        [3,2,3,1,2],  # total=11
-    "Context_Poisoning":      [2,3,2,3,1],  # total=11
-    "Disinformation":         [2,3,1,2,3],  # total=11
-    "Harassment":             [2,3,1,2,2],  # total=10
-    "Cyberattack":            [2,2,2,3,1],  # total=10
-    "Privacy_Violation":      [2,2,3,2,1],  # total=10
-    "Audit_Accountability":   [3,2,2,2,3],  # total=12 CENTRAL
-    "Financial_Fraud":        [2,3,2,2,1],  # total=10
-    "Physical_Violence":      [1,3,1,2,2],  # total=9
-    "Hate_Speech":            [2,2,1,2,3],  # total=10
-    "Drug_Trafficking":       [1,3,2,2,1],  # total=9
-    "Identity_Forgery":       [2,2,2,2,1],  # total=9
+# ── 23×5 Pearl Matrix — UPGRADED from integer 17×5 (P1-P5) ─────────
+# Values now [0.0, 1.0] causal scores from matrix_v2.py
+# Columns now Pearl L1→L3: RCT / TCE / INTV / MED / FLIP
+# CAUSAL_MATRIX is no longer a local dict — use MATRIX_23x5 from matrix_v2
+
+# Cascade map — updated to 23×5 category names
+# Triggered by CRITICAL tier + HIGH tier with sufficient TCE
+CASCADE_MAP: Dict[str, List[str]] = {
+    # CRITICAL tier: always cascade to co-occurring harm types
+    "weapon_synthesis":   ["violence", "cybercrime", "data_poisoning"],
+    "csam":               ["child_safety", "psychological_manipulation"],
+    "child_safety":       ["psychological_manipulation", "surveillance_stalking"],
+    # HIGH tier: cascade when TCE >= 12
+    "bias_discrimination":        ["regulatory_noncompliance", "medical_harm"],
+    "regulatory_noncompliance":   ["privacy_violation", "data_poisoning"],
+    "medical_harm":               ["bias_discrimination", "regulatory_noncompliance"],
 }
 
-# Cascade map — central nodes (≥12) cascade to adjacent rows
-CASCADE_MAP = {
-    "Representation_Bias":  ["Criminal_Justice_Bias","Healthcare_Bias","Decision_Transparency"],
-    "Misuse_Safety":        ["Physical_Violence","Drug_Trafficking","Cyberattack","Context_Poisoning"],
-    "Audit_Accountability": ["Decision_Transparency","Technical_Safety","Privacy_Violation"],
+# Domain → 23×5 Pearl category mapping
+# SCM engine domain keys → matrix_v2 category names
+# child_safety now has its OWN proper row (was Representation_Bias proxy before)
+DOMAIN_TO_ROW: Dict[str, str] = {
+    "representation_bias":   "bias_discrimination",
+    "criminal_justice_bias": "bias_discrimination",
+    "misuse_safety":         "weapon_synthesis",
+    "context_poisoning":     "data_poisoning",
+    "decision_transparency": "regulatory_noncompliance",
+    "disinformation":        "misinformation_synthetic",
+    "harassment":            "psychological_manipulation",
+    "cyberattack":           "cybercrime",
+    "privacy_violation":     "privacy_violation",
+    "financial_fraud":       "financial_fraud",
+    "medical_harm":          "medical_harm",
+    "physical_violence":     "violence",
+    "hate_speech":           "hate_speech",
+    "drug_trafficking":      "cybercrime",         # closest harm class
+    "child_safety":          "child_safety",        # ← NOW PROPER ROW (v5.1)
+    "identity_forgery":      "social_engineering_attack",
+    "audit_gap":             "regulatory_noncompliance",
 }
 
-# Domain → primary row mapping
-DOMAIN_TO_ROW = {
-    "representation_bias":    "Representation_Bias",
-    "criminal_justice_bias":  "Criminal_Justice_Bias",
-    "misuse_safety":          "Misuse_Safety",
-    "context_poisoning":      "Context_Poisoning",
-    "decision_transparency":  "Decision_Transparency",
-    "disinformation":         "Disinformation",
-    "harassment":             "Harassment",
-    "cyberattack":            "Cyberattack",
-    "privacy_violation":      "Privacy_Violation",
-    "financial_fraud":        "Financial_Fraud",
-    "medical_harm":           "Healthcare_Bias",
-    "physical_violence":      "Physical_Violence",
-    "hate_speech":            "Hate_Speech",
-    "drug_trafficking":       "Drug_Trafficking",
-    "child_safety":           "Representation_Bias",
-    "identity_forgery":       "Identity_Forgery",
-    "audit_gap":              "Audit_Accountability",
-}
+# Pearl column names (replaces P1_Interpretability…P5_Society)
+PATHWAY_NAMES: List[str] = PEARL_COLUMNS  # ["RCT","TCE","INTV","MED","FLIP"]
 
-PATHWAY_NAMES = ["P1_Interpretability","P2_Behavior","P3_Data","P4_Robustness","P5_Society"]
-CENTRAL_THRESHOLD = 12
+# Cascade trigger: CRITICAL always, HIGH when TCE >= threshold
+CENTRAL_THRESHOLD = 12   # kept for backward compat (not used in new logic)
+CASCADE_TCE_THRESHOLD = 12.0   # HIGH tier cascades if tce >= this value
 
 # ── Domain Risk Multiplier (v4.9 addition) ─────────────────────────
 # Real-world harm severity scales with deployment context.
@@ -1406,60 +1413,98 @@ class MatrixActivation:
 
 def activate_matrix(domain: str, tce: float, severity: Severity) -> MatrixActivation:
     """
-    Core sparse activation logic.
+    Core sparse activation logic — UPGRADED to 23×5 Pearl L1→L3 matrix.
 
-    Step 1: primary row from domain
-    Step 2: check if central node → fire cascade
-    Step 3: collect active cells (primary + cascaded)
-    Step 4: weight by TCE severity
-    Step 5: compute pathway scores
+    Step 1: Map domain key → Pearl category (DOMAIN_TO_ROW)
+    Step 2: Cascade if CRITICAL tier, or HIGH tier with TCE ≥ threshold
+    Step 3: Collect active rows (primary + cascaded)
+    Step 4: Compute aggregate_risk via compute_weighted_score (matrix_v2)
+    Step 5: Build pathway_scores over Pearl columns [RCT,TCE,INTV,MED,FLIP]
+
+    Backward-compatible: MatrixActivation fields unchanged.
+    aggregate_risk still 0.0–1.0; pipeline multiplies by 100.
     """
-    primary_row = DOMAIN_TO_ROW.get(domain, "Misuse_Safety")
-    primary_total = sum(CAUSAL_MATRIX.get(primary_row, [2,2,2,2,2]))
+    # Step 1: resolve domain → 23×5 category
+    primary_category = DOMAIN_TO_ROW.get(domain, "weapon_synthesis")
 
-    # Step 2: cascade if central node
-    cascade_fired  = primary_total >= CENTRAL_THRESHOLD
-    cascade_source = primary_row if cascade_fired else ""
-    cascaded_rows  = CASCADE_MAP.get(primary_row, []) if cascade_fired else []
+    # Step 2: cascade decision — tier-based (replaces integer sum ≥ 12)
+    tier = get_severity_tier(primary_category)
+    cascade_fired = (
+        tier == "CRITICAL"
+        or (tier == "HIGH" and tce >= CASCADE_TCE_THRESHOLD)
+    )
+    cascade_source    = primary_category if cascade_fired else ""
+    cascaded_rows     = CASCADE_MAP.get(primary_category, []) if cascade_fired else []
 
-    # Step 3: active rows = primary + cascaded
-    active_rows = list(dict.fromkeys([primary_row] + cascaded_rows))
+    # Step 3: active set (deduplicated, primary first)
+    active_rows = list(dict.fromkeys([primary_category] + cascaded_rows))
 
-    # Step 4: weight cells by TCE + severity
+    # Step 4: severity multiplier (same scale as before)
     sev_multiplier = {1: 0.6, 2: 0.8, 3: 1.0, 4: 1.2}.get(severity.value, 1.0)
-    tce_factor = min(tce / 20.0, 1.0)  # normalize TCE to 0-1
+    tce_norm = min(tce / 20.0, 1.0)   # normalize tce → [0, 1]  (same as old tce_factor)
 
-    active_cells  = {}
-    pathway_totals = [0.0] * 5
+    scm_overrides = {"tce": tce_norm}  # override TCE column with real SCM output
 
-    for row in active_rows:
-        weights = CAUSAL_MATRIX.get(row, [2,2,2,2,2])
-        row_factor = 1.0 if row == primary_row else 0.6  # cascade rows lower weight
-        cell_weights = {}
-        for i, (pname, w) in enumerate(zip(PATHWAY_NAMES, weights)):
-            activated_weight = w * sev_multiplier * tce_factor * row_factor
-            cell_weights[pname] = round(activated_weight, 3)
-            pathway_totals[i] += activated_weight
-        active_cells[row] = cell_weights
+    # Primary score from matrix_v2 with SCM tce override
+    primary_score = compute_weighted_score(primary_category,
+                                           scm_overrides=scm_overrides)
 
-    # Step 5: normalize pathway scores
-    max_possible = 3 * sev_multiplier * 1.0 * len(active_rows)
+    if cascade_fired and cascaded_rows:
+        cascade_scores = [
+            compute_weighted_score(c, scm_overrides=scm_overrides)
+            for c in cascaded_rows
+        ]
+        cascade_avg = sum(cascade_scores) / len(cascade_scores)
+        raw_risk = primary_score * 0.70 + cascade_avg * 0.30
+    else:
+        raw_risk = primary_score
+
+    # SCM Educational Dampener (v5.1 fix)
+    # Problem: new float matrix values (0.3-0.9) are always higher than old
+    #          integers (1-3 normalized), causing educational queries to score
+    #          too high → false positives (20 tests failing).
+    # Fix: scale aggregate_risk by tce_norm — if SCM says low harm (low TCE),
+    #      the matrix score is dampened proportionally.
+    # floor 0.30 = matrix never fully suppressed (preserves signal shape).
+    #
+    # Educational query: tce=2 → tce_norm=0.10 → dampener=0.30 → risk LOW → ALLOW
+    # Harmful query:     tce=20 → tce_norm=1.00 → dampener=1.00 → risk unchanged → BLOCK
+    # CRITICAL query:    tce=25 → tce_norm=1.00 → dampener=1.00 → BLOCK always
+    scm_dampener = max(tce_norm, 0.30)
+    aggregate_risk = round(min(1.0, raw_risk * sev_multiplier * scm_dampener), 3)
+
+    # Step 5: pathway scores over Pearl columns
+    primary_row_vals = list(get_row(primary_category))
+    pathway_scores: Dict[str, float] = {}
+    active_cells:   Dict[str, Dict[str, float]] = {}
+
+    for cat in active_rows:
+        row_vals   = list(get_row(cat))
+        row_factor = 1.0 if cat == primary_category else 0.6
+        cell_map: Dict[str, float] = {}
+        for i, col in enumerate(PATHWAY_NAMES):
+            activated = round(row_vals[i] * sev_multiplier * row_factor, 3)
+            cell_map[col] = activated
+            pathway_scores[col] = pathway_scores.get(col, 0.0) + activated
+        active_cells[cat] = cell_map
+
+    # Normalize pathway scores
+    n_rows = len(active_rows)
     pathway_scores = {
-        pname: round(pathway_totals[i] / max(max_possible, 0.01), 3)
-        for i, pname in enumerate(PATHWAY_NAMES)
+        col: round(v / max(n_rows, 1), 3)
+        for col, v in pathway_scores.items()
     }
-    dominant_path   = max(pathway_scores, key=pathway_scores.get)
-    aggregate_risk  = round(sum(pathway_totals) / (max_possible * 5), 3)
+    dominant_path = max(pathway_scores, key=pathway_scores.get)
 
     return MatrixActivation(
-        primary_row   = primary_row,
-        active_rows   = active_rows,
-        cascade_fired = cascade_fired,
-        cascade_source= cascade_source,
-        active_cells  = active_cells,
-        aggregate_risk= aggregate_risk,
-        pathway_scores= pathway_scores,
-        dominant_path = dominant_path,
+        primary_row    = primary_category,
+        active_rows    = active_rows,
+        cascade_fired  = cascade_fired,
+        cascade_source = cascade_source,
+        active_cells   = active_cells,
+        aggregate_risk = aggregate_risk,
+        pathway_scores = pathway_scores,
+        dominant_path  = dominant_path,
     )
 
 
@@ -1469,7 +1514,7 @@ def print_matrix_activation(m: MatrixActivation) -> None:
     print(f"  Cascade Fired : {'YES ← central node' if m.cascade_fired else 'NO'}")
     if m.cascade_fired:
         print(f"  Cascade Source: {m.cascade_source}")
-    print(f"  Active Rows   : {len(m.active_rows)}/17 (sparse)")
+    print(f"  Active Rows   : {len(m.active_rows)}/23 (sparse)")
     for row in m.active_rows:
         tag = " ← PRIMARY" if row == m.primary_row else " ← cascaded"
         cells = m.active_cells[row]
@@ -1485,11 +1530,14 @@ def print_matrix_activation(m: MatrixActivation) -> None:
 
 # ── Quick test ────────────────────────────────────────────────────
 if __name__ == "__main__":
-    print("\n=== Sparse Matrix Activation — 3 Cases ===")
+    print("\n=== Sparse Causal Activation Matrix v5.1 — 23×5 Pearl Columns ===")
+    print(f"Columns: {PATHWAY_NAMES}")
     test_cases = [
         ("compas_2016",       "criminal_justice_bias", 18.3, Severity.CRITICAL),
         ("misuse_vx",         "misuse_safety",         24.0, Severity.CRITICAL),
         ("amazon_hiring",     "representation_bias",   12.4, Severity.HIGH),
+        ("child_abuse_grooming", "child_safety",       20.0, Severity.CRITICAL),
+        ("deepfake_politics", "disinformation",         9.0, Severity.HIGH),
     ]
     for name, domain, tce, sev in test_cases:
         print(f"\n  [{name}]")
