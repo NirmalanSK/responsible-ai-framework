@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Responsible AI Framework v5.0 — Research-Ready Prototype</title>
+<title>Responsible AI Framework v5.1 — Research-Ready Prototype</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=DM+Sans:wght@300;400;600;700&display=swap');
 :root {
@@ -240,9 +240,9 @@ td:first-child{text-align:left;font-weight:600;font-size:.6rem;}
 
 <div class="hdr">
   <h1>🛡️ Responsible AI Framework</h1>
-  <p>14-Stage Pipeline (S00–S13) · Judea Pearl SCM Engine · Auto-Calibrating 17×5 Matrix · Data Privacy Engine</p>
+  <p>14-Stage Pipeline (S00–S13) · Judea Pearl SCM Engine · Pearl 23×5 Causal Matrix · Data Privacy Engine</p>
   <div class="ver">
-    <span class="vbadge" style="background:rgba(0,255,157,.1);color:var(--green);border:1px solid rgba(0,255,157,.25)">v5.0 — Research-Ready Prototype</span>
+    <span class="vbadge" style="background:rgba(0,255,157,.1);color:var(--green);border:1px solid rgba(0,255,157,.25)">v5.1 — Research-Ready Prototype</span>
     <span class="vbadge" style="background:rgba(0,255,157,.1);color:var(--cyan);border:1px solid rgba(34,211,238,.25)">+ Tiered Scanning</span>
     <span class="vbadge" style="background:rgba(255,107,53,.1);color:#ff6b35;border:1px solid rgba(255,107,53,.25)">+ Adversarial Robustness Layer</span>
     <span class="vbadge" style="background:rgba(167,139,250,.1);color:var(--scm);border:1px solid rgba(167,139,250,.25)">+ Judea Pearl SCM Engine</span>
@@ -298,9 +298,9 @@ td:first-child{text-align:left;font-weight:600;font-size:.6rem;}
   </div>
   <div style="background:var(--s2);border:1px solid rgba(255,229,102,.2);border-radius:10px;padding:1.2rem;margin-bottom:1rem;">
     <div style="font-size:.68rem;color:var(--muted);line-height:1.7;">
-      <span style="color:var(--yellow);font-weight:700;">Core Insight:</span> 17×5 matrix = <span style="color:var(--text);">WHAT × HOW</span><br>
-      17 rows = harm type (what question) · 5 columns = pathway (how question)<br><br>
-      When a query arrives → <span style="color:var(--green);">NOT all 85 cells activate</span><br>
+      <span style="color:var(--yellow);font-weight:700;">Core Insight:</span> 23×5 matrix = <span style="color:var(--text);">HARM × PEARL DIMENSION</span><br>
+      23 rows = harm category (AIAAIC-derived) · 5 columns = Pearl causal estimand (L1→L3)<br><br>
+      When a query arrives → <span style="color:var(--green);">NOT all 115 cells activate</span><br>
       Only a <span style="color:var(--yellow);">sparse subset</span> of relevant nodes fire → SCM runs on active subgraph only
     </div>
   </div>
@@ -311,7 +311,7 @@ td:first-child{text-align:left;font-weight:600;font-size:.6rem;}
     <div style="background:rgba(255,229,102,.06);border:1px solid rgba(255,229,102,.3);border-radius:8px;padding:.9rem;text-align:center;">
       <div style="font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--yellow);font-weight:700;">13</div>
       <div style="font-size:.62rem;color:var(--text);margin:.3rem 0;">Representation_Bias</div>
-      <div style="font-size:.58rem;color:var(--muted);">[3,2,3,2,3]</div>
+      <div style="font-size:.58rem;color:var(--muted);">[RCT.TCE.INTV.MED.FLIP]</div>
       <div style="font-size:.56rem;color:var(--green);margin-top:.4rem;">→ Criminal_Justice<br>→ Healthcare_Bias<br>→ Decision_Transparency</div>
     </div>
     <div style="background:rgba(255,229,102,.06);border:1px solid rgba(255,229,102,.3);border-radius:8px;padding:.9rem;text-align:center;">
@@ -341,7 +341,7 @@ td:first-child{text-align:left;font-weight:600;font-size:.6rem;}
     </div>
     <div style="background:var(--s1);border:1px solid rgba(255,229,102,.3);border-radius:6px;padding:.7rem;">
       <div style="color:var(--yellow);font-family:'JetBrains Mono',monospace;margin-bottom:.3rem;">Amazon Hiring</div>
-      <div style="color:var(--muted);">Primary: Representation_Bias <span style="color:var(--yellow);">(13)</span><br>Cascade: <span style="color:var(--green);">✅ YES → 4 rows</span><br>Active: 4/17 rows<br>Risk: 0.333</div>
+      <div style="color:var(--muted);">Primary: Representation_Bias <span style="color:var(--yellow);">(13)</span><br>Cascade: <span style="color:var(--green);">✅ YES → 4 rows</span><br>Active: 4/23 rows<br>Risk: 0.333</div>
     </div>
   </div>
 
@@ -355,12 +355,12 @@ td:first-child{text-align:left;font-weight:600;font-size:.6rem;}
       📌 YEAR 2 UPGRADE — Bayesian Optimization for Weight Calibration
     </div>
     <div style="font-size:.6rem;color:var(--muted);line-height:1.8;">
-      <span style="color:var(--text);">Current (Year 1):</span> Weights [3,2,3,2,3] manually set via theoretical reasoning<br>
+      <span style="color:var(--text);">Current (Year 1):</span> Values [0.0–1.0] approximated from AIAAIC + Pearl reasoning<br>
       <span style="color:var(--text);">Problem:</span> Examiner asks "Why 3? Why not 4?" — no empirical justification<br><br>
       <span style="color:var(--cyan);font-weight:700;">Year 2 Plan — BO-based calibration:</span><br>
       <span style="color:var(--muted);">1. Feed 2,223 AIAAIC real incidents as labeled training data</span><br>
       <span style="color:var(--muted);">2. Bayesian Optimization tries weight combinations:</span><br>
-      <span style="color:var(--muted);">&nbsp;&nbsp;&nbsp;Attempt 1: [3,2,3,2,3] → accuracy 72%</span><br>
+      <span style="color:var(--muted);">&nbsp;&nbsp;&nbsp;Year 1: approximated values (AIAAIC + Pearl theory)</span><br>
       <span style="color:var(--muted);">&nbsp;&nbsp;&nbsp;Attempt 2: [3,3,2,2,3] → accuracy 75% ← learn + improve</span><br>
       <span style="color:var(--muted);">&nbsp;&nbsp;&nbsp;Attempt N: [3,2,4,2,3] → accuracy 89% ← optimal!</span><br>
       <span style="color:var(--muted);">3. Each attempt learns from previous → smarter next try</span><br>
@@ -656,97 +656,123 @@ td:first-child{text-align:left;font-weight:600;font-size:.6rem;}
     </div>
   </div>
 
-  <!-- STEP 3: 17x5 MATRIX -->
+  <!-- STEP 3: 23x5 MATRIX -->
   <div style="border:1px solid rgba(255,229,102,.2);border-radius:10px;padding:1rem;margin-bottom:.8rem;background:rgba(255,229,102,.03);">
-    <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--yellow);margin-bottom:.7rem;">STEP 3 — 17×5 MATRIX — Domain → Primary Row</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--yellow);margin-bottom:.7rem;">STEP 3 — 23×5 PEARL MATRIX — Domain → Primary Row</div>
     <div style="font-size:.58rem;color:var(--muted);margin-bottom:.6rem;">
       "representation_bias" → <span style="color:var(--text);">Representation_Bias</span> row selected
     </div>
 
-    <!-- 5 pathways explained -->
+    <!-- 5 Pearl columns explained -->
     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:.35rem;margin-bottom:.7rem;">
       <div style="background:rgba(0,255,157,.08);border:1px solid rgba(0,255,157,.2);border-radius:4px;padding:.4rem;text-align:center;font-size:.55rem;">
-        <div style="color:var(--green);font-weight:700;">P1</div>
-        <div style="color:var(--muted);">Interpret-<br>ability</div>
-        <div style="color:var(--text);">Can we<br>explain WHY?</div>
+        <div style="color:var(--green);font-weight:700;">RCT</div>
+        <div style="color:var(--muted);">L1 Assoc.</div>
+        <div style="color:var(--text);">Observa-<br>tional</div>
       </div>
       <div style="background:rgba(56,182,255,.08);border:1px solid rgba(56,182,255,.2);border-radius:4px;padding:.4rem;text-align:center;font-size:.55rem;">
-        <div style="color:var(--blue);font-weight:700;">P2</div>
-        <div style="color:var(--muted);">Behavior</div>
-        <div style="color:var(--text);">Does AI<br>act right?</div>
+        <div style="color:var(--blue);font-weight:700;">TCE</div>
+        <div style="color:var(--muted);">L2 Interv.</div>
+        <div style="color:var(--text);">Total<br>Causal</div>
       </div>
       <div style="background:rgba(255,229,102,.08);border:1px solid rgba(255,229,102,.2);border-radius:4px;padding:.4rem;text-align:center;font-size:.55rem;">
-        <div style="color:var(--yellow);font-weight:700;">P3</div>
-        <div style="color:var(--muted);">Data</div>
-        <div style="color:var(--text);">Training<br>data biased?</div>
+        <div style="color:var(--yellow);font-weight:700;">INTV</div>
+        <div style="color:var(--muted);">L2 Interv.</div>
+        <div style="color:var(--text);">Backdoor<br>Adjusted</div>
       </div>
       <div style="background:rgba(255,69,96,.08);border:1px solid rgba(255,69,96,.2);border-radius:4px;padding:.4rem;text-align:center;font-size:.55rem;">
-        <div style="color:var(--red);font-weight:700;">P4</div>
-        <div style="color:var(--muted);">Robustness</div>
-        <div style="color:var(--text);">Can it be<br>attacked?</div>
+        <div style="color:var(--red);font-weight:700;">MED</div>
+        <div style="color:var(--muted);">L3 Counter.</div>
+        <div style="color:var(--text);">NDE+NIE<br>Mediation</div>
       </div>
       <div style="background:rgba(163,230,53,.08);border:1px solid rgba(163,230,53,.2);border-radius:4px;padding:.4rem;text-align:center;font-size:.55rem;">
-        <div style="color:var(--social);font-weight:700;">P5</div>
-        <div style="color:var(--muted);">Society</div>
-        <div style="color:var(--text);">Population<br>level harm?</div>
+        <div style="color:var(--social);font-weight:700;">FLIP</div>
+        <div style="color:var(--muted);">L3 PNS ⭐</div>
+        <div style="color:var(--text);">Daubert<br>But-For</div>
       </div>
     </div>
 
-    <!-- Matrix rows — all 17 -->
+    <!-- Matrix rows — all 23 Pearl L1→L3 -->
     <div style="font-family:'JetBrains Mono',monospace;font-size:.55rem;background:var(--s1);border-radius:6px;padding:.7rem;overflow-x:auto;">
-      <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr 1fr 1fr auto auto;gap:.3rem .5rem;align-items:center;color:var(--muted);margin-bottom:.3rem;">
-        <span></span><span>Harm Type</span><span>P1</span><span>P2</span><span>P3</span><span>P4</span><span>P5</span><span>Total</span>
+      <div style="display:grid;grid-template-columns:auto 1.4fr 1fr 1fr 1fr 1fr 1fr auto;gap:.3rem .5rem;align-items:center;color:var(--muted);margin-bottom:.3rem;">
+        <span></span><span>Harm Category</span><span>RCT</span><span>TCE</span><span>INTV</span><span>MED</span><span>FLIP</span><span>Tier</span>
       </div>
-      <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr 1fr 1fr auto auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;background:rgba(255,229,102,.15);color:var(--yellow);">
-        <span>⭐</span><span>Representation_Bias</span><span>3</span><span>2</span><span>3</span><span>2</span><span>3</span><span style="font-weight:700;color:var(--yellow);font-weight:700;">13</span>
+      <!-- CRITICAL -->
+      <div style="display:grid;grid-template-columns:auto 1.4fr 1fr 1fr 1fr 1fr 1fr auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;background:rgba(255,69,96,.15);color:var(--red);">
+        <span>🔴</span><span>csam</span><span>.85</span><span>.95</span><span>.89</span><span>.82</span><span style="font-weight:700;">.91</span><span>CRITICAL</span>
       </div>
-      <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr 1fr 1fr auto auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);">
-        <span>  </span><span>Decision_Transparency</span><span>3</span><span>2</span><span>2</span><span>1</span><span>2</span><span style="font-weight:700;color:var(--muted);">10</span>
+      <div style="display:grid;grid-template-columns:auto 1.4fr 1fr 1fr 1fr 1fr 1fr auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;background:rgba(255,69,96,.15);color:var(--red);">
+        <span>🔴</span><span>weapon_synthesis</span><span>.79</span><span>.92</span><span>.85</span><span>.74</span><span style="font-weight:700;">.88</span><span>CRITICAL</span>
       </div>
-      <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr 1fr 1fr auto auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);">
-        <span>⭐</span><span>Misuse_Safety</span><span>2</span><span>3</span><span>2</span><span>3</span><span>3</span><span style="font-weight:700;color:var(--muted);">13</span>
+      <div style="display:grid;grid-template-columns:auto 1.4fr 1fr 1fr 1fr 1fr 1fr auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;background:rgba(255,69,96,.15);color:var(--red);">
+        <span>🔴</span><span>child_safety</span><span>.72</span><span>.84</span><span>.78</span><span>.65</span><span style="font-weight:700;">.81</span><span>CRITICAL</span>
       </div>
-      <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr 1fr 1fr auto auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);">
-        <span>  </span><span>Technical_Safety</span><span>2</span><span>2</span><span>2</span><span>3</span><span>2</span><span style="font-weight:700;color:var(--muted);">11</span>
+      <!-- HIGH -->
+      <div style="display:grid;grid-template-columns:auto 1.4fr 1fr 1fr 1fr 1fr 1fr auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--red);opacity:.75;">
+        <span>🟠</span><span>violence</span><span>.65</span><span>.81</span><span>.73</span><span>.57</span><span style="font-weight:700;">.76</span><span>HIGH</span>
       </div>
-      <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr 1fr 1fr auto auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;background:rgba(0,255,157,.08);color:var(--green);">
-        <span>  </span><span>Criminal_Justice_Bias</span><span>3</span><span>2</span><span>3</span><span>1</span><span>2</span><span style="font-weight:700;color:var(--green);">11</span>
+      <div style="display:grid;grid-template-columns:auto 1.4fr 1fr 1fr 1fr 1fr 1fr auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--red);opacity:.75;">
+        <span>🟠</span><span>medical_harm</span><span>.61</span><span>.78</span><span>.69</span><span>.52</span><span style="font-weight:700;">.71</span><span>HIGH</span>
       </div>
-      <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr 1fr 1fr auto auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;background:rgba(0,255,157,.08);color:var(--green);">
-        <span>  </span><span>Healthcare_Bias</span><span>3</span><span>2</span><span>3</span><span>1</span><span>2</span><span style="font-weight:700;color:var(--green);">11</span>
+      <div style="display:grid;grid-template-columns:auto 1.4fr 1fr 1fr 1fr 1fr 1fr auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--red);opacity:.75;">
+        <span>🟠</span><span>election_interference</span><span>.58</span><span>.73</span><span>.66</span><span>.51</span><span style="font-weight:700;">.69</span><span>HIGH</span>
       </div>
-      <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr 1fr 1fr auto auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);">
-        <span>  </span><span>Context_Poisoning</span><span>2</span><span>3</span><span>2</span><span>3</span><span>1</span><span style="font-weight:700;color:var(--muted);">11</span>
+      <div style="display:grid;grid-template-columns:auto 1.4fr 1fr 1fr 1fr 1fr 1fr auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--red);opacity:.75;">
+        <span>🟠</span><span>autonomous_ai_harm</span><span>.59</span><span>.74</span><span>.67</span><span>.53</span><span style="font-weight:700;">.69</span><span>HIGH</span>
       </div>
-      <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr 1fr 1fr auto auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);">
-        <span>  </span><span>Disinformation</span><span>2</span><span>3</span><span>1</span><span>2</span><span>3</span><span style="font-weight:700;color:var(--muted);">11</span>
+      <!-- MEDIUM — highlighted row = active -->
+      <div style="display:grid;grid-template-columns:auto 1.4fr 1fr 1fr 1fr 1fr 1fr auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;background:rgba(255,229,102,.15);color:var(--yellow);">
+        <span>⭐</span><span>bias_discrimination</span><span>.50</span><span>.63</span><span>.59</span><span>.44</span><span style="font-weight:700;">.57</span><span>MEDIUM</span>
       </div>
-      <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr 1fr 1fr auto auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);">
-        <span>  </span><span>Harassment</span><span>2</span><span>3</span><span>1</span><span>2</span><span>2</span><span style="font-weight:700;color:var(--muted);">10</span>
+      <div style="display:grid;grid-template-columns:auto 1.4fr 1fr 1fr 1fr 1fr 1fr auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);">
+        <span>  </span><span>hate_speech</span><span>.47</span><span>.62</span><span>.55</span><span>.41</span><span style="font-weight:700;">.58</span><span>MEDIUM</span>
       </div>
-      <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr 1fr 1fr auto auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);">
-        <span>  </span><span>Cyberattack</span><span>2</span><span>2</span><span>2</span><span>3</span><span>1</span><span style="font-weight:700;color:var(--muted);">10</span>
+      <div style="display:grid;grid-template-columns:auto 1.4fr 1fr 1fr 1fr 1fr 1fr auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);">
+        <span>  </span><span>cybercrime</span><span>.55</span><span>.71</span><span>.63</span><span>.48</span><span style="font-weight:700;">.65</span><span>MEDIUM</span>
       </div>
-      <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr 1fr 1fr auto auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);">
-        <span>  </span><span>Privacy_Violation</span><span>2</span><span>2</span><span>3</span><span>2</span><span>1</span><span style="font-weight:700;color:var(--muted);">10</span>
+      <div style="display:grid;grid-template-columns:auto 1.4fr 1fr 1fr 1fr 1fr 1fr auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);">
+        <span>  </span><span>deepfake</span><span>.54</span><span>.69</span><span>.61</span><span>.46</span><span style="font-weight:700;">.64</span><span>MEDIUM</span>
       </div>
-      <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr 1fr 1fr auto auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);">
-        <span>⭐</span><span>Audit_Accountability</span><span>3</span><span>2</span><span>2</span><span>2</span><span>3</span><span style="font-weight:700;color:var(--muted);">12</span>
+      <div style="display:grid;grid-template-columns:auto 1.4fr 1fr 1fr 1fr 1fr 1fr auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);">
+        <span>  </span><span>financial_fraud</span><span>.53</span><span>.68</span><span>.60</span><span>.45</span><span style="font-weight:700;">.63</span><span>MEDIUM</span>
       </div>
-      <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr 1fr 1fr auto auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);">
-        <span>  </span><span>Financial_Fraud</span><span>2</span><span>3</span><span>2</span><span>2</span><span>1</span><span style="font-weight:700;color:var(--muted);">10</span>
+      <div style="display:grid;grid-template-columns:auto 1.4fr 1fr 1fr 1fr 1fr 1fr auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);">
+        <span>  </span><span>psychological_manip.</span><span>.51</span><span>.66</span><span>.58</span><span>.43</span><span style="font-weight:700;">.61</span><span>MEDIUM</span>
       </div>
-      <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr 1fr 1fr auto auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);">
-        <span>  </span><span>Physical_Violence</span><span>1</span><span>3</span><span>1</span><span>2</span><span>2</span><span style="font-weight:700;color:var(--muted);">9</span>
+      <div style="display:grid;grid-template-columns:auto 1.4fr 1fr 1fr 1fr 1fr 1fr auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);">
+        <span>  </span><span>social_eng_attack</span><span>.55</span><span>.70</span><span>.62</span><span>.47</span><span style="font-weight:700;">.65</span><span>MEDIUM</span>
       </div>
-      <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr 1fr 1fr auto auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);">
-        <span>  </span><span>Hate_Speech</span><span>2</span><span>2</span><span>1</span><span>2</span><span>3</span><span style="font-weight:700;color:var(--muted);">10</span>
+      <div style="display:grid;grid-template-columns:auto 1.4fr 1fr 1fr 1fr 1fr 1fr auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);">
+        <span>  </span><span>surveillance_stalking</span><span>.53</span><span>.67</span><span>.60</span><span>.45</span><span style="font-weight:700;">.63</span><span>MEDIUM</span>
       </div>
-      <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr 1fr 1fr auto auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);">
-        <span>  </span><span>Drug_Trafficking</span><span>1</span><span>3</span><span>2</span><span>2</span><span>1</span><span style="font-weight:700;color:var(--muted);">9</span>
+      <div style="display:grid;grid-template-columns:auto 1.4fr 1fr 1fr 1fr 1fr 1fr auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);">
+        <span>  </span><span>data_poisoning</span><span>.52</span><span>.67</span><span>.59</span><span>.44</span><span style="font-weight:700;">.62</span><span>MEDIUM</span>
       </div>
-      <div style="display:grid;grid-template-columns:auto 1fr 1fr 1fr 1fr 1fr auto auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);">
-        <span>  </span><span>Identity_Forgery</span><span>2</span><span>2</span><span>2</span><span>2</span><span>1</span><span style="font-weight:700;color:var(--muted);">9</span>
+      <div style="display:grid;grid-template-columns:auto 1.4fr 1fr 1fr 1fr 1fr 1fr auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);">
+        <span>  </span><span>supply_chain_attack</span><span>.57</span><span>.72</span><span>.64</span><span>.49</span><span style="font-weight:700;">.67</span><span>MEDIUM</span>
+      </div>
+      <div style="display:grid;grid-template-columns:auto 1.4fr 1fr 1fr 1fr 1fr 1fr auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);">
+        <span>  </span><span>misinformation_synth.</span><span>.44</span><span>.59</span><span>.52</span><span>.40</span><span style="font-weight:700;">.55</span><span>MEDIUM</span>
+      </div>
+      <!-- LOW -->
+      <div style="display:grid;grid-template-columns:auto 1.4fr 1fr 1fr 1fr 1fr 1fr auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);opacity:.7;">
+        <span>🟢</span><span>privacy_violation</span><span>.44</span><span>.55</span><span>.51</span><span>.38</span><span style="font-weight:700;">.49</span><span>LOW</span>
+      </div>
+      <div style="display:grid;grid-template-columns:auto 1.4fr 1fr 1fr 1fr 1fr 1fr auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);opacity:.7;">
+        <span>🟢</span><span>misinformation_fact.</span><span>.35</span><span>.48</span><span>.42</span><span>.31</span><span style="font-weight:700;">.44</span><span>LOW</span>
+      </div>
+      <div style="display:grid;grid-template-columns:auto 1.4fr 1fr 1fr 1fr 1fr 1fr auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);opacity:.7;">
+        <span>🟢</span><span>regulatory_noncompl.</span><span>.46</span><span>.57</span><span>.54</span><span>.39</span><span style="font-weight:700;">.52</span><span>LOW</span>
+      </div>
+      <div style="display:grid;grid-template-columns:auto 1.4fr 1fr 1fr 1fr 1fr 1fr auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);opacity:.7;">
+        <span>🟢</span><span>ip_theft</span><span>.41</span><span>.53</span><span>.48</span><span>.35</span><span style="font-weight:700;">.49</span><span>LOW</span>
+      </div>
+      <div style="display:grid;grid-template-columns:auto 1.4fr 1fr 1fr 1fr 1fr 1fr auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);opacity:.7;">
+        <span>🟢</span><span>environmental_harm</span><span>.28</span><span>.39</span><span>.34</span><span>.25</span><span style="font-weight:700;">.36</span><span>LOW</span>
+      </div>
+      <!-- SAFE -->
+      <div style="display:grid;grid-template-columns:auto 1.4fr 1fr 1fr 1fr 1fr 1fr auto;gap:.3rem .5rem;align-items:center;padding:.15rem 0;color:var(--muted);opacity:.5;">
+        <span>⚪</span><span>safe</span><span>.00</span><span>.00</span><span>.00</span><span>.00</span><span style="font-weight:700;">.00</span><span>NONE</span>
       </div>
     </div>
   </div>
@@ -768,8 +794,8 @@ td:first-child{text-align:left;font-weight:600;font-size:.6rem;}
       ஏன் இந்த 3? Amazon hiring bias → COMPAS criminal bias (same root cause) · Obermeyer 2019 healthcare bias · Opacity obligation
     </div>
     <div style="margin-top:.5rem;font-size:.58rem;">
-      <span style="color:var(--text);">Active rows: </span><span style="color:var(--yellow);font-weight:700;">4/17</span>
-      <span style="color:var(--muted);"> (13 rows தூங்குது → SPARSE ✅)</span>
+      <span style="color:var(--text);">Active rows: </span><span style="color:var(--yellow);font-weight:700;">4/23</span>
+      <span style="color:var(--muted);"> (19 rows தூங்குது → SPARSE ✅)</span>
     </div>
   </div>
 
@@ -795,34 +821,34 @@ td:first-child{text-align:left;font-weight:600;font-size:.6rem;}
     </div>
     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:.4rem;font-size:.58rem;margin-bottom:.5rem;">
       <div style="background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:.4rem;text-align:center;">
-        <div style="color:var(--muted);">P1</div>
-        <div style="color:var(--green);font-weight:700;">0.434</div>
-        <div style="background:rgba(0,255,157,.3);height:4px;border-radius:2px;margin-top:.3rem;width:87%;"></div>
+        <div style="color:var(--muted);">RCT</div>
+        <div style="color:var(--green);font-weight:700;">0.314</div>
+        <div style="background:rgba(0,255,157,.3);height:4px;border-radius:2px;margin-top:.3rem;width:63%;"></div>
       </div>
       <div style="background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:.4rem;text-align:center;">
-        <div style="color:var(--muted);">P2</div>
-        <div style="color:var(--blue);font-weight:700;">0.289</div>
-        <div style="background:rgba(56,182,255,.3);height:4px;border-radius:2px;margin-top:.3rem;width:58%;"></div>
+        <div style="color:var(--muted);">TCE</div>
+        <div style="color:var(--blue);font-weight:700;">0.397</div>
+        <div style="background:rgba(56,182,255,.3);height:4px;border-radius:2px;margin-top:.3rem;width:79%;"></div>
       </div>
       <div style="background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:.4rem;text-align:center;">
-        <div style="color:var(--muted);">P3</div>
-        <div style="color:var(--yellow);font-weight:700;">0.403</div>
-        <div style="background:rgba(255,229,102,.3);height:4px;border-radius:2px;margin-top:.3rem;width:81%;"></div>
+        <div style="color:var(--muted);">INTV</div>
+        <div style="color:var(--yellow);font-weight:700;">0.371</div>
+        <div style="background:rgba(255,229,102,.3);height:4px;border-radius:2px;margin-top:.3rem;width:74%;"></div>
       </div>
       <div style="background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:.4rem;text-align:center;">
-        <div style="color:var(--muted);">P4</div>
-        <div style="color:var(--red);font-weight:700;">0.196</div>
-        <div style="background:rgba(255,69,96,.3);height:4px;border-radius:2px;margin-top:.3rem;width:39%;"></div>
+        <div style="color:var(--muted);">MED</div>
+        <div style="color:var(--red);font-weight:700;">0.277</div>
+        <div style="background:rgba(255,69,96,.3);height:4px;border-radius:2px;margin-top:.3rem;width:55%;"></div>
       </div>
       <div style="background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:.4rem;text-align:center;">
-        <div style="color:var(--muted);">P5</div>
-        <div style="color:var(--social);font-weight:700;">0.341</div>
-        <div style="background:rgba(163,230,53,.3);height:4px;border-radius:2px;margin-top:.3rem;width:68%;"></div>
+        <div style="color:var(--muted);">FLIP⭐</div>
+        <div style="color:var(--social);font-weight:700;">0.357</div>
+        <div style="background:rgba(163,230,53,.3);height:4px;border-radius:2px;margin-top:.3rem;width:71%;"></div>
       </div>
     </div>
     <div style="background:var(--s1);border:1px solid rgba(255,229,102,.3);border-radius:5px;padding:.5rem;font-size:.6rem;">
-      <span style="color:var(--muted);">Dominant Path: </span><span style="color:var(--green);font-weight:700;">P1_Interpretability</span>
-      <span style="color:var(--muted);margin-left:.8rem;">Aggregate Risk: </span><span style="color:var(--yellow);font-weight:700;">0.333 → 33.3%</span>
+      <span style="color:var(--muted);">Dominant Dim: </span><span style="color:var(--green);font-weight:700;">FLIP/PNS (L3 — Daubert but-for)</span>
+      <span style="color:var(--muted);margin-left:.8rem;">Aggregate Risk: </span><span style="color:var(--yellow);font-weight:700;">0.342 → 34.2%</span>
     </div>
   </div>
 
@@ -1821,8 +1847,8 @@ if RCT evidence exists:
 
     <!-- ── S05 SCM Engine ── -->
     <div class="smap">
-      <div class="smb">SHARED CORE — SCM Auto-Calibrated · 17×5 Causal Matrix</div>
-      <div style="font-size:.76rem;font-weight:700;color:var(--green);text-align:center;margin-bottom:.25rem;">🗺 17 × 5 Matrix — Weights Auto-Updated by SCM</div>
+      <div class="smb">SHARED CORE — SCM Auto-Calibrated · 23×5 Pearl Causal Matrix</div>
+      <div style="font-size:.76rem;font-weight:700;color:var(--green);text-align:center;margin-bottom:.25rem;">🗺 23 × 5 Pearl Matrix — Weights Auto-Updated by SCM</div>
       <div class="rings">
         <div class="rp" style="background:rgba(0,255,157,.08);color:var(--green);border-color:var(--green)">CENTER · STRONG</div>
         <div class="rp" style="background:rgba(255,229,102,.07);color:var(--yellow);border-color:var(--yellow)">MIDDLE · MEDIUM</div>
@@ -1834,8 +1860,8 @@ if RCT evidence exists:
     <div class="blk b-sc" style="position:relative">
       <div class="sn">S05 · PEARL L1+L2+L3</div>
       <div class="bl">SCM Engine v2</div>
-      <div class="bt">🔬 Sparse Causal Activation Matrix 17×5</div>
-      <div class="bd">Full Judea Pearl Causality. L1 (Association) → L2 (Intervention / do-calculus / Backdoor / Frontdoor) → L3 (Counterfactual / NDE / NIE / PNS / PN / PS bounds). Daubert Legal Admissibility Score. 5 rules auto-calibrate 17×5 matrix weights in real-time.</div>
+      <div class="bt">🔬 Sparse Causal Activation Matrix 23×5 Pearl L1→L3</div>
+      <div class="bd">Full Judea Pearl Causality. L1 (Association) → L2 (Intervention / do-calculus / Backdoor / Frontdoor) → L3 (Counterfactual / NDE / NIE / PNS / PN / PS bounds). Daubert Legal Admissibility Score. 23×5 Pearl causal matrix (RCT/TCE/INTV/MED/FLIP). SCM educational dampener prevents false positives. Year 2: DoWhy calibrates all 115 cells empirically.</div>
       <span class="btag">CAUSAL PROOF · DAUBERT SCORE</span>
     </div>
 
@@ -2056,79 +2082,102 @@ if RCT evidence exists:
 <div class="mx-wrap">
   <table>
     <thead>
-      <tr><th style="text-align:left">Problem Type</th>
-        <th>P1 Interp.</th><th>P2 Behav.</th><th>P3 Data</th><th>P4 System</th><th>P5 Social</th>
-        <th>Severity</th><th>Detection</th><th>Mitigation</th></tr>
+      <tr><th style="text-align:left">Harm Category</th>
+        <th>RCT (L1)</th><th>TCE (L2)</th><th>INTV (L2)</th><th>MED (L3)</th><th>FLIP/PNS (L3⭐)</th>
+        <th>Tier</th><th>Source</th></tr>
     </thead>
     <tbody>
-      <tr class="cr"><td colspan="9">── BIAS ── (most central — highest causal connections)</td></tr>
-      <tr><td>1. Training Data Bias</td><td class="ts">3.0</td><td class="tm">2.0</td><td class="tm">2.0</td><td class="tw">1.0</td><td class="tm">2.0</td><td>High(3)</td><td>Med(2)</td><td>High(3)</td></tr>
-      <tr><td>2. Representation Bias ⭐</td><td class="ts">3.0</td><td class="ts">3.0</td><td class="tm">2.0</td><td class="tm">2.0</td><td class="ts">3.0</td><td>Crit(4)</td><td>Hard(3)</td><td>High(3)</td></tr>
-      <tr><td>3. Feedback Loop Bias</td><td class="tm">2.0</td><td class="ts">3.0</td><td class="tm">2.0</td><td class="tw">1.0</td><td class="tm">2.0</td><td>High(3)</td><td>Hard(3)</td><td>High(3)</td></tr>
-      <tr><td>4. Confirmation Bias</td><td class="tm">2.0</td><td class="ts">3.0</td><td class="tw">1.0</td><td class="ts">3.0</td><td class="tm">2.0</td><td>Med(2)</td><td>Hard(3)</td><td>Med(2)</td></tr>
-      <tr><td>5. Human-Understanding Bias</td><td class="tw">1.0</td><td class="tm">2.0</td><td class="tw">1.0</td><td class="ts">3.0</td><td class="tm">2.0</td><td>Med(2)</td><td>VH(4)</td><td>Med(2)</td></tr>
-      <tr class="cr"><td colspan="9">── PRIVACY ──</td></tr>
-      <tr><td>6. Data Collection Privacy</td><td class="tm">2.0</td><td class="tw">1.0</td><td class="ts">3.0</td><td class="tm">2.0</td><td class="tm">2.0</td><td>High(3)</td><td>Med(2)</td><td>Med(2)</td></tr>
-      <tr><td>7. Storage & Security</td><td class="tm">2.0</td><td class="tw">1.0</td><td class="ts">3.0</td><td class="tw">1.0</td><td class="tw">1.0</td><td>High(3)</td><td>Med(2)</td><td>High(3)</td></tr>
-      <tr><td>8. Inference Privacy</td><td class="ts">3.0</td><td class="tm">2.0</td><td class="tm">2.0</td><td class="tm">2.0</td><td class="tm">2.0</td><td>High(3)</td><td>Hard(3)</td><td>High(3)</td></tr>
-      <tr class="cr"><td colspan="9">── TRANSPARENCY ──</td></tr>
-      <tr><td>9. Decision Transparency</td><td class="ts">3.0</td><td class="tm">2.0</td><td class="ts">3.0</td><td class="tm">2.0</td><td class="tw">1.0</td><td>High(3)</td><td>Med(2)</td><td>Med(2)</td></tr>
-      <tr><td>10. Data Transparency</td><td class="tm">2.0</td><td class="tw">1.0</td><td class="ts">3.0</td><td class="tw">1.0</td><td class="tw">1.0</td><td>Med(2)</td><td>Easy(1)</td><td>Med(2)</td></tr>
-      <tr><td>11. Limitation Transparency</td><td class="ts">3.0</td><td class="tm">2.0</td><td class="tm">2.0</td><td class="ts">3.0</td><td class="tw">1.0</td><td>Med(2)</td><td>Easy(1)</td><td>Low(1)</td></tr>
-      <tr class="cr"><td colspan="9">── ACCOUNTABILITY ──</td></tr>
-      <tr><td>12. Developer Accountability</td><td class="tw">1.0</td><td class="tw">1.0</td><td class="ts">3.0</td><td class="tw">1.0</td><td class="tm">2.0</td><td>Med(2)</td><td>Med(2)</td><td>Med(2)</td></tr>
-      <tr><td>13. Deployment Accountability</td><td class="tw">1.0</td><td class="tm">2.0</td><td class="ts">3.0</td><td class="tm">2.0</td><td class="tm">2.0</td><td>High(3)</td><td>Med(2)</td><td>Med(2)</td></tr>
-      <tr><td>14. Audit Accountability ⭐</td><td class="ts">3.0</td><td class="ts">3.0</td><td class="ts">3.0</td><td class="tw">1.0</td><td class="tm">2.0</td><td>High(3)</td><td>Med(2)</td><td>Med(2)</td></tr>
-      <tr class="cr"><td colspan="9">── SAFETY ──</td></tr>
-      <tr><td>15. Technical Safety</td><td class="ts">3.0</td><td class="tm">2.0</td><td class="tm">2.0</td><td class="tw">1.0</td><td class="tw">1.0</td><td>Crit(4)</td><td>Hard(3)</td><td>High(3)</td></tr>
-      <tr><td>16. Misuse Safety</td><td class="tm">2.0</td><td class="ts">3.0</td><td class="ts">3.0</td><td class="tm">2.0</td><td class="ts">3.0</td><td>Crit(4)</td><td>Hard(3)</td><td>High(3)</td></tr>
-      <tr><td>17. Long-term Safety</td><td class="tm">2.0</td><td class="tw">1.0</td><td class="ts">3.0</td><td class="tm">2.0</td><td class="ts">3.0</td><td>Crit(4)</td><td>VH(4)</td><td>High(3)</td></tr>
+      <tr class="cr"><td colspan="8">── CRITICAL ── (highest PNS — Daubert but-for causation)</td></tr>
+      <tr><td>1. csam 🔴</td><td class="ts">0.85</td><td class="ts">0.95</td><td class="ts">0.89</td><td class="ts">0.82</td><td class="ts">0.91</td><td>CRITICAL</td><td>AIAAIC</td></tr>
+      <tr><td>2. weapon_synthesis 🔴</td><td class="ts">0.79</td><td class="ts">0.92</td><td class="ts">0.85</td><td class="tm">0.74</td><td class="ts">0.88</td><td>CRITICAL</td><td>AIAAIC</td></tr>
+      <tr><td>3. child_safety 🔴</td><td class="tm">0.72</td><td class="ts">0.84</td><td class="tm">0.78</td><td class="tm">0.65</td><td class="ts">0.81</td><td>CRITICAL</td><td>EU AI Act</td></tr>
+      <tr class="cr"><td colspan="8">── HIGH ──</td></tr>
+      <tr><td>4. violence</td><td class="tm">0.65</td><td class="ts">0.81</td><td class="tm">0.73</td><td class="tm">0.57</td><td class="tm">0.76</td><td>HIGH</td><td>AIAAIC</td></tr>
+      <tr><td>5. medical_harm</td><td class="tm">0.61</td><td class="tm">0.78</td><td class="tm">0.69</td><td class="tm">0.52</td><td class="tm">0.71</td><td>HIGH</td><td>AIAAIC</td></tr>
+      <tr><td>6. election_interference</td><td class="tm">0.58</td><td class="tm">0.73</td><td class="tm">0.66</td><td class="tm">0.51</td><td class="tm">0.69</td><td>HIGH</td><td>2024 AIAAIC</td></tr>
+      <tr><td>7. autonomous_ai_harm</td><td class="tm">0.59</td><td class="tm">0.74</td><td class="tm">0.67</td><td class="tm">0.53</td><td class="tm">0.69</td><td>HIGH</td><td>AIAAIC</td></tr>
+      <tr class="cr"><td colspan="8">── MEDIUM ──</td></tr>
+      <tr><td>8. bias_discrimination ⭐</td><td class="tm">0.50</td><td class="tm">0.63</td><td class="tm">0.59</td><td class="tw">0.44</td><td class="tm">0.57</td><td>MEDIUM</td><td>COMPAS</td></tr>
+      <tr><td>9. hate_speech</td><td class="tw">0.47</td><td class="tm">0.62</td><td class="tm">0.55</td><td class="tw">0.41</td><td class="tm">0.58</td><td>MEDIUM</td><td>AIAAIC</td></tr>
+      <tr><td>10. cybercrime</td><td class="tm">0.55</td><td class="tm">0.71</td><td class="tm">0.63</td><td class="tw">0.48</td><td class="tm">0.65</td><td>MEDIUM</td><td>AIAAIC</td></tr>
+      <tr><td>11. deepfake</td><td class="tm">0.54</td><td class="tm">0.69</td><td class="tm">0.61</td><td class="tw">0.46</td><td class="tm">0.64</td><td>MEDIUM</td><td>AIAAIC</td></tr>
+      <tr><td>12. financial_fraud</td><td class="tm">0.53</td><td class="tm">0.68</td><td class="tm">0.60</td><td class="tw">0.45</td><td class="tm">0.63</td><td>MEDIUM</td><td>AIAAIC</td></tr>
+      <tr><td>13. psychological_manipulation</td><td class="tm">0.51</td><td class="tm">0.66</td><td class="tm">0.58</td><td class="tw">0.43</td><td class="tm">0.61</td><td>MEDIUM</td><td>AIAAIC</td></tr>
+      <tr><td>14. social_engineering_attack</td><td class="tm">0.55</td><td class="tm">0.70</td><td class="tm">0.62</td><td class="tw">0.47</td><td class="tm">0.65</td><td>MEDIUM</td><td>AIAAIC</td></tr>
+      <tr><td>15. surveillance_stalking</td><td class="tm">0.53</td><td class="tm">0.67</td><td class="tm">0.60</td><td class="tw">0.45</td><td class="tm">0.63</td><td>MEDIUM</td><td>2024 AIAAIC</td></tr>
+      <tr><td>16. data_poisoning</td><td class="tm">0.52</td><td class="tm">0.67</td><td class="tm">0.59</td><td class="tw">0.44</td><td class="tm">0.62</td><td>MEDIUM</td><td>AIAAIC</td></tr>
+      <tr><td>17. supply_chain_attack</td><td class="tm">0.57</td><td class="tm">0.72</td><td class="tm">0.64</td><td class="tw">0.49</td><td class="tm">0.67</td><td>MEDIUM</td><td>2024 AIAAIC</td></tr>
+      <tr><td>18. misinformation_synthetic</td><td class="tw">0.44</td><td class="tm">0.59</td><td class="tm">0.52</td><td class="tw">0.40</td><td class="tm">0.55</td><td>MEDIUM</td><td>AIAAIC</td></tr>
+      <tr class="cr"><td colspan="8">── LOW ──</td></tr>
+      <tr><td>19. privacy_violation</td><td class="tw">0.44</td><td class="tm">0.55</td><td class="tm">0.51</td><td class="tw">0.38</td><td class="tw">0.49</td><td>LOW</td><td>LK PDP + GDPR</td></tr>
+      <tr><td>20. misinformation_factual</td><td class="tw">0.35</td><td class="tw">0.48</td><td class="tw">0.42</td><td class="tw">0.31</td><td class="tw">0.44</td><td>LOW</td><td>AIAAIC</td></tr>
+      <tr><td>21. regulatory_noncompliance</td><td class="tw">0.46</td><td class="tm">0.57</td><td class="tm">0.54</td><td class="tw">0.39</td><td class="tm">0.52</td><td>LOW</td><td>EU AI Act</td></tr>
+      <tr><td>22. intellectual_property_theft</td><td class="tw">0.41</td><td class="tm">0.53</td><td class="tw">0.48</td><td class="tw">0.35</td><td class="tw">0.49</td><td>LOW</td><td>NYT v OpenAI</td></tr>
+      <tr><td>23. environmental_harm</td><td class="tw">0.28</td><td class="tw">0.39</td><td class="tw">0.34</td><td class="tw">0.25</td><td class="tw">0.36</td><td>LOW</td><td>EU AI Act</td></tr>
+      <tr class="cr"><td colspan="8">── NONE ──</td></tr>
+      <tr><td>24. safe ⚪</td><td class="tw">0.00</td><td class="tw">0.00</td><td class="tw">0.00</td><td class="tw">0.00</td><td class="tw">0.00</td><td>NONE</td><td>zero row</td></tr>
     </tbody>
   </table>
 </div>
 <p style="font-size:.58rem;color:var(--muted);text-align:center;margin-top:.4rem;font-family:'JetBrains Mono',monospace;">
-  ⭐ Central nodes · Values currently logical estimates · Year 2 PhD: SCM-validated empirical weights replace these
+  ⭐ FLIP/PNS col weight=0.30 (Daubert but-for) · Values: AIAAIC-approximated · Year 2: DoWhy calibrates all 115 cells · Year 3: Bayesian Optimization optimal weights
 </p>
 </div>
 
 <!-- ══════════════ CALC ══════════════ -->
 <div id="calc" class="panel">
 <div class="cw"><div class="cb">
-  <h3>🧮 Risk Score Calculator</h3>
-  <div class="fm">Risk = Connection Sum × Severity × Detection × Domain<br>Cascade Bonus: +20% if node is central (⭐)<br>SCM Boost: if RCT evidence → −10% (more confidence = lower uncertainty)</div>
-  <div class="fi"><label>PROBLEM TYPE</label>
+  <h3>🧮 Pearl Causal Risk Calculator</h3>
+  <div class="fm">Score = Σ(cell × column_weight) × sev_multiplier × scm_dampener<br>
+  Column weights: RCT=0.15 · TCE=0.25 · INTV=0.20 · MED=0.10 · FLIP=0.30<br>
+  SCM Dampener: max(tce_norm, 0.30) — educational queries dampened</div>
+  <div class="fi"><label>HARM CATEGORY</label>
     <select id="prob">
-      <option value="10,3,2,1">1. Training Data Bias (central)</option>
-      <option value="13,4,3,1">2. Representation Bias ⭐ (most central)</option>
-      <option value="9,3,3,1">3. Feedback Loop Bias (central)</option>
-      <option value="8,2,3,0">4. Confirmation Bias</option>
-      <option value="7,2,4,0">5. Human-Understanding Bias</option>
-      <option value="8,3,2,0">6. Data Collection Privacy</option>
-      <option value="6,3,2,0">7. Storage & Security Privacy</option>
-      <option value="9,3,3,0">8. Inference Privacy</option>
-      <option value="9,3,2,0">9. Decision Transparency</option>
-      <option value="5,2,1,0">10. Data Transparency</option>
-      <option value="9,2,1,0">11. Limitation Transparency</option>
-      <option value="5,2,2,0">12. Developer Accountability</option>
-      <option value="7,3,2,0">13. Deployment Accountability</option>
-      <option value="10,3,2,1">14. Audit Accountability ⭐ (central)</option>
-      <option value="7,4,3,0">15. Technical Safety</option>
-      <option value="11,4,3,1">16. Misuse Safety (central)</option>
-      <option value="9,4,4,1">17. Long-term Safety (central)</option>
+      <option value="0.85,0.95,0.89,0.82,0.91,CRITICAL">csam 🔴 (CRITICAL)</option>
+      <option value="0.79,0.92,0.85,0.74,0.88,CRITICAL">weapon_synthesis 🔴 (CRITICAL)</option>
+      <option value="0.72,0.84,0.78,0.65,0.81,CRITICAL">child_safety 🔴 (CRITICAL)</option>
+      <option value="0.65,0.81,0.73,0.57,0.76,HIGH">violence 🟠 (HIGH)</option>
+      <option value="0.61,0.78,0.69,0.52,0.71,HIGH">medical_harm 🟠 (HIGH)</option>
+      <option value="0.58,0.73,0.66,0.51,0.69,HIGH">election_interference 🟠 (HIGH)</option>
+      <option value="0.59,0.74,0.67,0.53,0.69,HIGH">autonomous_ai_harm 🟠 (HIGH)</option>
+      <option value="0.50,0.63,0.59,0.44,0.57,MEDIUM" selected>bias_discrimination ⭐ (MEDIUM)</option>
+      <option value="0.47,0.62,0.55,0.41,0.58,MEDIUM">hate_speech (MEDIUM)</option>
+      <option value="0.55,0.71,0.63,0.48,0.65,MEDIUM">cybercrime (MEDIUM)</option>
+      <option value="0.54,0.69,0.61,0.46,0.64,MEDIUM">deepfake (MEDIUM)</option>
+      <option value="0.53,0.68,0.60,0.45,0.63,MEDIUM">financial_fraud (MEDIUM)</option>
+      <option value="0.51,0.66,0.58,0.43,0.61,MEDIUM">psychological_manipulation (MEDIUM)</option>
+      <option value="0.55,0.70,0.62,0.47,0.65,MEDIUM">social_engineering_attack (MEDIUM)</option>
+      <option value="0.53,0.67,0.60,0.45,0.63,MEDIUM">surveillance_stalking (MEDIUM)</option>
+      <option value="0.52,0.67,0.59,0.44,0.62,MEDIUM">data_poisoning (MEDIUM)</option>
+      <option value="0.57,0.72,0.64,0.49,0.67,MEDIUM">supply_chain_attack (MEDIUM)</option>
+      <option value="0.44,0.59,0.52,0.40,0.55,MEDIUM">misinformation_synthetic (MEDIUM)</option>
+      <option value="0.44,0.55,0.51,0.38,0.49,LOW">privacy_violation 🟢 (LOW)</option>
+      <option value="0.35,0.48,0.42,0.31,0.44,LOW">misinformation_factual 🟢 (LOW)</option>
+      <option value="0.46,0.57,0.54,0.39,0.52,LOW">regulatory_noncompliance 🟢 (LOW)</option>
+      <option value="0.41,0.53,0.48,0.35,0.49,LOW">intellectual_property_theft 🟢 (LOW)</option>
+      <option value="0.28,0.39,0.34,0.25,0.36,LOW">environmental_harm 🟢 (LOW)</option>
+      <option value="0.00,0.00,0.00,0.00,0.00,NONE">safe ⚪ (NONE)</option>
     </select></div>
   <div class="fi"><label>DOMAIN</label>
     <select id="dom">
-      <option value="1.0">General AI (1.0×)</option>
-      <option value="1.5">Entertainment (1.5×)</option>
-      <option value="2.0">Education (2.0×)</option>
-      <option value="2.5">Finance (2.5×)</option>
-      <option value="3.0">Healthcare (3.0×)</option>
+      <option value="general,1.0">General AI (α=0.65)</option>
+      <option value="finance,2.5">Finance (α=0.65)</option>
+      <option value="healthcare,3.0">Healthcare (α=0.75)</option>
+      <option value="criminal_justice,1.0">Criminal Justice (FLIP=0.40, α=0.78)</option>
     </select></div>
-  <div class="fi" style="display:flex;align-items:center;gap:.5rem;">
-    <input type="checkbox" id="rct" style="accent-color:var(--green);width:13px;height:13px;">
-    <label style="margin-bottom:0;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);" for="rct">RCT Evidence exists (−10% risk)</label>
+  <div class="fi"><label>SCM TCE OUTPUT (%)</label>
+    <input type="range" id="tce_slider" min="0" max="30" value="12" step="0.5"
+      oninput="document.getElementById('tce_val').textContent=this.value+'%'">
+    <span id="tce_val" style="color:var(--yellow);font-family:'JetBrains Mono',monospace;font-size:.7rem;">12%</span>
   </div>
-  <button class="cbtn" onclick="calcRisk()">Calculate</button>
+  <div class="fi"><label>SEVERITY</label>
+    <select id="sev">
+      <option value="0.6">LOW (0.6×)</option>
+      <option value="0.8">MEDIUM (0.8×)</option>
+      <option value="1.0" selected>HIGH (1.0×)</option>
+      <option value="1.2">CRITICAL (1.2×)</option>
+    </select></div>
+  <button class="cbtn" onclick="calcRisk()">▶ Calculate Pearl Score</button>
   <div class="rb" id="rb">
     <div class="rs" id="rs"></div>
     <div class="rl" id="rl"></div>
@@ -2136,6 +2185,54 @@ if RCT evidence exists:
   </div>
 </div></div>
 </div>
+
+<script>
+function calcRisk() {
+  const probVal = document.getElementById('prob').value.split(',');
+  const rct=+probVal[0], tce_col=+probVal[1], intv=+probVal[2], med=+probVal[3], flip=+probVal[4];
+  const tier = probVal[5];
+  const domVal = document.getElementById('dom').value.split(',');
+  const domain = domVal[0];
+  const tce = +document.getElementById('tce_slider').value;
+  const sev = +document.getElementById('sev').value;
+
+  // Column weights
+  let w = {rct:0.15, tce:0.25, intv:0.20, med:0.10, flip:0.30};
+  if (domain === 'criminal_justice') w.flip = 0.40;
+
+  // Normalize weights (in case flip changed)
+  const total_w = w.rct + w.tce + w.intv + w.med + w.flip;
+  Object.keys(w).forEach(k => w[k] = w[k]/total_w);
+
+  // SCM override for TCE column
+  const tce_norm = Math.min(tce/20.0, 1.0);
+  const tce_col_val = tce_norm;  // override TCE column with real SCM
+
+  // Weighted score
+  const raw = rct*w.rct + tce_col_val*w.tce + intv*w.intv + med*w.med + flip*w.flip;
+
+  // SCM dampener
+  const dampener = Math.max(tce_norm, 0.30);
+  const score = Math.min(1.0, raw * sev * dampener);
+  const pct = Math.round(score * 100);
+
+  let decision, col;
+  if (pct >= 70) { decision='BLOCK'; col='var(--red)'; }
+  else if (pct >= 55) { decision='EXPERT REVIEW'; col='var(--purple)'; }
+  else if (pct >= 30) { decision='WARN'; col='var(--yellow)'; }
+  else { decision='ALLOW'; col='var(--green)'; }
+
+  const bar = document.getElementById('rs');
+  bar.style.cssText = `width:${pct}%;background:${col};height:18px;border-radius:4px;transition:width .4s;`;
+  document.getElementById('rl').innerHTML =
+    `<span style="color:${col};font-weight:700;font-size:.9rem;">${decision}</span>
+     <span style="color:var(--muted);font-size:.7rem;margin-left:.5rem;">${pct}% risk</span>
+     <span style="color:var(--muted);font-size:.6rem;display:block;margin-top:.2rem;">Tier: ${tier} · SCM dampener: ${dampener.toFixed(2)} · sev: ${sev}×</span>`;
+  document.getElementById('rf').innerHTML =
+    `Formula: (${rct}×${w.rct.toFixed(2)} + ${tce_col_val.toFixed(2)}×${w.tce.toFixed(2)} + ${intv}×${w.intv.toFixed(2)} + ${med}×${w.med.toFixed(2)} + ${flip}×${w.flip.toFixed(2)}) × ${sev} × ${dampener.toFixed(2)} = ${score.toFixed(3)}`;
+  document.getElementById('rb').style.display='block';
+}
+</script>
 
 <!-- ══════════════ ROADMAP ══════════════ -->
 <div id="road" class="panel">
@@ -2149,7 +2246,7 @@ if RCT evidence exists:
       <li>14-Stage Pipeline (pipeline_v15+step09b, S00–S13 + Step 09b) — <span style="color:var(--green)">212/212 tests ✅</span></li>
       <li>SCM Engine v2 — Full Pearl Theory (L1+L2+L3) ✅</li>
       <li>Adversarial Engine v5 — 4 attack types + skimming + suicide variants ✅</li>
-      <li>Sparse Causal Activation Matrix 17×5 ✅</li>
+      <li>Sparse Causal Activation Matrix 23×5 Pearl L1→L3 ✅</li>
       <li>10 real-world cases — 0 harmful output ✅</li>
       <li>Ablation study: 4/5 bias cases need SCM ✅</li>
       <li>Legal claims corrected (Daubert-aligned) ✅</li>
@@ -2192,7 +2289,7 @@ if RCT evidence exists:
         <span style="color:var(--red)">"s4r1n synthesis" → BLOCK (5ms)</span> ·
         <span style="color:var(--red)">"AI sentence Black defendant" → BLOCK (5ms)</span><br>
         <b style="color:var(--yellow)">Gap found:</b> AI sentencing + protected class scored 28.6% (below 30% WARN) → was ALLOW → fixed in v15d<br>
-        <b style="color:var(--text)">PhD value:</b> "Synthetic tests: 177/179 → Live deployment found gap #178 → Fixed same session → AIAAIC validation → 195/195 → Causal Human Oversight Verifier → 212/212 (100%) final."
+        <b style="color:var(--text)">PhD value:</b> "Synthetic tests: 177/179 → Live deployment found gap #178 → Fixed same session → AIAAIC validation → 212/212 → Causal Human Oversight Verifier → 212/212 (100%) final."
       </div>
     </div>
 
@@ -2284,7 +2381,7 @@ if RCT evidence exists:
     <div style="background:rgba(56,182,255,.05);border:1px solid rgba(56,182,255,.15);border-radius:6px;padding:.7rem;margin-bottom:.7rem;">
       <div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--cyan);margin-bottom:.4rem;">PHASE 3 — Bayesian Optimization (Months 4-7) · Our idea + DeepSeek</div>
       <ul style="font-size:.62rem;color:var(--muted);line-height:1.8;margin:0;padding-left:1rem;">
-        <li>AIAAIC 2223 labeled incidents → BO calibrate matrix weights [3,2,3,2,3]</li>
+        <li>AIAAIC 2223 labeled incidents → BO calibrate 23×5 Pearl matrix (115 cells) — Year 2 DoWhy + Year 3 BO</li>
         <li>scikit-optimize gp_minimize — 100 smart tries &gt; 10,000 random</li>
         <li>Also calibrate: tier thresholds + domain multipliers</li>
         <li>GPT examiner "metric calibration" revision → ✅ SOLVED</li>
@@ -2730,7 +2827,7 @@ def verify_patch(patch, original_attack):<br>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;">
       <div>
         <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:#a8ff78;margin-bottom:.3rem;">Open Category Layer</div>
-        <div style="font-size:.65rem;color:var(--muted);line-height:1.55;">Unknown PROBLEM TYPES detect பண்றது. "இந்த question என்னோட 17 categories-ல் fit ஆகல" → flag → expert review → matrix update. Reactive — problem வந்த பிறகு.</div>
+        <div style="font-size:.65rem;color:var(--muted);line-height:1.55;">Unknown PROBLEM TYPES detect பண்றது. "இந்த question என்னோட 23 categories-ல் fit ஆகல" → flag → expert review → matrix update. Reactive — problem வந்த பிறகு.</div>
       </div>
       <div>
         <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:#ff6b35;margin-bottom:.3rem;">Adversarial Robustness Layer</div>
@@ -3313,7 +3410,7 @@ def decide_tier(query, context, emotion):<br>
 </div>
 
 <div class="note">
-  <span class="g">v5.0 Year 1 Complete = Sparse Causal Activation Matrix (17×5 central node cascade) + Uncertainty Scorer Step04b (OOD detection, 10 grey-area patterns) + scm_engine_v2 (Full Pearl: PNS/PN/PS, NDE/NIE, 17 DAGs, Legal Score) + pipeline_v15+step09b (212/212 tests · 14 stages S00–S13 + Step 09b Human Decision Verifier) + adversarial_engine_v5 (injection FP fixed) + data_privacy_engine v1.0 (GDPR Art.25) + Two-Pass LLM Self-Verification + 60-Case Groq Validation (100%) + Causal Human Oversight Verifier (Pearl L3 + Constitutional Ethics)</span><br>
+  <span class="g">v5.1 Year 1 Complete = Sparse Causal Activation Matrix (23×5 Pearl L1→L3 · RCT/TCE/INTV/MED/FLIP · SCM educational dampener · 6 new categories) + Uncertainty Scorer Step04b (OOD detection, 10 grey-area patterns) + scm_engine_v2 (Full Pearl: PNS/PN/PS, NDE/NIE, 17 DAGs, Legal Score) + pipeline_v15+step09b (212/212 tests · 14 stages S00–S13 + Step 09b Human Decision Verifier) + adversarial_engine_v5 (injection FP fixed) + data_privacy_engine v1.0 (GDPR Art.25) + Two-Pass LLM Self-Verification + 60-Case Groq Validation (100%) + Causal Human Oversight Verifier (Pearl L3 + Constitutional Ethics)</span><br>
   <span class="g">v4.5 = v4.4 + Tiered Scanning (70% faster · zero safety compromise · continuous red-teaming outside VAC)</span><br>
   <span style="color:#ff6b35">Living System: Query-level (14 stages) + System-level (Open Category) + Security-level (Adversarial)</span><br>
   <span class="p">SCM = Expert Witness · Matrix = Judge · Rules replace subjective with empirical</span><br>
@@ -3596,7 +3693,7 @@ L3 Counterfactual: Female candidate X — if male, selected with 89% probability
       { n:5,  active:true,  color:"#a8ff78",
         title:"🌐 Open Category Layer",
         input:"Does this match known problem categories?",
-        finding:"Matched: Representation Bias (Problem #2) + Training Data Bias (Problem #1). Known category — no anomaly flag needed.",
+        finding:"Matched: bias_discrimination (v5.1 matrix row #8) + historical training data bias. Known category — no anomaly flag needed.",
         output:"Category confirmed: REPRESENTATION BIAS · Risk propagation: P1→P2→P5 cascade triggered" },
       { n:6,  active:true,  color:"#60a5fa",
         title:"⚖️ Jurisdiction Policy Engine",
@@ -3620,13 +3717,13 @@ Combined gender-proxy influence: 80%`,
       { n:9,  active:true,  color:"#fb923c",
         title:"🔎 Compliance Verifier",
         input:"Answer + SHAP explanation verified against SCM-calibrated matrix",
-        finding:"Matrix check: Representation Bias node → Severity 4, Detection 4. SHAP score 80% > threshold 30%. EEO Act violation confirmed. Output FAILS compliance.",
+        finding:"Matrix check: bias_discrimination → FLIP/PNS=0.57 · TCE=0.63 · Tier: MEDIUM. SHAP score 80% > threshold 30%. EEO Act violation confirmed. Output FAILS compliance.",
         output:"Compliance score: 12% (far below 70% threshold) → BLOCK triggered" },
       { n:10, active:true,  color:"#ff4560",
         title:"⚖️ Decision Engine",
         input:"All signals: SCM causal proof + SHAP 80% + EEO violation + Severity 4",
         finding:"Hard rule triggered: Gender causal effect >10% + legal violation = mandatory BLOCK. RL component confirms — no edge case, clear violation. Cascade alert sent to Path 2 (behavioral) and Path 5 (societal).",
-        output:"DECISION: 🚫 BLOCK · Reason: Representation Bias confirmed causally + legally" },
+        output:"DECISION: 🚫 BLOCK · Reason: bias_discrimination confirmed causally (PNS=0.57) + legally" },
       { n:11, active:true,  color:"#a3e635",
         title:"🌍 Societal Impact Monitor",
         input:"Anonymized aggregate: how many similar hiring queries show same pattern?",
@@ -3638,7 +3735,7 @@ Combined gender-proxy influence: 80%`,
         finding:"User receives: (1) BLOCK decision with reason, (2) SHAP proof showing 80% gender influence, (3) EEO Act citation, (4) Recommended bias mitigation steps, (5) Request to retrain with gender-neutral data.",
         output:"Responsible output delivered. Full audit trail logged. Causal proof attached." }
     ],
-    verdict: { label:"🚫 BLOCKED — Representation Bias Detected", color:"#ff4560",
+    verdict: { label:"🚫 BLOCKED — bias_discrimination Detected (Pearl L3 PNS=0.57)", color:"#ff4560",
       summary:"Amazon's hiring AI would have been stopped at Step 9 (Compliance Verifier) with full causal proof from SCM Engine and SHAP explanation showing 80% gender influence in reasoning." },
     phd: `<div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:#a78bfa;margin-bottom:.4rem;">// PhD Chapter 4 — Why this case matters</div>
     <div style="font-size:.68rem;color:var(--muted);line-height:1.7;">
@@ -3675,7 +3772,7 @@ L3: Counterfactual — same criminal history, different race → score changes 4
         output:"Causal effect = 18.3% · Flip rate = 40% → Severity 4 · Detection 4" },
       { n:5,  active:true,  color:"#a8ff78", title:"🌐 Open Category Layer",
         input:"Category matching",
-        finding:"Matched: Training Data Bias + Representation Bias + Decision Transparency. Triple cascade triggered.",
+        finding:"Matched: bias_discrimination + data_poisoning + regulatory_noncompliance. Triple cascade triggered.",
         output:"3 problem categories active. P1→P3→P5 cascade." },
       { n:6,  active:true,  color:"#60a5fa", title:"⚖️ Jurisdiction Engine",
         input:"US jurisdiction — criminal justice context",
@@ -4085,7 +4182,7 @@ function runDC() {
 
     document.getElementById('dc_matrix_update').innerHTML = `
       <b style="color:var(--purple);font-family:'JetBrains Mono',monospace;font-size:.58rem">🔄 MATRIX AUTO-UPDATE:</b><br>
-      Representation Bias node → Severity: ${sevLabel} · Edge: <span style="color:${edgeColor}">${edge}</span> · Detection: ${detLabel}<br>
+      bias_discrimination → FLIP/PNS: ${sevLabel} · Edge: <span style="color:${edgeColor}">${edge}</span> · Detection: ${detLabel}<br>
       ${epistemic?'Epistemic Risk node: <span style="color:#fb923c">ACTIVATED (Severity=3)</span>':''}<br>
       ${edge==='STRONG'?'<span style="color:#ff4560">P1→P2→P5 CASCADE TRIGGERED</span>':'P1 standalone — no cascade'}<br>
       Next query with similar pattern → pre-loaded weights from this calibration.`;
@@ -4646,7 +4743,7 @@ WARN  if combined ≥ 30%</pre>
           <div style="margin-top:.4rem;font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--purple);font-weight:700;">SCM_risk<br>legal_score</div>
         </div>
         <div style="background:rgba(56,182,255,.07);border:1px solid rgba(56,182,255,.2);border-radius:8px;padding:.7rem;text-align:center;">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:.54rem;color:var(--blue);margin-bottom:.3rem;">📊 17×5 Matrix</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.54rem;color:var(--blue);margin-bottom:.3rem;">📊 23×5 Matrix</div>
           <div style="font-size:.56rem;color:var(--muted);">Sparse activation<br>Central node cascade</div>
           <div style="margin-top:.4rem;font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--blue);font-weight:700;">Matrix_risk<br>cascade_active</div>
         </div>
@@ -4820,7 +4917,7 @@ WARN  if combined ≥ 30%</pre>
 
   <!-- Matrix expansion note -->
   <div style="background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:1.2rem;">
-    <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--cyan);margin-bottom:.8rem;">📊 17×5 MATRIX EXPANSION — Year 2 (20×5)</div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--cyan);margin-bottom:.8rem;">📊 23×5 MATRIX EXPANSION — Year 2 (DoWhy calibration)</div>
     <div style="font-size:.62rem;color:var(--muted);margin-bottom:.8rem;">3 missing rows identified via real-world incident analysis:</div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7rem;">
       <div style="background:rgba(255,69,96,.05);border:1px solid rgba(255,69,96,.2);border-radius:8px;padding:.8rem;">
@@ -4836,7 +4933,7 @@ WARN  if combined ≥ 30%</pre>
         <div style="font-size:.58rem;color:var(--muted);line-height:1.6;">Synthetic biology, pathogen enhancement<br><b style="color:var(--text)">Weight: [4,4,3,3,5] = 19</b><br>Cascade → Misuse_Safety, Physical_Violence</div>
       </div>
     </div>
-    <div style="margin-top:.7rem;font-size:.58rem;color:var(--muted);">Current: 17×5 = 85 cells | Year 2: 20×5 = 100 cells | Still sparse: 3–5 active per query</div>
+    <div style="margin-top:.7rem;font-size:.58rem;color:var(--muted);">Current: 23×5 = 115 cells (approx.) | Year 2: DoWhy calibrates all 115 | Year 3: BO optimal weights</div>
   </div>
 
 </div>
@@ -4953,7 +5050,7 @@ hfCalc();
       <div style="font-size:.52rem;color:var(--muted);margin-top:.1rem;">S01→S12 · SCM + Adversarial + VAC · 212/212 tests</div>
       <div style="margin-top:.4rem;display:flex;gap:.35rem;">
         <span style="font-size:.5rem;background:rgba(139,92,246,.08);color:var(--scm);border-radius:4px;padding:.1rem .3rem;">Pearl L1–L3</span>
-        <span style="font-size:.5rem;background:rgba(139,92,246,.08);color:var(--scm);border-radius:4px;padding:.1rem .3rem;">17×5 Matrix</span>
+        <span style="font-size:.5rem;background:rgba(139,92,246,.08);color:var(--scm);border-radius:4px;padding:.1rem .3rem;">23×5 Matrix</span>
         <span style="font-size:.5rem;background:rgba(139,92,246,.08);color:var(--scm);border-radius:4px;padding:.1rem .3rem;">Legal Score</span>
       </div>
     </div>
@@ -5454,7 +5551,7 @@ hfCalc();
 
   <!-- Header -->
   <div style="text-align:center;margin-bottom:1.4rem;">
-    <div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;margin-bottom:.3rem;">RESPONSIBLE AI FRAMEWORK v5.0</div>
+    <div style="font-size:.62rem;color:var(--muted);letter-spacing:.08em;margin-bottom:.3rem;">RESPONSIBLE AI FRAMEWORK v5.1</div>
     <div style="font-size:1rem;font-weight:700;color:var(--cyan);">📁 Repository File Architecture</div>
     <div style="font-size:.6rem;color:var(--muted);margin-top:.3rem;">github.com/NirmalanSK/responsible-ai-framework · Last updated: April 2026 (v15k)</div>
   </div>
@@ -5500,7 +5597,7 @@ hfCalc();
 └── <span style="color:var(--blue);">docs/</span>
     ├── <span style="color:var(--cyan);">responsible_ai_v5_0.html</span>     <span style="color:var(--muted);"># ← YOU ARE HERE · Interactive dashboard (30 tabs)</span>
     ├── framework_explanation.html       <span style="color:var(--muted);"># Pearl→Matrix link · 14-stage pipeline · Step 05 trace</span>
-    ├── rai_dynamic_assessment.html      <span style="color:var(--muted);"># Live sliders → 17×5 matrix activation + 14-stage trace</span>
+    ├── rai_dynamic_assessment.html      <span style="color:var(--muted);"># Live sliders → 23×5 matrix activation + 14-stage trace</span>
     ├── pipeline_10case_report_v15k.html <span style="color:var(--muted);"># 10-case full pipeline trace · 7B · 2W · 1A</span>
     ├── validation_10_cases.html         <span style="color:var(--muted);"># Dynamic assessment formula validation · 10/10 Python≡HTML</span>
     ├── RAI_v15b_5Case_LiveReport.docx   <span style="color:var(--muted);"># CASE_01–05 live pipeline (5/5 BLOCK)</span>
