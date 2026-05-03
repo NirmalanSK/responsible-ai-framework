@@ -111,7 +111,7 @@ select:focus{outline:1px solid #58a6ff}
 <div class="hdr">
   <h1>Responsible AI Framework v5.0</h1>
   <span class="badge">Dynamic Assessment Engine</span>
-  <span class="badge">17×5 Matrix</span>
+  <span class="badge">23×5 Matrix</span>
   <span class="badge">12-Step Pipeline</span>
 </div>
 <div class="main">
@@ -150,23 +150,37 @@ select:focus{outline:1px solid #58a6ff}
   <div class="ctrl-group">
     <label>Domain</label>
     <select id="sel-domain">
-      <option value="misuse_safety">Misuse / Safety</option>
-      <option value="representation_bias">Representation Bias</option>
-      <option value="criminal_justice_bias">Criminal Justice Bias</option>
-      <option value="context_poisoning">Context Poisoning</option>
-      <option value="decision_transparency">Decision Transparency</option>
-      <option value="disinformation">Disinformation</option>
-      <option value="harassment">Harassment</option>
-      <option value="cyberattack">Cyberattack</option>
-      <option value="privacy_violation">Privacy Violation</option>
-      <option value="financial_fraud">Financial Fraud</option>
-      <option value="medical_harm">Medical Harm</option>
-      <option value="physical_violence">Physical Violence</option>
-      <option value="hate_speech">Hate Speech</option>
-      <option value="drug_trafficking">Drug Trafficking</option>
-      <option value="child_safety">Child Safety</option>
-      <option value="identity_forgery">Identity Forgery</option>
-      <option value="audit_gap">Audit / Accountability</option>
+      <optgroup label="── CRITICAL ──">
+        <option value="csam">CSAM (Child Sexual Abuse)</option>
+        <option value="weapon_synthesis">Weapon Synthesis</option>
+        <option value="child_safety">Child Safety (non-CSAM)</option>
+      </optgroup>
+      <optgroup label="── HIGH ──">
+        <option value="violence">Violence / Incitement</option>
+        <option value="medical_harm">Medical Harm</option>
+        <option value="election_interference">Election Interference</option>
+        <option value="autonomous_ai_harm">Autonomous AI Harm</option>
+      </optgroup>
+      <optgroup label="── MEDIUM ──">
+        <option value="hate_speech">Hate Speech</option>
+        <option value="bias_discrimination">Bias / Discrimination</option>
+        <option value="cybercrime">Cybercrime</option>
+        <option value="deepfake">Deepfake</option>
+        <option value="financial_fraud">Financial Fraud</option>
+        <option value="psychological_manipulation">Psychological Manipulation</option>
+        <option value="social_engineering_attack">Social Engineering Attack</option>
+        <option value="surveillance_stalking">Surveillance / Stalking</option>
+        <option value="data_poisoning">Data Poisoning</option>
+        <option value="supply_chain_attack">Supply Chain Attack</option>
+        <option value="misinformation_synthetic">Misinformation (Synthetic)</option>
+      </optgroup>
+      <optgroup label="── LOW ──">
+        <option value="privacy_violation">Privacy Violation</option>
+        <option value="misinformation_factual">Misinformation (Factual)</option>
+        <option value="regulatory_noncompliance">Regulatory Noncompliance</option>
+        <option value="intellectual_property_theft">Intellectual Property Theft</option>
+        <option value="environmental_harm">Environmental Harm</option>
+      </optgroup>
     </select>
   </div>
   <div class="ctrl-group">
@@ -192,7 +206,7 @@ select:focus{outline:1px solid #58a6ff}
 <div class="content">
   <div class="tabs">
     <div class="tab active" data-tab="pipeline">Pipeline Trace (12 Steps)</div>
-    <div class="tab" data-tab="matrix">17×5 Activation Matrix</div>
+    <div class="tab" data-tab="matrix">23×5 Activation Matrix</div>
     <div class="tab" data-tab="formulas">SCM Formulas</div>
     <div class="tab" data-tab="decision">Final Decision</div>
   </div>
@@ -205,47 +219,81 @@ select:focus{outline:1px solid #58a6ff}
 </div>
 
 <script>
+// ── 23×5 Pearl Causal Activation Matrix (matrix_v2.py) ──────────────────────
+// Columns: RCT (L1), TCE (L2), INTV (L2 deconfounded), MED (L3 mediation), FLIP (L3 PNS)
+// Values ∈ [0.0, 1.0]  |  Row sum ≥ 4.0 → CASCADE fires (≥ 80% of max 5.0)
 const CAUSAL_MATRIX = {
-  "Representation_Bias":   [3,2,3,2,3],
-  "Decision_Transparency": [3,2,2,1,2],
-  "Misuse_Safety":         [2,3,2,3,3],
-  "Technical_Safety":      [2,2,2,3,2],
-  "Criminal_Justice_Bias": [3,2,3,1,2],
-  "Healthcare_Bias":       [3,2,3,1,2],
-  "Context_Poisoning":     [2,3,2,3,1],
-  "Disinformation":        [2,3,1,2,3],
-  "Harassment":            [2,3,1,2,2],
-  "Cyberattack":           [2,2,2,3,1],
-  "Privacy_Violation":     [2,2,3,2,1],
-  "Audit_Accountability":  [3,2,2,2,3],
-  "Financial_Fraud":       [2,3,2,2,1],
-  "Physical_Violence":     [1,3,1,2,2],
-  "Hate_Speech":           [2,2,1,2,3],
-  "Drug_Trafficking":      [1,3,2,2,1],
-  "Identity_Forgery":      [2,2,2,2,1],
+  // ── CRITICAL TIER ──────────────────────────────────────────
+  "csam":                      [0.85, 0.95, 0.89, 0.82, 0.91],
+  "weapon_synthesis":          [0.79, 0.92, 0.85, 0.74, 0.88],
+  "child_safety":              [0.72, 0.84, 0.78, 0.65, 0.81],
+  // ── HIGH TIER ──────────────────────────────────────────────
+  "violence":                  [0.65, 0.81, 0.73, 0.57, 0.76],
+  "medical_harm":              [0.61, 0.78, 0.69, 0.52, 0.71],
+  "election_interference":     [0.58, 0.73, 0.66, 0.51, 0.69],
+  "autonomous_ai_harm":        [0.59, 0.74, 0.67, 0.53, 0.69],
+  // ── MEDIUM TIER ────────────────────────────────────────────
+  "hate_speech":               [0.47, 0.62, 0.55, 0.41, 0.58],
+  "bias_discrimination":       [0.50, 0.63, 0.59, 0.44, 0.57],
+  "cybercrime":                [0.55, 0.71, 0.63, 0.48, 0.65],
+  "deepfake":                  [0.54, 0.69, 0.61, 0.46, 0.64],
+  "financial_fraud":           [0.53, 0.68, 0.60, 0.45, 0.63],
+  "psychological_manipulation":[0.51, 0.66, 0.58, 0.43, 0.61],
+  "social_engineering_attack": [0.55, 0.70, 0.62, 0.47, 0.65],
+  "surveillance_stalking":     [0.53, 0.67, 0.60, 0.45, 0.63],
+  "data_poisoning":            [0.52, 0.67, 0.59, 0.44, 0.62],
+  "supply_chain_attack":       [0.57, 0.72, 0.64, 0.49, 0.67],
+  "misinformation_synthetic":  [0.44, 0.59, 0.52, 0.40, 0.55],
+  // ── LOW TIER ───────────────────────────────────────────────
+  "privacy_violation":         [0.44, 0.55, 0.51, 0.38, 0.49],
+  "misinformation_factual":    [0.35, 0.48, 0.42, 0.31, 0.44],
+  "regulatory_noncompliance":  [0.46, 0.57, 0.54, 0.39, 0.52],
+  "intellectual_property_theft":[0.41, 0.53, 0.48, 0.35, 0.49],
+  "environmental_harm":        [0.28, 0.39, 0.34, 0.25, 0.36],
 };
 const ROW_ORDER = Object.keys(CAUSAL_MATRIX);
-const PATHWAY_NAMES = ["P1 Interpret.","P2 Behavior","P3 Data","P4 Robust.","P5 Society"];
-const PATHWAY_SHORT = ["P1","P2","P3","P4","P5"];
+// Pearl L1→L3 column names (replaces old P1–P5 pathway labels)
+const PATHWAY_NAMES = ["RCT (L1)","TCE (L2)","INTV (L2)","MED (L3)","FLIP/PNS (L3)"];
+const PATHWAY_SHORT = ["RCT","TCE","INTV","MED","FLIP"];
+
+// Cascade: row sum ≥ 4.0 (≥ 80% of max 5.0) → CRITICAL tier → fires cascade
 const CASCADE_MAP = {
-  "Representation_Bias": ["Criminal_Justice_Bias","Healthcare_Bias","Decision_Transparency"],
-  "Misuse_Safety": ["Physical_Violence","Drug_Trafficking","Cyberattack","Context_Poisoning"],
-  "Audit_Accountability": ["Decision_Transparency","Technical_Safety","Privacy_Violation"],
+  "csam":              ["child_safety","psychological_manipulation"],
+  "weapon_synthesis":  ["violence","cybercrime","supply_chain_attack"],
+  "bias_discrimination":["autonomous_ai_harm","regulatory_noncompliance","surveillance_stalking"],
+  "cybercrime":        ["supply_chain_attack","data_poisoning","social_engineering_attack"],
 };
+// Direct domain key → matrix row mapping
 const DOMAIN_TO_ROW = {
-  "misuse_safety":"Misuse_Safety","representation_bias":"Representation_Bias",
-  "criminal_justice_bias":"Criminal_Justice_Bias","context_poisoning":"Context_Poisoning",
-  "decision_transparency":"Decision_Transparency","disinformation":"Disinformation",
-  "harassment":"Harassment","cyberattack":"Cyberattack","privacy_violation":"Privacy_Violation",
-  "financial_fraud":"Financial_Fraud","medical_harm":"Healthcare_Bias",
-  "physical_violence":"Physical_Violence","hate_speech":"Hate_Speech",
-  "drug_trafficking":"Drug_Trafficking","child_safety":"Representation_Bias",
-  "identity_forgery":"Identity_Forgery","audit_gap":"Audit_Accountability",
+  "csam":                      "csam",
+  "weapon_synthesis":          "weapon_synthesis",
+  "child_safety":              "child_safety",
+  "violence":                  "violence",
+  "medical_harm":              "medical_harm",
+  "election_interference":     "election_interference",
+  "autonomous_ai_harm":        "autonomous_ai_harm",
+  "hate_speech":               "hate_speech",
+  "bias_discrimination":       "bias_discrimination",
+  "cybercrime":                "cybercrime",
+  "deepfake":                  "deepfake",
+  "financial_fraud":           "financial_fraud",
+  "psychological_manipulation":"psychological_manipulation",
+  "social_engineering_attack": "social_engineering_attack",
+  "surveillance_stalking":     "surveillance_stalking",
+  "data_poisoning":            "data_poisoning",
+  "supply_chain_attack":       "supply_chain_attack",
+  "misinformation_synthetic":  "misinformation_synthetic",
+  "privacy_violation":         "privacy_violation",
+  "misinformation_factual":    "misinformation_factual",
+  "regulatory_noncompliance":  "regulatory_noncompliance",
+  "intellectual_property_theft":"intellectual_property_theft",
+  "environmental_harm":        "environmental_harm",
 };
 const DOMAIN_MULT = {"healthcare":3.0,"finance":2.5,"education":2.0,"entertainment":1.5,"general":1.0};
 const DOMAIN_MULT_MAP = {
-  "medical_harm":"healthcare","financial_fraud":"finance","drug_trafficking":"general",
-  "misuse_safety":"general","representation_bias":"general","criminal_justice_bias":"general",
+  "medical_harm":"healthcare","financial_fraud":"finance","election_interference":"general",
+  "csam":"general","weapon_synthesis":"general","bias_discrimination":"general",
+  "autonomous_ai_harm":"general","cybercrime":"general",
 };
 
 function getSevLabel(v){return["","LOW","MEDIUM","HIGH","CRITICAL"][v]||"LOW"}
@@ -273,9 +321,9 @@ function computeSCM(tce, med, flip, intv, rct){
 }
 
 function computeMatrix(domain, tce, scm){
-  let primaryRow = DOMAIN_TO_ROW[domain]||"Misuse_Safety";
+  let primaryRow = DOMAIN_TO_ROW[domain]||"weapon_synthesis";
   let primaryTotal = CAUSAL_MATRIX[primaryRow].reduce((a,b)=>a+b,0);
-  let cascadeFired = primaryTotal >= 12;
+  let cascadeFired = primaryTotal >= 4.0; // ≥ 80% of max 5.0 → CRITICAL tier
   let cascadedRows = cascadeFired ? (CASCADE_MAP[primaryRow]||[]) : [];
   let activeRows = [...new Set([primaryRow,...cascadedRows])];
   
@@ -284,7 +332,7 @@ function computeMatrix(domain, tce, scm){
   
   let activeCells = {}, pathwayTotals = [0,0,0,0,0];
   for(let row of activeRows){
-    let w = CAUSAL_MATRIX[row]||[2,2,2,2,2];
+    let w = CAUSAL_MATRIX[row]||[0.5,0.5,0.5,0.5,0.5];
     let rf = row===primaryRow ? 1.0 : 0.6;
     let cellW = {};
     for(let i=0;i<5;i++){
@@ -294,7 +342,8 @@ function computeMatrix(domain, tce, scm){
     }
     activeCells[row] = cellW;
   }
-  let maxPossible = 3*sevMult*1.0*activeRows.length;
+  // maxPossible = 1.0 (max float weight) × sevMult × tceFactor=1.0 × rf=1.0 × rows
+  let maxPossible = 1.0*sevMult*1.0*activeRows.length;
   let pathwayScores = pathwayTotals.map(t=>maxPossible>0?t/maxPossible:0);
   let dominantIdx = pathwayScores.indexOf(Math.max(...pathwayScores));
   let aggregateRisk = maxPossible>0 ? pathwayTotals.reduce((a,b)=>a+b,0)/(maxPossible*5) : 0;
@@ -428,7 +477,7 @@ function renderPipeline(data){
 
 function cellColor(w, isActive, isPrimary){
   if(!isActive) return {bg:'#161b22',color:'#30363d'};
-  let maxW = isPrimary?3.5:2.1;
+  let maxW = isPrimary ? 1.0 : 0.6; // float weight range [0,1]
   let ratio = Math.min(w/maxW,1);
   if(isPrimary){
     let r=Math.round(13+ratio*50), g=Math.round(95+ratio*130), b=Math.round(255);
@@ -449,7 +498,7 @@ function renderMatrix(data){
     <div style="font-size:11px;color:#8b949e;margin-bottom:8px">
       Primary: <span style="color:#79c0ff;font-weight:700">${mat.primaryRow}</span>
       &nbsp;|&nbsp; Cascade: <span class="cascade-badge ${mat.cascadeFired?'fired':''}">
-        ${mat.cascadeFired?'FIRED — '+mat.cascadedRows.length+' rows cascade':'NOT FIRED (total < 12)'}
+        ${mat.cascadeFired?'FIRED — '+mat.cascadedRows.length+' rows cascade':'NOT FIRED (sum < 4.0)'}
       </span>
       &nbsp;|&nbsp; sevMult: <span style="color:#ffa657">${mat.sevMult.toFixed(2)}</span>
       &nbsp;|&nbsp; tceFactor: <span style="color:#ffa657">${mat.tceFactor.toFixed(3)}</span>
@@ -468,22 +517,22 @@ function renderMatrix(data){
     let isActive  = mat.activeRows.includes(row);
     let weights   = CAUSAL_MATRIX[row];
     let rowTotal  = weights.reduce((a,b)=>a+b,0);
-    let isCentral = rowTotal>=12;
+    let isCentral = rowTotal >= 4.0; // cascade threshold for 23×5 float matrix
     let labelCls  = isPrimary?"primary":isCascade?"cascaded":"";
     
     html += `<tr>
       <td class="row-label ${labelCls}" style="padding:2px 8px;font-size:11px">
         ${isPrimary?'▶ ':isCascade?'↳ ':'  '}${row.replace(/_/g,' ')}
-        ${isCentral?`<span style="font-size:9px;color:${isPrimary?'#58a6ff':isCascade?'#a5d6ff':'#484f58'}"> ★${rowTotal}</span>`:`<span style="font-size:9px;color:#484f58"> ${rowTotal}</span>`}
+        ${isCentral?`<span style="font-size:9px;color:${isPrimary?'#58a6ff':isCascade?'#a5d6ff':'#484f58'}"> ★${rowTotal.toFixed(2)}</span>`:`<span style="font-size:9px;color:#484f58"> ${rowTotal.toFixed(2)}</span>`}
       </td>
-      <td style="text-align:center;font-size:11px;color:${isActive?(isCentral?'#ffa657':'#c9d1d9'):'#484f58'}">${rowTotal}</td>`;
+      <td style="text-align:center;font-size:11px;color:${isActive?(isCentral?'#ffa657':'#c9d1d9'):'#484f58'}">${rowTotal.toFixed(2)}</td>`;
     
     for(let i=0;i<5;i++){
       let rawW = weights[i];
       let activatedW = isActive ? (mat.activeCells[row]?.[PATHWAY_SHORT[i]]||0) : 0;
       let cc = cellColor(activatedW, isActive, isPrimary);
       html += `<td class="cell" style="background:${cc.bg};color:${cc.color}">
-        ${rawW}<span class="raw">${isActive?activatedW.toFixed(2):'-'}</span>
+        ${rawW.toFixed(2)}<span class="raw">${isActive?activatedW.toFixed(3):'-'}</span>
       </td>`;
     }
     
@@ -494,7 +543,7 @@ function renderMatrix(data){
   
   html += `</tbody></table></div>
   <div style="margin-top:16px">
-    <div class="panel-title">Pathway Scores (P1–P5)</div>`;
+    <div class="panel-title">Column Scores (RCT / TCE / INTV / MED / FLIP)</div>`;
   for(let i=0;i<5;i++){
     let score = mat.pathwayScores[i];
     let isDom = PATHWAY_SHORT[i]===mat.dominantPath;
@@ -572,20 +621,21 @@ function renderFormulas(data){
     </div>
   </div>
   <div class="scm-rule">
-    <div class="scm-rule-title">Matrix Activation (Step 05 — 17×5 Sparse)</div>
+    <div class="scm-rule-title">Matrix Activation (Step 05 — 23×5 Pearl L1→L3)</div>
     <div class="scm-rule-body" style="font-family:monospace;line-height:2">
       primaryRow = <span style="color:#58a6ff">${mat.primaryRow}</span><br>
-      primaryTotal = ${CAUSAL_MATRIX[mat.primaryRow].join('+')} = <span style="color:#ffa657">${CAUSAL_MATRIX[mat.primaryRow].reduce((a,b)=>a+b,0)}</span> ${mat.cascadeFired?'≥ 12 → CASCADE FIRES':'< 12 → no cascade'}<br>
+      primaryTotal = ${CAUSAL_MATRIX[mat.primaryRow].map(v=>v.toFixed(2)).join('+')} = <span style="color:#ffa657">${CAUSAL_MATRIX[mat.primaryRow].reduce((a,b)=>a+b,0).toFixed(2)}</span> ${mat.cascadeFired?'≥ 4.0 → CASCADE FIRES':'< 4.0 → no cascade'}<br>
+      columns = RCT | TCE | INTV | MED | FLIP  (Pearl L1 → L3)<br>
       activeRows = [${mat.activeRows.join(', ')}] (${mat.activeRows.length} rows)<br>
       sevMult = ${mat.sevMult.toFixed(2)} | tceFactor = min(${tce}/20, 1.0) = ${mat.tceFactor.toFixed(3)}<br>
-      aggregate_risk = Σ(pathway_totals) / (max_possible × 5) = <span style="color:#ffa657">${(mat.aggregateRisk*100).toFixed(1)}%</span>
+      aggregate_risk = Σ(column_totals) / (max_possible × 5) = <span style="color:#ffa657">${(mat.aggregateRisk*100).toFixed(1)}%</span>
     </div>
   </div>
   <div class="scm-rule">
     <div class="scm-rule-title">Combined Risk Calculation (Step 05 final)</div>
     <div class="scm-rule-body" style="font-family:monospace;line-height:2">
       scm_risk = <span style="color:#ffa657">${scm.base_risk.toFixed(1)}%</span><br>
-      matrix_risk = ${(mat.aggregateRisk*100).toFixed(1)}% (from 17×5 matrix)<br>
+      matrix_risk = ${(mat.aggregateRisk*100).toFixed(1)}% (from 23×5 Pearl matrix)<br>
       combined = 0.6 × ${scm.base_risk.toFixed(1)} + 0.4 × ${(mat.aggregateRisk*100).toFixed(1)} = <span style="color:#ffa657">${(0.6*scm.base_risk+0.4*mat.aggregateRisk*100).toFixed(1)}%</span><br>
       domain_multiplier = <span style="color:#ffa657">×${dm.mult}</span> (${dm.label})<br>
       ${(0.6*scm.base_risk+0.4*mat.aggregateRisk*100)>=25?`final = ${(0.6*scm.base_risk+0.4*mat.aggregateRisk*100).toFixed(1)}% × ${dm.mult} =`:'(risk < 25%, multiplier skipped) final ='} <span style="color:#f85149;font-weight:700;font-size:14px">${combinedRisk.toFixed(1)}%</span>
@@ -656,7 +706,7 @@ function renderDecision(data){
     <span style="color:#e6edf3">Causal inputs: </span>
     TCE=${tce}% | MED=${med}% | FlipRate=${flip}% | INTV=${intv}%
     &nbsp;|&nbsp; <span style="color:#e6edf3">Dominant pathway: </span>${mat.dominantPath}
-    &nbsp;|&nbsp; <span style="color:#e6edf3">Active rows: </span>${mat.activeRows.length}/17
+    &nbsp;|&nbsp; <span style="color:#e6edf3">Active rows: </span>${mat.activeRows.length}/23
   </div>`;
   
   document.getElementById('tab-decision').innerHTML = html;
