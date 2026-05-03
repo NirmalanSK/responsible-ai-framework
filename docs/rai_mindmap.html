@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAI Framework v5.1 — Full System Mindmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0A0C10;
+  --bg2:      #10131A;
+  --bg3:      #181C26;
+  --border:   rgba(255,255,255,.07);
+  --border2:  rgba(255,255,255,.12);
+  --text:     #E8EAF0;
+  --muted:    #8890A8;
+  --faint:    #454D66;
+
+  --green:    #00E5A0;
+  --green-d:  rgba(0,229,160,.08);
+  --green-b:  rgba(0,229,160,.18);
+
+  --blue:     #4D9EFF;
+  --blue-d:   rgba(77,158,255,.07);
+  --blue-b:   rgba(77,158,255,.16);
+
+  --purple:   #A78BFA;
+  --purple-d: rgba(167,139,250,.07);
+  --purple-b: rgba(167,139,250,.16);
+
+  --amber:    #FFB547;
+  --amber-d:  rgba(255,181,71,.07);
+  --amber-b:  rgba(255,181,71,.16);
+
+  --red:      #FF6B6B;
+  --red-d:    rgba(255,107,107,.07);
+  --red-b:    rgba(255,107,107,.16);
+
+  --cyan:     #38B2FF;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+.header {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 1.5rem 2rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(12px);
+}
+.header-left h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -.01em;
+  color: var(--text);
+}
+.header-left h1 span { color: var(--green); }
+.header-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.header-badges { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.hbadge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.hb-green { background: var(--green-b); color: var(--green); border: 1px solid rgba(0,229,160,.3); }
+.hb-blue  { background: var(--blue-b);  color: var(--blue);  border: 1px solid rgba(77,158,255,.3); }
+.hb-purple{ background: var(--purple-b);color: var(--purple); border: 1px solid rgba(167,139,250,.3); }
+
+/* ── LEGEND ── */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: .9rem 2rem;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+}
+.lchip { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+.ldot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── MAIN ── */
+.main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+/* ── SECTION LABELS ── */
+.sec-label {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  margin: 2rem 0 .8rem;
+}
+.sec-line { flex: 1; height: 1px; background: var(--border); }
+.sec-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding: 3px 10px;
+  border-radius: 4px;
+}
+.st-green  { background: var(--green-b); color: var(--green); }
+.st-amber  { background: var(--amber-b); color: var(--amber); }
+.st-blue   { background: var(--blue-b);  color: var(--blue); }
+.st-purple { background: var(--purple-b);color: var(--purple); }
+.st-red    { background: var(--red-b);   color: var(--red); }
+
+/* ── PIPELINE FLOW ── */
+.pipe-box {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  margin-bottom: .5rem;
+}
+.pipe-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  margin-bottom: .6rem;
+  font-weight: 500;
+}
+.pipe-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+.step {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+.s-g  { background: var(--green-b);  color: var(--green);  border: 1px solid rgba(0,229,160,.2); }
+.s-a  { background: var(--amber-b);  color: var(--amber);  border: 1px solid rgba(255,181,71,.2); }
+.s-b  { background: var(--blue-b);   color: var(--blue);   border: 1px solid rgba(77,158,255,.2); }
+.s-p  { background: var(--purple-b); color: var(--purple); border: 1px solid rgba(167,139,250,.2); }
+.sep  { color: var(--faint); font-size: 12px; }
+.pipe-note { font-size: 11px; color: var(--faint); margin-top: .5rem; font-family: 'JetBrains Mono', monospace; }
+
+/* ── GRID LAYOUTS ── */
+.g1 { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+@media(max-width:700px){
+  .g2,.g3 { grid-template-columns: 1fr; }
+  .header { padding: 1rem; }
+  .main { padding: 1rem .75rem 3rem; }
+}
+
+/* ── CARDS ── */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: .75rem 1rem;
+  cursor: pointer;
+  transition: border-color .15s, transform .12s, background .15s;
+  position: relative;
+}
+.card:hover { transform: translateY(-2px); }
+.card.open { border-color: var(--border2); }
+
+.cb { background: var(--badge-bg, var(--green-b)); color: var(--badge-c, var(--green)); }
+
+.badge {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  margin-bottom: 5px;
+  letter-spacing: .03em;
+}
+.card-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 3px;
+}
+.card-sub {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.card-arrow {
+  position: absolute;
+  top: .75rem;
+  right: .9rem;
+  font-size: 12px;
+  color: var(--faint);
+  transition: transform .2s;
+}
+.card.open .card-arrow { transform: rotate(90deg); }
+
+/* card colour themes */
+.now .card { border-color: rgba(0,229,160,.12); }
+.now .card:hover { border-color: rgba(0,229,160,.3); background: rgba(0,229,160,.03); }
+.now .card.open { border-color: rgba(0,229,160,.35); background: rgba(0,229,160,.04); }
+.now .badge { background: var(--green-b); color: var(--green); }
+.now .card-title { color: #7FFFD4; }
+
+.chat .card { border-color: rgba(255,181,71,.12); }
+.chat .card:hover { border-color: rgba(255,181,71,.3); background: rgba(255,181,71,.03); }
+.chat .card.open { border-color: rgba(255,181,71,.35); background: rgba(255,181,71,.04); }
+.chat .badge { background: var(--amber-b); color: var(--amber); }
+.chat .card-title { color: #FFD080; }
+
+.y2 .card { border-color: rgba(77,158,255,.12); }
+.y2 .card:hover { border-color: rgba(77,158,255,.3); background: rgba(77,158,255,.03); }
+.y2 .card.open { border-color: rgba(77,158,255,.35); background: rgba(77,158,255,.04); }
+.y2 .badge { background: var(--blue-b); color: var(--blue); }
+.y2 .card-title { color: #8DC8FF; }
+
+.y3 .card { border-color: rgba(167,139,250,.12); }
+.y3 .card:hover { border-color: rgba(167,139,250,.3); background: rgba(167,139,250,.03); }
+.y3 .card.open { border-color: rgba(167,139,250,.35); background: rgba(167,139,250,.04); }
+.y3 .badge { background: var(--purple-b); color: var(--purple); }
+.y3 .card-title { color: #C4B5FD; }
+
+.prob .card { border-color: rgba(255,107,107,.12); }
+.prob .card:hover { border-color: rgba(255,107,107,.3); background: rgba(255,107,107,.03); }
+.prob .card.open { border-color: rgba(255,107,107,.35); background: rgba(255,107,107,.04); }
+.prob .badge { background: var(--red-b); color: var(--red); }
+.prob .card-title { color: #FFA5A5; }
+
+/* ── DETAIL PANEL ── */
+.detail {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: .9rem 1.1rem;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.8;
+  display: none;
+  animation: slideDown .18s ease;
+}
+.detail.open { display: block; }
+@keyframes slideDown { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:translateY(0)} }
+.detail strong { color: var(--text); font-weight: 500; }
+.detail code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  background: rgba(255,255,255,.06);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--cyan);
+}
+.dtag {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin: 1px 2px;
+}
+.dt-g { background: var(--green-b); color: var(--green); }
+.dt-b { background: var(--blue-b);  color: var(--blue); }
+.dt-p { background: var(--purple-b);color: var(--purple); }
+.dt-a { background: var(--amber-b); color: var(--amber); }
+
+/* ── CONNECTOR ── */
+.connector {
+  display: flex;
+  justify-content: center;
+  padding: .6rem 0;
+  color: var(--faint);
+  font-size: 18px;
+}
+
+/* ── THREE PILLAR BANNER ── */
+.pillar-banner {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 1rem 1.3rem;
+  margin-top: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem 1.2rem;
+}
+.pillar-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; width: 100%; margin-bottom: 2px; }
+.pillar-item { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; }
+.pillar-arrow { color: var(--faint); font-size: 14px; }
+.pi-g { color: var(--green); }
+.pi-b { color: var(--blue); }
+.pi-p { color: var(--purple); }
+.pillar-sub { font-size: 11px; color: var(--muted); font-weight: 400; font-family: 'Inter', sans-serif; }
+
+/* ── FUTURE PIPELINE TABLE ── */
+.pipe-table { border-collapse: collapse; width: 100%; font-size: 12px; margin-top: 8px; }
+.pipe-table td { padding: 5px 8px; border-bottom: 1px solid var(--border); }
+.pipe-table td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; width: 60px; }
+.pipe-table tr:last-child td { border-bottom: none; }
+
+/* ── STATS ROW ── */
+.stats-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1rem; }
+.stat-box {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: .5rem .9rem;
+  flex: 1;
+  min-width: 120px;
+}
+.stat-val { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; color: var(--green); }
+.stat-lbl { font-size: 11px; color: var(--muted); }
+
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <h1>RAI Framework <span>v5.1</span> — Full System Mindmap</h1>
+    <div class="header-sub">pipeline_v15+step09b · S00–S13 + Step 09b · 14 stages · 212/212 tests (100%) · May 2026</div>
+  </div>
+  <div class="header-badges">
+    <span class="hbadge hb-green">✅ Year 1 Complete</span>
+    <span class="hbadge hb-blue">🔬 Year 2 Planned</span>
+    <span class="hbadge hb-purple">🚀 Year 3 Future</span>
+    <span class="hbadge" style="background:rgba(255,181,71,.15);color:var(--amber);border:1px solid rgba(255,181,71,.3)">⚡ Click any card to expand</span>
+  </div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="lchip"><div class="ldot" style="background:var(--green)"></div> Year 1 — working now</div>
+  <div class="lchip"><div class="ldot" style="background:var(--amber)"></div> Chatbot layer → pipeline (Year 2)</div>
+  <div class="lchip"><div class="ldot" style="background:var(--blue)"></div> Year 2 — planned</div>
+  <div class="lchip"><div class="ldot" style="background:var(--purple)"></div> Year 3 — future</div>
+  <div class="lchip"><div class="ldot" style="background:var(--red)"></div> Problem it solves</div>
+</div>
+
+<div class="main">
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-val">212/212</div><div class="stat-lbl">Tests passing (100%)</div></div>
+    <div class="stat-box"><div class="stat-val">14</div><div class="stat-lbl">Pipeline stages (S00–S13)</div></div>
+    <div class="stat-box"><div class="stat-val">23×5</div><div class="stat-lbl">Pearl L1→L3 causal matrix</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:var(--blue)">9+</div><div class="stat-lbl">Year 2 phases planned</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:var(--purple)">3</div><div class="stat-lbl">Year 3 extensions (multimodal · agentic · adaptive)</div></div>
+  </div>
+
+  <!-- PIPELINE FLOW -->
+  <div class="pipe-box">
+    <div class="pipe-title">Current pipeline flow — 14 stages + Step 09b (S00–S13) · v15+step09b</div>
+    <div class="pipe-steps">
+      <span class="step s-g">S00 Privacy Gate</span><span class="sep">→</span>
+      <span class="step s-g">S01 Sanitise</span><span class="sep">→</span>
+      <span class="step s-g">S02 Detect</span><span class="sep">→</span>
+      <span class="step s-g">S03 Tier</span><span class="sep">→</span>
+      <span class="step s-g">S04 Emotion</span><span class="sep">→</span>
+      <span class="step s-g">S04b OOD</span><span class="sep">→</span>
+      <span class="step s-g">S05 SCM</span><span class="sep">→</span>
+      <span class="step s-g">S06 Matrix</span><span class="sep">→</span>
+      <span class="step s-g">S07 Adversarial</span><span class="sep">→</span>
+      <span class="step s-g">S08 Jurisdiction</span><span class="sep">→</span>
+      <span class="step s-g">S09 VAC</span><span class="sep">→</span>
+      <span class="step" style="background:rgba(167,139,250,.15);color:var(--purple);border:1px solid rgba(167,139,250,.35)">S09b Human Verifier ✨</span><span class="sep">→</span>
+      <span class="step s-g">S10 Domain Risk</span><span class="sep">→</span>
+      <span class="step s-g">S11 Legal Score</span><span class="sep">→</span>
+      <span class="step s-g">S12 Decision</span><span class="sep">→</span>
+      <span class="step s-g">S13 Output Scan</span><span class="sep">→→</span>
+      <span class="step s-a">Chatbot: ContextEngine</span>
+      <span class="sep">+</span>
+      <span class="step s-a">output_verifier</span>
+    </div>
+    <div class="pipe-note">S09b = post EXPERT_REVIEW only (external call). Year 2: ContextEngine → S00 inside pipeline · output_verifier → S14 · pipeline becomes S00–S14</div>
+  </div>
+
+  <!-- ══ YEAR 1 NOW ══ -->
+  <div class="sec-label">
+    <div class="sec-line"></div>
+    <div class="sec-text st-green">Year 1 — working now (v15+step09b · May 2026)</div>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="now g1">
+    <div class="g2">
+      <div>
+        <div class="card" onclick="tog('scm',this)">
+          <div class="badge">scm_engine_v2.py · S05</div>
+          <div class="card-title">SCM Engine — Full Pearl Theory</div>
+          <div class="card-sub">L1 Association · L2 Intervention · L3 Counterfactual · PNS/PN/PS bounds · 17 domain DAGs</div>
+          <span class="card-arrow">▶</span>
+        </div>
+        <div id="scm" class="detail">
+          <strong>What it does now:</strong> Every query → 17 domain DAGs → compute TCE/NIE/NDE/PNS/PN/PS → risk score.<br>
+          <strong>How:</strong> Backdoor/frontdoor adjustment, do-calculus, structural equations. Amazon Hiring case hardcoded as reference DAG.<br>
+          <strong>Pearl ladder:</strong>
+          <span class="dtag dt-g">L1 — See</span> correlation
+          <span class="dtag dt-g">L2 — Do</span> intervention (do-calculus)
+          <span class="dtag dt-g">L3 — Imagine</span> counterfactual (PNS/PN/PS)<br>
+          <strong>Current limit:</strong> <code>causal_data</code> manually entered (known cases) or keyword-heuristic fallback. Not auto-computed from data.<br>
+          <strong>Year 2 fix:</strong> DoWhy Phase 4 auto-computes from AIAAIC 2223 labeled incidents. Manual dependency removed entirely.
+        </div>
+      </div>
+      <div>
+        <div class="card" onclick="tog('matrix',this)">
+          <div class="badge">pipeline_v15.py · S06</div>
+          <div class="card-title">Sparse Causal Activation Matrix 23×5 Pearl L1→L3</div>
+          <div class="card-sub">5 causal signals × 17 harm domains · manual weights [3,2,3,2,3] · central-node cascade</div>
+          <span class="card-arrow">▶</span>
+        </div>
+        <div id="matrix" class="detail">
+          <strong>What it does now:</strong> 17 rows (harm domains) × 5 columns (TCE, mediation, flip-risk, intervention, RCT). Each cell = activation (0/1). Score = Σ(weight × activation).<br>
+          <strong>Ablation result:</strong> SCM = detection (4/5 cases affected) · Matrix = amplification (2/5 cases affected). Combined: "SCM detects, Matrix amplifies."<br>
+          <strong>Central-node cascade:</strong> High-centrality nodes (weapons, bias) activate neighbouring domains automatically.<br>
+          <strong>Current limit:</strong> Weights [3,2,3,2,3] are manual — theoretical, not empirical.<br>
+          <strong>Year 2 fix:</strong> Bayesian Optimization (Phase 3) calibrates weights using AIAAIC 2223 ground truth. First empirical matrix.
+        </div>
+      </div>
+    </div>
+
+    <div class="g3">
+      <div>
+        <div class="card" onclick="tog('adv',this)">
+          <div class="badge">adversarial_engine_v5.py · S07</div>
+          <div class="card-title">Adversarial Engine</div>
+          <div class="card-sub">4 attack types · 180+ patterns · injection FP fixed (v15k)</div>
+          <span class="card-arrow">▶</span>
+        </div>
+        <div id="adv" class="detail">
+          <strong>4 attack types:</strong> Prompt injection · Role-play jailbreak · Obfuscation/leet-speak · Authority spoof.<br>
+          <strong>v15k FP fix:</strong> <code>ENCODING_PATTERNS[1]</code> base64 index mismatch (i==0→i==1). Any word ≥12 chars ("scholarships") no longer scores 0.70 confidence → BLOCK. CASE_07 resolved.<br>
+          <strong>v15k FN fix:</strong> <code>injection.analyze()</code> now runs on original message (not lowercased evasion output) — real base64 injections now caught.<br>
+          <strong>HarmBench ceiling:</strong> 14.5% recall. Same keyword, different intent → not caught.<br>
+          <strong>Year 2:</strong> SBERT hybrid tiering (Phase 2) → cosine similarity against AdvBench library → intent-based, not keyword-based.
+        </div>
+      </div>
+      <div>
+        <div class="card" onclick="tog('priv',this)">
+          <div class="badge">data_privacy_engine.py · S00+S13</div>
+          <div class="card-title">Data Privacy Engine v1.0</div>
+          <div class="card-sub">13-cat PII · Laplace DP ε=1.0 · 6 jurisdiction minimization rulebooks</div>
+          <span class="card-arrow">▶</span>
+        </div>
+        <div id="priv" class="detail">
+          <strong>Step 00 (Privacy Gate):</strong> Runs before S01. All downstream steps receive PII-masked query. Original query NEVER enters SCM, Adversarial, or Jurisdiction engines.<br>
+          <strong>3 layers:</strong><br>
+          <span class="dtag dt-g">L1</span> PII detection + masking — 13 categories, 5 masking strategies, &lt;5ms latency.<br>
+          <span class="dtag dt-g">L2</span> Differential Privacy — Laplace(0, sensitivity/ε) on causal_data + audit scores. ε=1.0 default.<br>
+          <span class="dtag dt-g">L3</span> Data Minimisation — 6 jurisdiction rulebooks (GDPR/CCPA/ICO/PIPEDA/AU/DPDP). Unknown fields auto-blocked.<br>
+          <strong>Step 13 (Output Scan):</strong> Checks LLM hint for PII leakage. Applies DP noise to audit bundle before export.<br>
+          <strong>Standard:</strong> GDPR Art.25 Privacy by Design — first deployment-layer RAI middleware with built-in DP.<br>
+          <strong>Year 2:</strong> ε auto-calibration via BO — medical/legal → ε=0.1, general info → ε=5.0.
+        </div>
+      </div>
+      <div>
+        <div class="card" onclick="tog('ood',this)">
+          <div class="badge">pipeline_v15.py · S04b</div>
+          <div class="card-title">Uncertainty Scorer (OOD)</div>
+          <div class="card-sub">10 grey-area patterns · OOD detection · ESCALATE → EXPERT_REVIEW</div>
+          <span class="card-arrow">▶</span>
+        </div>
+        <div id="ood" class="detail">
+          <strong>What it does:</strong> Detects queries at the boundary of pattern coverage — inputs keywords can't classify confidently.<br>
+          <strong>10 patterns:</strong> Dual-use research · Edge-case medical · Moral dilemma · Hypothetical harm · Defensive framing · Academic authority · Partial compliance · etc.<br>
+          <strong>Output:</strong> ESCALATE signal → Decision Engine routes to EXPERT_REVIEW.<br>
+          <strong>PhD connection:</strong> Conceptual precursor to Phase 2 SBERT. OOD concept becomes "aleatoric uncertainty quantification" in Year 2 — when BERT confidence &lt;70% → same ESCALATE path, now grounded in learned embeddings.
+        </div>
+      </div>
+    </div>
+
+    <div class="g3">
+      <div>
+        <div class="card" onclick="tog('jur',this)">
+          <div class="badge">pipeline_v15.py · S08</div>
+          <div class="card-title">Jurisdiction Engine</div>
+          <div class="card-sub">EU AI Act · US NIST RMF · India IT Act · GLOBAL fallback</div>
+          <span class="card-arrow">▶</span>
+        </div>
+        <div id="jur" class="detail">
+          <strong>What it does:</strong> Auto-detects query jurisdiction, applies most-restrictive legal standard.<br>
+          <strong>v15k additions:</strong><br>
+          <span class="dtag dt-g">US</span> Autonomous criminal sentencing → Due Process violation (5th/14th Amendment)<br>
+          <span class="dtag dt-g">EU</span> Gender-based downscoring in hiring → EU AI Act Art.5 prohibited practice<br>
+          <strong>GLOBAL default:</strong> When jurisdiction ambiguous → most restrictive rule applies. "Caution over permissiveness."<br>
+          <strong>Legal Score (S11):</strong> Jurisdiction findings feed Legal Score — each violation adds weighted penalty to final risk score.
+        </div>
+      </div>
+      <div>
+        <div class="card" onclick="tog('vac',this)">
+          <div class="badge">pipeline_v15.py · S09</div>
+          <div class="card-title">VAC — Value Alignment Check</div>
+          <div class="card-sub">Absolute ethical violations · override all scores → BLOCK</div>
+          <span class="card-arrow">▶</span>
+        </div>
+        <div id="vac" class="detail">
+          <strong>What it does:</strong> Hard ethical floor — certain violations BLOCK regardless of SCM/Matrix/Jurisdiction scores.<br>
+          <strong>VAC categories:</strong> CBRN weapons synthesis · CSAM · Targeted assassination · Genocide facilitation · Critical infrastructure attacks.<br>
+          <strong>Why it exists:</strong> Causal score could theoretically be low for a high-harm query if pattern matching fails. VAC bypasses all scoring — direct BLOCK.<br>
+          <strong>PhD defense:</strong> "The VAC is the last safety gate before output. It is not probabilistic — it is categorical. No causal calculation can override it."
+        </div>
+      </div>
+      <div>
+        <div class="card" onclick="tog('hdv',this)" style="border-color:rgba(167,139,250,.4);background:rgba(167,139,250,.04)">
+          <div class="badge" style="background:rgba(167,139,250,.15);color:var(--purple);border:1px solid rgba(167,139,250,.3)">human_decision_verifier.py · ethics_code.py · S09b ✨</div>
+          <div class="card-title" style="color:var(--purple)">Causal Human Oversight Verifier — Step 09b</div>
+          <div class="card-sub">"Who watches the watchman?" · Pearl L3 · post EXPERT_REVIEW only · ACCEPT / RE_ESCALATE</div>
+          <span class="card-arrow">▶</span>
+        </div>
+        <div id="hdv" class="detail">
+          <strong>Problem it solves:</strong> After EXPERT_REVIEW escalation, human reviewer decisions were accepted unconditionally — single point of accountability failure. A fatigued or biased reviewer could ALLOW high-risk content with no check.<br><br>
+          <strong>3-component verifier (verify_human_decision()):</strong><br><br>
+          <strong>① PearlCounterfactualVerifier (L3 do-calculus):</strong><br>
+          counterfactual_delta = P(harm|do(ALLOW)) − P(harm|do(BLOCK))<br>
+          P(harm|do(ALLOW)) ≈ scm_risk/100 · P(harm|do(BLOCK)) ≈ scm_risk × 0.05<br>
+          delta &gt; 0.55 → RE_ESCALATE (human decision causally critical)<br><br>
+          <strong>② RiskGapAnalyzer:</strong><br>
+          gap = |AI risk score − human implied risk|<br>
+          ALLOW → implied risk ≈ 0.10 · BLOCK → implied risk ≈ 0.90<br>
+          gap &gt; 0.60 → RE_ESCALATE (AI and human strongly disagree)<br><br>
+          <strong>③ ConstitutionalEthicsChecker (5 principles):</strong><br>
+          <span class="dtag dt-b">HARM_PREVENTION</span> ALLOW + risk ≥ 80% → CRITICAL violation<br>
+          <span class="dtag dt-b">FAIRNESS</span> Protected-attribute query + no documented reason<br>
+          <span class="dtag dt-b">AUTONOMY</span> BLOCK + risk &lt; 20% → unjustified suppression<br>
+          <span class="dtag dt-b">TRANSPARENCY</span> Large gap + no reason → EU AI Act Art.14 violation<br>
+          <span class="dtag dt-b">ACCOUNTABILITY</span> Single reviewer ALLOW on risk ≥ 70% → senior review required<br><br>
+          <strong>Outcome logic:</strong> RE_ESCALATE if cf_delta &gt; 0.55 OR gap &gt; 0.60 OR CRITICAL violation OR HIGH violation + no reason. ACCEPT otherwise (violations logged in audit trail).<br><br>
+          <strong>Files:</strong> ethics_code.py (EthicsCode, HumanReviewInput, EthicsViolation) + human_decision_verifier.py (all 3 components + orchestrator) + pipeline_v15.py (verify_human_decision() method, self.s09b, print_report() extended)<br><br>
+          <strong>Tests:</strong> TestHumanDecisionVerifier — 17 new tests · 195 → 212/212 ✅<br><br>
+          <strong>PhD defense:</strong> "Causal Human Oversight via Pearl L3 Counterfactual Verification — first deployment-layer implementation combining do-calculus with Constitutional AI for human-in-loop validation. Extends Stoyanovich et al. accountability + transparency to the human oversight layer. Year 2: DoWhy replaces structural approximation — same interface, zero pipeline changes."
+        </div>
+      </div>
+      <div>
+        <div class="card" onclick="tog('ctx2',this)">
+          <div class="badge">pipeline_v15.py · S10+S12</div>
+          <div class="card-title">Domain Risk + Decision Engine</div>
+          <div class="card-sub">Domain multipliers · ALLOW / WARN / BLOCK / EXPERT_REVIEW</div>
+          <span class="card-arrow">▶</span>
+        </div>
+        <div id="ctx2" class="detail">
+          <strong>S10 — Domain Risk:</strong> 17 domain multipliers applied to base risk score. Medical=1.8×, Legal=1.5×, Financial=1.3×, General=1.0×.<br>
+          <strong>S12 — Decision Engine:</strong> Final decision from all signals.<br>
+          <span class="dtag dt-g">ALLOW</span> risk &lt;30%, no flags<br>
+          <span class="dtag dt-a">WARN</span> risk 30–60%, WARN signals<br>
+          <span class="dtag" style="background:var(--red-b);color:var(--red)">BLOCK</span> risk &gt;60%, VAC=YES, or Tier 3 attack<br>
+          <span class="dtag dt-b">EXPERT_REVIEW</span> ESCALATE from S04b OOD<br>
+          <strong>Tie-break:</strong> VAC &gt; Jurisdiction &gt; Matrix &gt; SCM &gt; Domain in descending priority.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CHATBOT LAYER ══ -->
+  <div class="sec-label">
+    <div class="sec-line"></div>
+    <div class="sec-text st-amber">Chatbot layer — Year 2 la pipeline-ku migrate aagum</div>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="chat g1">
+    <div class="g2">
+      <div>
+        <div class="card" onclick="tog('ctx',this)">
+          <div class="badge">context_engine.py · chatbot → S00 (Year 2)</div>
+          <div class="card-title">ContextEngine — Multi-Turn Detection</div>
+          <div class="card-sub">SQLite session memory · 4 signals · ≥3 BLOCKs → cumulative override</div>
+          <span class="card-arrow">▶</span>
+        </div>
+        <div id="ctx" class="detail">
+          <strong>Now (chatbot layer):</strong> After <code>pipeline.run()</code> → ContextEngine checks session history → cumulative override to BLOCK if ≥3 BLOCKs in session.<br>
+          <strong>4 signals:</strong><br>
+          S1: Escalation pattern (risk increases across turns)<br>
+          S2: Topic switch immediately after BLOCK (evasion attempt)<br>
+          S3: Social engineering (authority claim + previous BLOCK)<br>
+          S4: Block-count threshold (≥3 BLOCKs → session override)<br>
+          <strong>DB schema:</strong> Already pipeline-compatible (Year 2 columns = NULL, not missing). Zero migration needed when integrated as S00.<br>
+          <strong>Year 2 transition:</strong> <code>pipeline.run()</code> → Step 00 ContextEngine inside pipeline. Chatbot delegation removed.
+        </div>
+      </div>
+      <div>
+        <div class="card" onclick="tog('ov',this)">
+          <div class="badge">output_verifier.py · chatbot → S14 (Year 2)</div>
+          <div class="card-title">Output Verifier — Two-Pass Self-Check</div>
+          <div class="card-sub">Draft → self_verify() → approved/revised · model-agnostic · any LLM</div>
+          <span class="card-arrow">▶</span>
+        </div>
+        <div id="ov" class="detail">
+          <strong>Now (chatbot layer):</strong> <code>governed_chatbot.py</code> (Groq) + <code>gemini_governed_chatbot.py</code> both had <code>self_verify()</code>. Duplicated, model-specific.<br>
+          <strong>output_verifier.py (extracted April 2026):</strong> Standalone model-agnostic module. <code>llm_fn = any callable</code> (Groq / Gemini / GPT / local).<br>
+          <strong>4 functions:</strong> <code>build_rai_context()</code> · <code>build_system_prompt()</code> · <code>build_verify_prompt()</code> · <code>verify()</code>.<br>
+          <strong>Output tag:</strong> <code>✓ self-verified</code> or <code>🔄 self-verified+revised</code>.<br>
+          <strong>Year 2 (S14):</strong> <code>pipeline.run()</code> → S14 <code>output_verifier.verify(draft, result, llm_fn)</code>. Chatbots remove own <code>self_verify()</code>. Single source of truth.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector">↓</div>
+
+  <!-- ══ YEAR 2 ══ -->
+  <div class="sec-label">
+    <div class="sec-line"></div>
+    <div class="sec-text st-blue">Year 2 — empirical foundation (Months 1–14)</div>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="y2 g1">
+    <div class="g2">
+      <div>
+        <div class="card" onclick="tog('sim',this)">
+          <div class="badge">Phase 1 · Months 1–3</div>
+          <div class="card-title">Simulation Mode — Ground Truth</div>
+          <div class="card-sub">WildChat 500 + AdvBench 520 + AIAAIC 2223 · observation-only · first real precision/recall</div>
+          <span class="card-arrow">▶</span>
+        </div>
+        <div id="sim" class="detail">
+          <strong>Problem it solves:</strong> 212/212 tests pass but all are hand-crafted. No empirical precision/recall/F1 from real-world data. GPT examiner flagged "empirical validation gap."<br>
+          <strong>What happens:</strong> Deploy in observation mode (no enforcement). Every query logged with pipeline decision. 6–8 weeks data collection → manual TP/FP/TN/FN labels → first real numbers.<br>
+          <strong>Datasets:</strong> WildChat 500 (diverse real queries) · AdvBench 520 (adversarial) · AIAAIC 2223 (real AI incidents with harm labels).<br>
+          <strong>PhD value:</strong> FAccT 2027 paper requires empirical evaluation. This is the non-negotiable foundation for all Phase 2–9.
+        </div>
+      </div>
+      <div>
+        <div class="card" onclick="tog('sbert',this)">
+          <div class="badge">Phase 2 · Months 2–5</div>
+          <div class="card-title">SBERT Hybrid Tiering</div>
+          <div class="card-sub">Cosine sim vs AdvBench · BERT confidence → aleatoric uncertainty · ~89% recall</div>
+          <span class="card-arrow">▶</span>
+        </div>
+        <div id="sbert" class="detail">
+          <strong>Problem it solves:</strong> Current keyword accuracy ~72%. HarmBench 14.5% (pattern ceiling — same keywords, different intent).<br>
+          <strong>How:</strong> Query → SBERT embedding → cosine similarity vs AdvBench library → sim &gt;0.90 → Tier 3 (high risk).<br>
+          <strong>Confidence gate:</strong> BERT &gt;95% → pass through | &lt;70% → Tier 3 auto-escalate.<br>
+          <strong>PhD term:</strong> "Aleatoric Uncertainty Quantification" — system knows when it doesn't know. Directly extends S04b OOD already built.<br>
+          <strong>Expected lift:</strong> keyword ~72% → SBERT+BERT ~89–91% recall. HarmBench floor raised significantly.<br>
+          <strong>Architecture:</strong> Wraps existing S03 Tier step — no downstream pipeline changes.
+        </div>
+      </div>
+    </div>
+
+    <div class="g2">
+      <div>
+        <div class="card" onclick="tog('bo',this)">
+          <div class="badge">Phase 3 · Months 4–7</div>
+          <div class="card-title">Bayesian Optimization</div>
+          <div class="card-sub">scikit-optimize · calibrate matrix weights + tier thresholds + DP ε per domain</div>
+          <span class="card-arrow">▶</span>
+        </div>
+        <div id="bo" class="detail">
+          <strong>Problem it solves:</strong> Matrix weights [3,2,3,2,3] manually set by theoretical reasoning. GPT examiner flagged "metric calibration" gap.<br>
+          <strong>How:</strong> AIAAIC 2223 labeled incidents → <code>gp_minimize</code> (100 smart tries &gt; 10,000 random grid search) → optimal weights + tier thresholds + domain multipliers.<br>
+          <strong>Also calibrates:</strong> DP ε per domain for Data Privacy Engine (ε=0.1 medical/legal, ε=5.0 general).<br>
+          <strong>Key connection:</strong> Nirmalan independently identified BO as the right approach → later confirmed by VirnyFlow paper (Stoyanovich lab). "Independent convergence" — strong PhD signal.<br>
+          <strong>After BO:</strong> Defense answer upgrades from "weights are theoretical" to "BO-calibrated from 2223 real-world AI incidents."
+        </div>
+      </div>
+      <div>
+        <div class="card" onclick="tog('dowhy',this)">
+          <div class="badge">Phase 4 · Months 5–9</div>
+          <div class="card-title">DoWhy Integration</div>
+          <div class="card-sub">Auto-compute TCE/NIE/NDE · remove manual CausalFindings · 17 DAGs validated</div>
+          <span class="card-arrow">▶</span>
+        </div>
+        <div id="dowhy" class="detail">
+          <strong>Problem it solves:</strong> <code>causal_data</code> currently manual (known cases) or keyword heuristic. GPT examiner flagged "DAG validity" gap.<br>
+          <strong>How:</strong> <code>pip install dowhy</code> → HarmDAG → CausalModel → auto-compute TCE/ATE/NIE/NDE from AIAAIC data → <code>CausalFindings</code> auto-populated.<br>
+          <strong>DAG validation:</strong> Binkytė-style sensitivity analysis runs BEFORE BO. Unstable DAGs (risk score changes &gt;15% when one edge removed) → flagged before weight calibration.<br>
+          <strong>PhD claim upgrade:</strong> "Full Pearl L1+L2+L3 — empirically validated, not manually entered."<br>
+          <strong>Connection to S05b/S05c:</strong> DoWhy (Phase 4) computes causal values → Binkytė (Phase 9) validates DAG structure → both together = rigorous causal foundation.
+        </div>
+      </div>
+    </div>
+
+    <div class="g2">
+      <div>
+        <div class="card" onclick="tog('cn',this)">
+          <div class="badge">Phase 5 · Months 6–10</div>
+          <div class="card-title">Causal-Neural Feedback Loop</div>
+          <div class="card-sub">BERT ALLOW → SCM counterfactual → PNS &gt;0.30 → override BLOCK</div>
+          <span class="card-arrow">▶</span>
+        </div>
+        <div id="cn" class="detail">
+          <strong>Problem it solves:</strong> Neural (BERT) and causal (SCM) run independently — no feedback. BERT can say ALLOW on a semantically dangerous query the causal engine would catch.<br>
+          <strong>How:</strong> BERT says ALLOW (80% confident) → SCM counterfactual check → if PNS &gt;0.30 → SCM overrides → BLOCK. "Pearl &gt; Neural — always."<br>
+          <strong>Novel architecture:</strong> No existing RAI system does BERT + Pearl counterfactual override.<br>
+          <strong>Connection to S14:</strong> Phase 5 = proactive (SCM shapes generation BEFORE output). S14 output_verifier = reactive (pipeline verifies AFTER output). Both together = complete causal governance of the full LLM response lifecycle.<br>
+          <strong>PhD defense:</strong> "The neural layer maximizes coverage. The causal layer provides guarantees. Neither alone is sufficient."
+        </div>
+      </div>
+      <div>
+        <div class="card" onclick="tog('xlm',this)">
+          <div class="badge">Phase 6 · Months 6–9</div>
+          <div class="card-title">XLM-RoBERTa Language Layer</div>
+          <div class="card-sub">100+ languages · same embedding space · replaces translation dependency</div>
+          <span class="card-arrow">▶</span>
+        </div>
+        <div id="xlm" class="detail">
+          <strong>Problem it solves:</strong> Current multilingual = Google Translate → English → pattern match. Translation errors cause FP/FN. Tamil/Hindi/Arabic harmful prompts misclassified or missed.<br>
+          <strong>How:</strong> XLM-RoBERTa (100+ languages) → same embedding space regardless of input language → no translation step at all.<br>
+          <strong>Tri-layer architecture:</strong> XLM-RoBERTa (language understanding) + SBERT (semantic intent) + BERT (confidence scoring).<br>
+          <strong>Kimi's finding:</strong> XLM-RoBERTa reduces required patterns by ~60%, eliminates translation dependency entirely.<br>
+          <strong>Real-world impact:</strong> Framework becomes genuinely global — not English-first with translation as afterthought.
+        </div>
+      </div>
+    </div>
+
+    <div class="g3">
+      <div>
+        <div class="card" onclick="tog('safenudge',this)">
+          <div class="badge">Phase 8 · Months 10–12</div>
+          <div class="card-title">SafeNudge Integration</div>
+          <div class="card-sub">Fonseca/Bell/Stoyanovich 2025 · arXiv:2501.02018 · NYU lab collaboration</div>
+          <span class="card-arrow">▶</span>
+        </div>
+        <div id="safenudge" class="detail">
+          <strong>What SafeNudge does:</strong> Operates INSIDE model during token generation. Reduces jailbreaks 28–37%. Safety only — no fairness, no legal proof, no causal audit.<br>
+          <strong>What our framework adds:</strong> SCM do-calculus to audit SafeNudge itself. <code>do(race=X)</code> → SafeNudge intervention rate. If PNS &gt;0.20 → SafeNudge introduces demographic bias.<br>
+          <strong>Novel contribution:</strong> "First system to audit a safety mechanism for fairness." — Meta-governance. "Who watches the watchmen?"<br>
+          <strong>Alignment with "who watches the watchman" problem:</strong> Nirmalan independently identified this ASI-scale alignment problem → maps to Constitutional AI, Corrigibility, Value Alignment. SafeNudge audit is a concrete implementation of this theoretical insight.<br>
+          <strong>Three-pillar narrative:</strong> VirnyFlow (training) → SafeNudge (generation) → Our framework (deployment). Full NYU collaboration story.
+        </div>
+      </div>
+      <div>
+        <div class="card" onclick="tog('binkyte',this)">
+          <div class="badge">Phase 9 · Months 11–14</div>
+          <div class="card-title">Binkytė DAG Sensitivity</div>
+          <div class="card-sub">S05b — DAG sensitivity checker · S05c — bias source attribution</div>
+          <span class="card-arrow">▶</span>
+        </div>
+        <div id="binkyte" class="detail">
+          <strong>Binkytė et al. (2025) context:</strong> Post-hoc causal auditing (Pearl L1–L2 only, theory-only, no real-time enforcement). Our framework vs Binkytė: real-time prevention (full Pearl L1–L3 with PNS/PN/PS bounds, 14-stage live enforcement).<br>
+          <strong>S05b — DAG Sensitivity Checker (Year 2, Months 11–12):</strong> Tests each DAG by removing one edge at a time. If risk score changes &gt;15% → DAG is structurally fragile → flagged before BO calibration.<br>
+          <strong>S05c — Bias Source Attribution (Year 2, Months 12–14):</strong> Which edge in the DAG is the primary bias source? Attribution vector per domain. "The hiring DAG → zip code → race edge contributes 67% of discriminatory risk."<br>
+          <strong>PhD defense value:</strong> "We don't just detect bias — we identify its causal source at the DAG edge level."
+        </div>
+      </div>
+      <div>
+        <div class="card" onclick="tog('pub',this)">
+          <div class="badge">Phase 7 · Months 9–12</div>
+          <div class="card-title">FAccT 2027 Publication</div>
+          <div class="card-sub">"Uncertainty-Aware Tiered Causal-Neural Governance Middleware" · FAccT / AIES 2027</div>
+          <span class="card-arrow">▶</span>
+        </div>
+        <div id="pub" class="detail">
+          <strong>Requires (gates):</strong> Phase 1 (empirical precision/recall) + Phase 3 (BO calibration) + Phase 4 (DoWhy validation). Cannot publish without these three.<br>
+          <strong>Title:</strong> "Uncertainty-Aware Tiered Causal-Neural Governance Middleware for Responsible AI Deployment"<br>
+          <strong>Target venues:</strong> FAccT 2027 (primary) · AIES 2027 (fallback) · NeurIPS 2027 Safety track (stretch).<br>
+          <strong>After publication:</strong> Framework claim upgrades: "Design complete" → "Empirically validated, peer-reviewed." Year 1 becomes "established baseline", not "proposed system."<br>
+          <strong>Co-author target:</strong> Prof. Julia Stoyanovich (NYU) — SafeNudge audit contribution natural bridge.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector">↓</div>
+
+  <!-- ══ YEAR 3 ══ -->
+  <div class="sec-label">
+    <div class="sec-line"></div>
+    <div class="sec-text st-purple">Year 3 — multimodal · agentic · adaptive (external plugin architecture)</div>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="y3 g1">
+    <div class="g3">
+      <div>
+        <div class="card" onclick="tog('mm',this)">
+          <div class="badge">MultimodalProcessor · Year 3 pre-processor</div>
+          <div class="card-title">Multimodal Extension</div>
+          <div class="card-sub">CLIP + OCR (images) · Whisper (audio) → text → pipeline unchanged (S00–S14)</div>
+          <span class="card-arrow">▶</span>
+        </div>
+        <div id="mm" class="detail">
+          <strong>Problem it solves:</strong> Framework is text-only. Images, audio, video queries are ungovernned.<br>
+          <strong>Architecture — EXTERNAL pre-processor (pipeline S00–S14 completely unchanged):</strong><br>
+          Image → CLIP + OCR → text description → pipeline unchanged.<br>
+          Audio → Whisper → transcript → pipeline unchanged.<br>
+          Video → frame sample → CLIP → text → pipeline unchanged.<br>
+          <strong>UnifiedInput dataclass:</strong> Already designed. Supports text/image/audio/video. <code>BaseProcessor</code> interface guarantees pipeline stability — <code>safe_process()</code> wrapper catches all exceptions, falls back to original text. Pipeline cannot break.<br>
+          <strong>PhD defense answer:</strong> "The pipeline doesn't need to know about modalities. The pre-processor translates everything into the text channel the pipeline already handles perfectly. Modality-agnostic by design, not by accident."<br>
+          <strong>Year 3 as S15:</strong> MultimodalProcessor registered as S15 step. <code>BaseProcessor.process(input) → output</code> interface. Plugin architecture — add/remove modalities without touching S00–S14.
+        </div>
+      </div>
+      <div>
+        <div class="card" onclick="tog('agent',this)">
+          <div class="badge">AgenticMonitor · Year 3 post-processor</div>
+          <div class="card-title">Agentic AI Monitor</div>
+          <div class="card-sub">Action-level risk · tool call audit trail · SCM do-calculus per action</div>
+          <span class="card-arrow">▶</span>
+        </div>
+        <div id="agent" class="detail">
+          <strong>Problem it solves:</strong> Agents act autonomously — purchase, hire, send email, execute code. A query saying "hire this person" is different from an agent actually submitting a hiring API call. Pipeline governs the query, not the action.<br>
+          <strong>Architecture — EXTERNAL post-processor (after S14):</strong><br>
+          Agent action → <code>AgenticMonitor.gate(action, tool_call, pipeline_result)</code> → action-level risk score → ALLOW/BLOCK action.<br>
+          <strong>Critical insight:</strong> Hiring/loan selections trigger SCM do-calculus — agent selection IS a <code>do(X)</code> intervention. PNS computed per action, not per query.<br>
+          <strong>Tool call audit trail:</strong> Every agent action logged with SCM findings, risk score, decision. Full accountability chain. GDPR/NIST traceable.<br>
+          <strong>Year 3 as S16:</strong> AgenticMonitor registered as S16. Same <code>BaseProcessor</code> interface.<br>
+          <strong>PhD defense:</strong> "Agents compress query+action into one step. My framework decouples them — query governed at S00–S14, action governed at S16 AgenticMonitor. Both layers needed for complete agentic governance."
+        </div>
+      </div>
+      <div>
+        <div class="card" onclick="tog('adapt',this)">
+          <div class="badge">AdaptiveMatrixUpdater · Year 3</div>
+          <div class="card-title">Adaptive Matrix Updater</div>
+          <div class="card-sub">BO base + human feedback + production logs → live weight update (human-in-the-loop)</div>
+          <span class="card-arrow">▶</span>
+        </div>
+        <div id="adapt" class="detail">
+          <strong>Problem it solves:</strong> BO (Phase 3) calibrates weights once from AIAAIC data. In production, harm patterns evolve — AI misuse adapts, weights go stale within months.<br>
+          <strong>Three-tier update architecture:</strong><br>
+          <span class="dtag dt-b">Tier 1</span> BO base weights (Phase 3 output — persistent, calibrated offline. Never auto-overwritten.)<br>
+          <span class="dtag dt-a">Tier 2</span> Human expert feedback interface — domain experts (legal/medical/ethics board) adjust domain-specific multipliers.<br>
+          <span class="dtag dt-p">Tier 3</span> Production log adaptation — high-FP domains auto-reduce weight, high-FN domains auto-increase. Bounded change per cycle.<br>
+          <strong>Safety constraint:</strong> Human-in-the-loop REQUIRED for all Tier 2/3 changes. No fully autonomous weight updates — alignment safety principle.<br>
+          <strong>Implementation note:</strong> <code>adaptive_matrix_updater.py</code> — design documented in research_notes.md. Implementation target Year 3.
+        </div>
+      </div>
+    </div>
+
+    <!-- Year 3 complete pipeline -->
+    <div>
+      <div class="card" onclick="tog('futurepipe',this)">
+        <div class="badge">Year 3 target — complete pipeline S00 to S16</div>
+        <div class="card-title">Full Future Pipeline Architecture</div>
+        <div class="card-sub">14 current + ContextEngine S00 + output_verifier S14 + multimodal S15 + agentic S16</div>
+        <span class="card-arrow">▶</span>
+      </div>
+      <div id="futurepipe" class="detail">
+        <strong>Year 3 complete pipeline flow:</strong>
+        <table class="pipe-table">
+          <tr><td class="dtag dt-g">S00</td><td><strong>ContextEngine</strong> (multi-turn, migrated from chatbot) + Privacy Gate (PII mask + DP)</td></tr>
+          <tr><td class="dtag dt-g">S01–S04b</td><td>Sanitise → Detect → Tier (SBERT) → Emotion → OOD uncertainty scorer</td></tr>
+          <tr><td class="dtag dt-g">S05</td><td>SCM Engine (DoWhy auto-computed TCE/NIE/NDE + S05b DAG sensitivity + S05c bias attribution)</td></tr>
+          <tr><td class="dtag dt-g">S06</td><td>Sparse Causal Activation Matrix (BO-calibrated weights)</td></tr>
+          <tr><td class="dtag dt-g">S07</td><td>Adversarial Engine (SBERT + XLM-RoBERTa + base64 FP fixed)</td></tr>
+          <tr><td class="dtag dt-g">S08–S12</td><td>Jurisdiction → VAC → Domain Risk → Legal Score → Decision Engine (Causal-Neural Feedback Phase 5)</td></tr>
+          <tr><td class="dtag dt-g">S13</td><td>Output Privacy Scan (PII leakage check + DP noise on audit bundle)</td></tr>
+          <tr><td class="dtag dt-b">S14</td><td><strong>output_verifier</strong> — two-pass self-check (migrated from chatbot, model-agnostic)</td></tr>
+          <tr><td class="dtag dt-p">S15</td><td><strong>MultimodalProcessor</strong> — CLIP+OCR+Whisper pre-processor plugin</td></tr>
+          <tr><td class="dtag dt-p">S16</td><td><strong>AgenticMonitor</strong> — action-level SCM gate, tool call audit trail</td></tr>
+        </table>
+        <br>
+        <strong>Plugin interface (BaseProcessor):</strong> Every extension implements <code>process(input) → output</code>. <code>safe_process()</code> wrapper = no exception escapes. Pipeline stable regardless of extension failure. Design locked — implementation Year 2/3.
+      </div>
+    </div>
+  </div>
+
+  <div class="connector">↓</div>
+
+  <!-- ══ PROBLEMS SOLVED ══ -->
+  <div class="sec-label">
+    <div class="sec-line"></div>
+    <div class="sec-text st-red">Problems this solves — examiner questions answered</div>
+    <div class="sec-line"></div>
+  </div>
+
+  <div class="prob g1">
+    <div class="g2">
+      <div>
+        <div class="card" onclick="tog('p1',this)">
+          <div class="badge">Solved by: SBERT + XLM-RoBERTa (Phase 2 + 6)</div>
+          <div class="card-title">"Patterns don't scale — HarmBench 14.5%"</div>
+          <div class="card-sub">Semantic understanding replaces keyword matching · intent-based, not token-based</div>
+          <span class="card-arrow">▶</span>
+        </div>
+        <div id="p1" class="detail">
+          <strong>Problem:</strong> Same keywords, different intent → pattern ceiling at 14.5% HarmBench recall. Any paraphrase of a harmful query bypasses all current patterns.<br>
+          <strong>Year 2 solution (Phase 2):</strong> SBERT hybrid → cosine similarity vs AdvBench → intent-based routing. Keyword ~72% → SBERT+BERT ~89–91%.<br>
+          <strong>Year 2 solution (Phase 6):</strong> XLM-RoBERTa → 100+ languages in same embedding space → no translation loss. Tamil/Hindi/Arabic harmful prompts caught natively.<br>
+          <strong>Year 3 solution (Phase 5):</strong> Causal-Neural loop → if BERT misses, SCM counterfactual catches it. PNS &gt;0.30 → BLOCK regardless of BERT score.<br>
+          <strong>Defense answer:</strong> "The keyword system is a Year 1 baseline. Year 2 replaces it with three semantic layers. Year 3 adds causal override for any remaining misses."
+        </div>
+      </div>
+      <div>
+        <div class="card" onclick="tog('p2',this)">
+          <div class="badge">Solved by: Bayesian Optimization + Simulation (Phase 1 + 3)</div>
+          <div class="card-title">"Weights are manually chosen, not empirical"</div>
+          <div class="card-sub">BO calibrates from 2223 real AI incidents · no more theoretical [3,2,3,2,3]</div>
+          <span class="card-arrow">▶</span>
+        </div>
+        <div id="p2" class="detail">
+          <strong>Problem:</strong> GPT reviewer flagged "metric calibration" — matrix weights [3,2,3,2,3] are theoretical, not data-driven.<br>
+          <strong>Phase 1 solution:</strong> Simulation Mode → ground truth labels on WildChat 500 + AdvBench 520 + AIAAIC 2223. First real TP/FP/TN/FN numbers.<br>
+          <strong>Phase 3 solution:</strong> BO (<code>gp_minimize</code>) → calibrates weights + tier thresholds + domain multipliers from 2223 real AI incidents.<br>
+          <strong>Also calibrates:</strong> DP ε per domain. Medical=0.1, Legal=0.1, General=5.0.<br>
+          <strong>PhD defense after Year 2:</strong> "Weights are BO-calibrated from 2223 labeled real-world AI harm incidents. The only manual inputs are the DAG structures — and Phase 4 DoWhy validates those empirically too."
+        </div>
+      </div>
+    </div>
+    <div class="g2">
+      <div>
+        <div class="card" onclick="tog('p3',this)">
+          <div class="badge">Solved by: DoWhy + Binkytė sensitivity (Phase 4 + 9)</div>
+          <div class="card-title">"DAGs are hand-drawn, not validated"</div>
+          <div class="card-sub">DoWhy auto-computes from AIAAIC data · S05b edge-removal stability test</div>
+          <span class="card-arrow">▶</span>
+        </div>
+        <div id="p3" class="detail">
+          <strong>Problem:</strong> 17 domain DAGs manually drawn. GPT examiner flagged "DAG validity" — no empirical basis for causal structure claims.<br>
+          <strong>Phase 4 solution:</strong> DoWhy → CausalModel from AIAAIC incident data → TCE/NIE/NDE auto-computed. <code>CausalFindings</code> no longer manually entered.<br>
+          <strong>Phase 9 solution:</strong> Binkytė-inspired S05b DAG sensitivity → edge removal test → if risk score changes &gt;15% → DAG is fragile → flagged before BO.<br>
+          <strong>S05c:</strong> Bias source attribution at edge level — "zip code → race proxy edge contributes 67% of discriminatory risk in hiring DAG."<br>
+          <strong>Defense answer:</strong> "DAGs validated by DoWhy empirical computation AND Binkytė-style sensitivity analysis. Not hand-drawn assumptions — empirically tested causal structures."
+        </div>
+      </div>
+      <div>
+        <div class="card" onclick="tog('p4',this)">
+          <div class="badge">Solved by: MultimodalProcessor + AgenticMonitor (Year 3)</div>
+          <div class="card-title">"Text-only · agentic actions unmonitored"</div>
+          <div class="card-sub">CLIP+Whisper pre-processor · AgenticMonitor action-level SCM gate</div>
+          <span class="card-arrow">▶</span>
+        </div>
+        <div id="p4" class="detail">
+          <strong>Problem 1 (multimodal):</strong> Framework is text-only. Images and audio ungovernned — a harmful image query bypasses pipeline entirely.<br>
+          <strong>Solution:</strong> MultimodalProcessor (Year 3, S15) → CLIP+OCR+Whisper → text channel → pipeline S00–S14 unchanged. BaseProcessor.safe_process() guarantees no pipeline breakage under any extension failure.<br>
+          <strong>Problem 2 (agentic):</strong> Agents compress query+action into one step — pipeline governs the query but not the action itself. An ALLOW decision on a query does not mean the resulting agent action is safe.<br>
+          <strong>Solution:</strong> AgenticMonitor (Year 3, S16) → action-level SCM do-calculus → hiring/loan/email actions trigger PNS bounds → ALLOW/BLOCK the action, not just the query.<br>
+          <strong>Defense answer:</strong> "Two separate governance layers: query governance (S00–S14) + action governance (S16). Both required. Neither alone is sufficient for agentic systems."
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- THREE PILLAR BANNER -->
+  <div class="pillar-banner">
+    <div class="pillar-label">Three-pillar NYU Responsible AI collaboration narrative</div>
+    <div class="pillar-item pi-g">VirnyFlow <span class="pillar-sub">(Stoyanovich lab) — training-time fairness via multi-objective BO</span></div>
+    <div class="pillar-arrow">→</div>
+    <div class="pillar-item pi-b">SafeNudge <span class="pillar-sub">(Stoyanovich lab) — generation-time safety nudging · arXiv:2501.02018</span></div>
+    <div class="pillar-arrow">→</div>
+    <div class="pillar-item pi-p">Our Framework <span class="pillar-sub">— deployment-time governance · Safety + RAI + Legal · full Pearl L1–L3 · real-time enforcement</span></div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+function tog(id, card) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const isOpen = el.classList.contains('open');
+  el.classList.toggle('open', !isOpen);
+  if (card) card.classList.toggle('open', !isOpen);
+}
+</script>
+</body>
+</html>

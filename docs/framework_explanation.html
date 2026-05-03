@@ -224,7 +224,7 @@
 </head>
 <body>
 
-<h1>Responsible AI Framework v5.0</h1>
+<h1>Responsible AI Framework v5.1</h1>
 <p class="subtitle">Pearl Causality + Sparse Matrix + 12-Step Pipeline — Professor Explanation Reference</p>
 
 <div class="tabs">
@@ -373,7 +373,7 @@ NDE = TE − NIE         ← direct path
 if NDE ≥ 70%: "PRIMARILY DIRECT"
   → AI itself causes harm (strong liability)
 if NIE ≥ 70%: "PRIMARILY MEDIATED"
-  → systemic pathway (shared liability)</div>
+  → systemic causal chain (shared liability)</div>
 
       <p class="formula-label pearl-label" style="margin-top:10px;">L3 — Tian-Pearl Bounds (PNS / PN / PS)</p>
       <div class="formula-box">p  = p_y_given_x    p' = p_y_given_notx
@@ -422,7 +422,7 @@ if primary_total ≥ 12:
     cascaded = CASCADE_MAP[primary_row]
 
 # Example: "representation_bias" → total=13
-CASCADE_MAP["Representation_Bias"] = [
+CASCADE_MAP["bias_discrimination"] = [
   "Criminal_Justice_Bias",   # total=11
   "Healthcare_Bias",         # total=11
   "Decision_Transparency"    # total=10
@@ -444,8 +444,7 @@ pathway_score[Pi] = Σ activated[Pi]
 aggregate_risk = Σ all pathway_totals
                  / (max_possible × 5)
 # 0.0 → 1.0
-# P1=Interpretability P2=Behavior
-# P3=Data P4=Robustness P5=Society</div>
+# RCT=L1(0.15) TCE=L2(0.25) INTV=L2(0.20) MED=L3(0.10) FLIP=L3(0.30)</div>
     </div>
   </div>
 
@@ -467,7 +466,7 @@ if combined_risk ≥ 25.0:
 risk_pct = round(combined_risk, 1)   ← feeds Decision Engine</div>
 
   <div class="note-box">
-    <strong>Academic summary:</strong> Pearl SCM = "Is harm causal, and how large is the effect?" → SCM_risk%. Matrix = "Which of the 5 harm pathways does that harm propagate through (P1 Interpretability, P2 Behavior, P3 Data, P4 Robustness, P5 Society)?" → matrix_risk%. Pipeline fuses both at a 60:40 ratio. <strong>The Matrix is not an alternative to Pearl — it converts Pearl's causal proof into an operational pathway structure.</strong> Conceptually: "SCM = Expert Witness · Matrix = Judge."
+    <strong>Academic summary:</strong> Pearl SCM = "Is harm causal, and how large is the effect?" → SCM_risk%. Matrix = "Across 5 Pearl causal dimensions (RCT/L1, TCE/L2, INTV/L2, MED/L3, FLIP-PNS/L3), how strong is the causal signal for this harm category?" → matrix_risk%. Pipeline fuses both at a 60:40 ratio. <strong>The Matrix is not an alternative to Pearl — it IS Pearl, encoding L1→L3 estimands directly as column weights. FLIP/PNS column carries highest weight (0.30) — Daubert but-for causation standard.</strong> Conceptually: "SCM = Expert Witness · Matrix = Judge."
   </div>
 </div>
 
@@ -559,7 +558,7 @@ SCM_risk = min(100, 27.25/432 × 100 × 4.5)
          → After matrix fusion: risk_pct = 37.8% ≥ 30.0 → Step 05 final signal = WARN</div>
 
   <p class="formula-label" style="margin-top:12px;">④ activate_matrix("representation_bias", tce=12.4, CRITICAL)</p>
-  <div class="formula-box">primary_row   = "Representation_Bias"
+  <div class="formula-box">primary_row   = "bias_discrimination"
 weights       = [3, 2, 3, 2, 3]   total = 13 → CENTRAL NODE ✓
 cascade_fired = True
 cascaded_rows = ["Criminal_Justice_Bias","Healthcare_Bias","Decision_Transparency"]
@@ -568,17 +567,16 @@ active_rows   = 4 of 17  (sparse activation)
 sev_multiplier = 1.2  (CRITICAL=4)
 tce_factor     = min(12.4/20.0, 1.0) = 0.62
 
-Representation_Bias (primary, row_factor=1.0):
-  P1 = 3 × 1.2 × 0.62 × 1.0 = 2.232
-  P2 = 2 × 1.2 × 0.62 × 1.0 = 1.488
-  P3 = 3 × 1.2 × 0.62 × 1.0 = 2.232
-  P4 = 2 × 1.2 × 0.62 × 1.0 = 1.488
-  P5 = 3 × 1.2 × 0.62 × 1.0 = 2.232
+bias_discrimination (primary, row_factor=1.0):
+  RCT  = 0.50 × 1.2 × 0.62 × 0.15 = 0.056
+  TCE  = 0.63 × 1.2 × 0.62 × 0.25 = 0.117
+  INTV = 0.59 × 1.2 × 0.62 × 0.20 = 0.088
+  MED  = 0.44 × 1.2 × 0.62 × 0.10 = 0.033
+  FLIP = 0.57 × 1.2 × 0.62 × 0.30 = 0.127
 
 Criminal_Justice_Bias (cascaded, row_factor=0.6):
   weights = [3,2,3,1,2]
-  P1 = 3 × 1.2 × 0.62 × 0.6 = 1.339
-  P3 = 3 × 1.2 × 0.62 × 0.6 = 1.339  ...
+  FLIP = 0.57 × 1.2 × 0.62 × 0.6 × 0.30 = 0.076  (cascade, row_factor=0.6)
 
 max_possible = 3 × 1.2 × 1.0 × 4 = 14.4
 aggregate_risk ≈ 0.52   → matrix_risk = 52.0%
@@ -600,7 +598,7 @@ signal   = "WARN"  (37.8 ≥ 30.0 WARN_THRESHOLD ✓ | below 70.0 BLOCK_THRESHOL
 Step 05 log detail:
 "TCE=12.4% | Med=68.0% | Flip=43.0% |
  Risk=37.8% → WARN |
- Matrix: Representation_Bias agg=0.52 |
+ Matrix: bias_discrimination agg=0.421 (Pearl weighted) |
  CASCADE→4 rows"</div>
 
   <p class="formula-label" style="margin-top:12px;">⑥ → Decision Engine (Step 10) receives risk_pct = 37.8%</p>
@@ -618,7 +616,7 @@ Step 05 log detail:
   <hr class="divider">
   <p class="formula-label">Professor-level one-line thesis</p>
   <div class="note-box">
-    "User prompt first cleaned and classified; then Judea Pearl SCM engine proves whether harm or bias is causal (L1→L2→L3), the sparse activation matrix maps which of the 5 harm pathways are activated (Interpretability/Behavior/Data/Robustness/Society), both are fused 60:40 into one risk score, then legal, adversarial, and absolute ethics gates produce the final governed output."
+    "User prompt first cleaned and classified; then Judea Pearl SCM engine proves whether harm or bias is causal (L1→L2→L3), the 23×5 sparse causal matrix scores harm strength across 5 Pearl estimands (RCT/TCE/INTV/MED/FLIP-PNS), SCM dampener adjusts matrix contribution by real TCE signal, both are fused 60:40 into one risk score, then legal, adversarial, and absolute ethics gates produce the final governed output."
   </div>
 </div>
 

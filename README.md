@@ -1,6 +1,6 @@
 # Responsible AI Framework v5.1
 
-[🌐 Open Interactive Dashboard](https://nirmalansk.github.io/responsible-ai-framework/responsible_ai_v5_0.html) &nbsp;&nbsp; [📖 Framework Deep-Dive Explanation](https://nirmalansk.github.io/responsible-ai-framework/framework_explanation.html) &nbsp;&nbsp; [⚗️ Dynamic Assessment Tool](https://nirmalansk.github.io/responsible-ai-framework/rai_dynamic_assessment.html) &nbsp;&nbsp; [📊 Pipeline Report](https://nirmalansk.github.io/responsible-ai-framework/pipeline_10case_report_v15k.html) &nbsp;&nbsp; [⚗️ Validation Report](https://nirmalansk.github.io/responsible-ai-framework/validation_10_cases.html)
+[🌐 Open Interactive Dashboard](https://nirmalansk.github.io/responsible-ai-framework/responsible_ai_v5_0.html) &nbsp;&nbsp; [🗺 Framework Mindmap](https://nirmalansk.github.io/responsible-ai-framework/docs/rai_mindmap.html) &nbsp;&nbsp; [📖 Framework Deep-Dive Explanation](https://nirmalansk.github.io/responsible-ai-framework/docs/framework_explanation.html) &nbsp;&nbsp; [⚗️ Dynamic Assessment Tool](https://nirmalansk.github.io/responsible-ai-framework/rai_dynamic_assessment.html) &nbsp;&nbsp; [📊 Pipeline Report](https://nirmalansk.github.io/responsible-ai-framework/docs/pipeline_10case_report_v15k.html) &nbsp;&nbsp; [⚗️ Validation Report](https://nirmalansk.github.io/responsible-ai-framework/docs/validation_10_cases.html)
 
 [![Tests](https://github.com/NirmalanSK/responsible-ai-framework/actions/workflows/ci.yml/badge.svg)](https://github.com/NirmalanSK/responsible-ai-framework/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
@@ -758,14 +758,15 @@ responsible-ai-framework/
 │   └── groq_60case_context_memory.csv   # ContextEngine session turns (multi-turn proof)
 │
 └── docs/
-    ├── responsible_ai_v5_0.html         # Interactive dashboard (DAG · Roadmap · Ablation · Latency)
-    ├── framework_explanation.html       # Interactive deep-dive: Pearl→Matrix link · 14-step pipeline · Step 05 trace
-    ├── rai_dynamic_assessment.html      # Dynamic assessment — live sliders → 17×5 matrix activation + 14-step pipeline trace + SCM formulas
+    ├── rai_mindmap.html             # 🗺 Framework Mindmap — full system visual (all 14 stages · Pearl SCM · 23×5 matrix · roadmap) — best first-read for Prof
+    ├── responsible_ai_v5_0.html         # Interactive dashboard (DAG · Roadmap · Ablation · Latency · 23×5 Pearl Matrix tab · Calculator)
+    ├── framework_explanation.html       # Deep-dive: Pearl→Matrix link · 14-step pipeline · Step 05 trace · bias_discrimination worked example
+    ├── rai_dynamic_assessment.html      # Dynamic assessment — live sliders → 23×5 Pearl matrix activation + 14-step pipeline trace + SCM formulas
     ├── pipeline_10case_report_v15k.html # April 2026 — 10-case full 14-step pipeline trace + SCM per case (7B · 2W · 1A)
     ├── validation_10_cases.html         # April 2026 — Dynamic assessment formula validation (1B · 5W · 4A · 10/10 Python≡HTML match)
     ├── RAI_v15b_5Case_LiveReport.docx   # March 2026 — CASE_01–05 live pipeline execution (5/5 BLOCK)
     ├── RAI_v15e_5Case_Report_v2.docx    # March 2026 — CASE_06–10 pipeline + Qwen verification (3 BLOCK · 2 WARN)
-    ├── theory_vs_implementation_full_trace.md  # Full Pearl formula trace: COMPAS case → SCM → 17×5 matrix → pipeline → decision
+    ├── theory_vs_implementation_full_trace.md  # Full Pearl formula trace: COMPAS case → SCM → 23×5 matrix → pipeline → decision
     ├── phd_math_proofs.pdf              # Formal mathematical proofs (PDF)
     └── phd_math_proofs.tex              # Formal mathematical proofs (LaTeX source)
 ```
