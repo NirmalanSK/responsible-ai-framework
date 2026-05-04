@@ -768,9 +768,7 @@ responsible-ai-framework/
     ├── pipeline_10case_report_v15k.html # April 2026 — 10-case full 14-step pipeline trace + SCM per case (7B · 2W · 1A)
     ├── validation_10_cases.html         # April 2026 — Dynamic assessment formula validation (1B · 5W · 4A · 10/10 Python≡HTML match)
     ├── RAI_v15b_5Case_LiveReport.docx   # March 2026 — CASE_01–05 live pipeline execution (5/5 BLOCK)
-    ├── RAI_v15e_5Case_Report_v2.docx    # March 2026 — CASE_06–10 pipeline + Qwen verification (3 BLOCK · 2 WARN)
-    ├── phd_math_proofs.pdf              # Formal mathematical proofs (PDF)
-    └── phd_math_proofs.tex              # Formal mathematical proofs (LaTeX source)
+    └── RAI_v15e_5Case_Report_v2.docx    # March 2026 — CASE_06–10 pipeline + Qwen verification (3 BLOCK · 2 WARN)
 ```
 
 ### Quick Start

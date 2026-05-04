@@ -51,3 +51,5 @@ chatbots/groq/session_risk_hist.png
 rai_context.db
 *.db
 chatbots/groq/context_memory_batch_*.csv
+docs/phd_math_proofs.pdf
+docs/phd_math_proofs.tex
