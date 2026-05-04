@@ -2,6 +2,8 @@
 
 [🌐 Open Interactive Dashboard](https://nirmalansk.github.io/responsible-ai-framework/responsible_ai_v5_0.html) &nbsp;&nbsp; [🗺 Framework Mindmap](https://nirmalansk.github.io/responsible-ai-framework/rai_mindmap.html) &nbsp;&nbsp; [🏗️ Middleware Architecture](https://nirmalansk.github.io/responsible-ai-framework/rai-middleware-visual.html) &nbsp;&nbsp; [⚗️ Dynamic Assessment Tool](https://nirmalansk.github.io/responsible-ai-framework/rai_dynamic_assessment.html) &nbsp;&nbsp; [📊 Pipeline Report](https://nirmalansk.github.io/responsible-ai-framework/pipeline_10case_report_v15k.html) &nbsp;&nbsp; [⚗️ Validation Report](https://nirmalansk.github.io/responsible-ai-framework/validation_10_cases.html)
 
+![RAI Middleware Architecture](docs/rai-architecture.svg)
+
 [![Tests](https://github.com/NirmalanSK/responsible-ai-framework/actions/workflows/ci.yml/badge.svg)](https://github.com/NirmalanSK/responsible-ai-framework/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
