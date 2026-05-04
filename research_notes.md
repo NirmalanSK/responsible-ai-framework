@@ -47,13 +47,13 @@ Source: VirnyFlow paper (Stoyanovich et al., 2025) → independently thought of 
 
 ### The Problem
 Current matrix weights are manually set:
-  "Representation_Bias": [3, 2, 3, 2, 3]
+  "bias_discrimination": [0.50, 0.63, 0.59, 0.44, 0.57]  # (v5.1 float values)
   
-  P1=3 (Interpretability)
-  P2=2 (Behavior)  
-  P3=3 (Data)
-  P4=2 (Robustness)
-  P5=3 (Society)
+  RCT=0.50 (L1 observational)
+  TCE=0.63 (L2 total causal effect)  
+  INTV=0.59 (L2 deconfounded)
+  MED=0.44  (L3 mediation)
+  FLIP=0.57 (L3 PNS counterfactual)
 
 GPT examiner said: "Why 3? Why not 4?" → no empirical justification
 = WEAK point in PhD defense
@@ -106,13 +106,13 @@ Bayesian Optimization (BO) on AIAAIC 2,223 real incidents:
   
   4. BO finds optimal weights in ~100 iterations
   
-  5. Update HTML v5.0 + scm_engine_v2.py
+  5. Update matrix_v2.py + scm_engine_v2.py + HTML dashboard
 
 ### Code Sketch (Year 2)
   from skopt import gp_minimize
   from skopt.space import Integer
   
-  space = [Integer(1, 4, name=f'w{i}') for i in range(85)]  # 17×5
+  space = [Integer(1, 4, name=f'w{i}') for i in range(115)]  # 23×5 (v5.1)
   
   result = gp_minimize(
       objective,
@@ -1189,52 +1189,56 @@ Source: Grok AI + DeepSeek + Claude analysis (April 2026)
 
 ---
 
-#### Phase 10: 17×5 Matrix Expansion — 3 Missing Rows (Months 14-16)
-Source: DeepSeek + Claude analysis (April 2026)
+#### Phase 10: 23×5 Matrix — DoWhy Calibration + Future Expansion (Months 14-16)
+Source: DeepSeek + Claude analysis (April 2026) | Updated: May 2026 (v5.1)
 
-### Current 17 Rows — Coverage Gaps Found
+### Status Update (v5.1 — May 2026)
 
-  MISSING ROWS (critical real-world harms):
+  ✅ DONE (Year 1 — v5.1): Matrix upgraded from 17×5 (integers, P1-P5) → 23×5 (floats, RCT/TCE/INTV/MED/FLIP)
   
-  Row 18: Child_Safety
-    What: CSAM generation, minor grooming, child targeting
-    Why missing: High-severity, separate from Harassment
-    Cases: AI-generated CSAM, deepfake targeting minors
-    Weight: P1=4 P2=4 P3=3 P4=4 P5=5 = 20 (ALWAYS central node)
+  What was originally planned as Phase 10 expansion (3 missing rows) is now COMPLETE:
+    - Child_Safety:    ✅ Added as "child_safety" in 23-row matrix
+    - Biosecurity:     ✅ Covered by "weapon_synthesis" (CRITICAL tier, highest values)
+    - Wage_Exploitation: ⚠️ Not yet added — candidate for Phase 10 expansion to 25×5
+  
+  v5.1 full change summary (see README version history for details):
+    Categories: 17 → 23 (+6 new, +1 split, +3 renamed, backward-compatible aliases)
+    Columns: P1-P5 capability pathways → Pearl L1→L3 causal dimensions (RCT/TCE/INTV/MED/FLIP)
+    Values: integers [1-3] → floats [0.0-1.0]
+    Cascade threshold: sum ≥ 12 (integer) → sum ≥ 4.0 (≥80% of max 5.0 float)
+    Current: 23×5 = 115 cells | Still sparse: typically 1-3 active per query
+  
+### Phase 10 — What Remains (Year 2/3 Target)
+
+  TARGET 1: DoWhy empirical calibration of all 115 cells
+    Current: float values approximated from AIAAIC + Pearl reasoning
+    Year 2:  DoWhy computes exact values per cell from 2223 incident data
+    Result:  "Empirically calibrated 115-cell matrix"
+
+  TARGET 2: Expand to 25×5 — 2 still-missing categories
+  
+    Row 24: Wage_Exploitation
+      What: Algorithmic wage suppression, gig economy pricing manipulation
+      Why missing: Economic harm via AI pricing distinct from Financial_Fraud
+      Cases: Uber/delivery surge pricing, salary suppression algorithms
+      Approx values: RCT=0.44 TCE=0.58 INTV=0.52 MED=0.39 FLIP=0.56 (sum=2.49, MEDIUM)
     
-  Row 19: Wage_Exploitation  
-    What: Algorithmic wage suppression, gig economy exploitation
-    Why missing: Economic harm via AI pricing algorithms
-    Cases: Uber/delivery app price manipulation, salary suppression
-    Weight: P1=3 P2=3 P3=4 P4=2 P5=4 = 16 (central node)
+    Row 25: Biosecurity (standalone)
+      What: Targeted pathogen enhancement, synthetic biology risk
+      Why separate from weapon_synthesis: Different causal mechanism (scientific + dual-use)
+      Cases: AlphaFold misuse for pathogen design, gain-of-function AI assistance
+      Approx values: RCT=0.82 TCE=0.93 INTV=0.87 MED=0.76 FLIP=0.91 (sum=4.29, CRITICAL)
     
-  Row 20: Biosecurity
-    What: AI-generated pathogen enhancement, synthetic biology risk
-    Why missing: Distinct from Misuse_Safety (different mechanism)
-    Cases: Protein structure design for pathogen enhancement
-    Weight: P1=4 P2=4 P3=3 P4=3 P5=5 = 19 (always central node)
+    Implementation: matrix_v2.py update + dag_selector.py + test_v15.py TestMatrixExpansion
+    Year 2 DoWhy calibration will produce exact values (replaces approximations above)
 
-### Cascade Links (New)
+### Cascade Links (Additions for future rows)
 
-  Child_Safety → Harassment (victims often harassed)
-  Child_Safety → Privacy_Violation (minor data)
-  Child_Safety → Identity_Forgery (deepfakes of minors)
+  Wage_Exploitation → bias_discrimination (gig workers disproportionately minorities)
+  Wage_Exploitation → financial_fraud (price manipulation mechanism overlap)
   
-  Wage_Exploitation → Representation_Bias (gig workers often minorities)
-  Wage_Exploitation → Financial_Fraud (price manipulation)
-  
-  Biosecurity → Misuse_Safety (dual-use risk)
-  Biosecurity → Physical_Violence (mass casualty potential)
-
-### Implementation Note
-
-  scm_engine_v2.py: Add 3 new DAGs for new domains
-  pipeline_v15.py: Add keyword patterns for new rows
-  test_v15.py: Add TestMatrixExpansion class (Year 2)
-  
-  Current: 17×5 = 85 cells
-  Updated: 20×5 = 100 cells
-  Still sparse: typically 3-5 active per query
+  Biosecurity (standalone) → weapon_synthesis (dual-use research cross-activation)
+  Biosecurity (standalone) → supply_chain_attack (research infrastructure targeting)
 Source: Kimi (critical — "don't enforce immediately")
 
   Month 13: Simulation Mode → Warn Mode
@@ -1735,7 +1739,7 @@ Process:
   2. Train/test split: 800 train, 200 test
   3. Run gp_minimize (100 iterations)
   4. Each iteration: update weights → run 800 incidents → compute F1
-  5. Output: Optimal 17×5 weight matrix (data-driven)
+  5. Output: Optimal 23×5 weight matrix (data-driven — 115 cells)
   6. Validate on held-out 200 incidents
   7. Compare: Manual F1=0.72 → BO F1=0.89+ (target)
                 │
@@ -2264,10 +2268,10 @@ After expert review + edge correction:
 ### Why BO (Not Grid Search or Random)
 
 ```
-Problem: Optimize 85 parameters (17×5 matrix), each value 1-4
+Problem: Optimize 115 parameters (23×5 matrix), each value 0.0-1.0
 
-Option 1: Grid Search
-  4^85 = 10^51 combinations
+Option 1: Grid Search (integer era — no longer applicable)
+  1.0^115 continuous = infinite combinations (continuous space)
   Time: Universe age × 10^30
   Status: IMPOSSIBLE
 
@@ -2405,52 +2409,74 @@ class BOResult:
 # ─── Matrix Structure ─────────────────────────────────────────
 
 DOMAIN_TO_ROW = {
-    "representation_bias":    0,
-    "criminal_justice":       1,
-    "healthcare":             2,
-    "credit_lending":         3,
-    "content_moderation":     4,
-    "surveillance":           5,
-    "autonomous_weapons":     6,
-    "disinformation":         7,
-    "privacy_breach":         8,
-    "financial_fraud":        9,
-    "mental_health":          10,
-    "education_bias":         11,
-    "employment_screening":   12,
-    "insurance_discrimination": 13,
-    "housing_discrimination": 14,
-    "political_manipulation": 15,
-    "child_safety":           16,
+    # ── CRITICAL ──
+    "csam":                       0,
+    "weapon_synthesis":            1,
+    "child_safety":                2,
+    # ── HIGH ──
+    "violence":                    3,
+    "medical_harm":                4,
+    "election_interference":       5,
+    "autonomous_ai_harm":          6,
+    # ── MEDIUM ──
+    "hate_speech":                 7,
+    "bias_discrimination":         8,
+    "cybercrime":                  9,
+    "deepfake":                    10,
+    "financial_fraud":             11,
+    "psychological_manipulation":  12,
+    "social_engineering_attack":   13,
+    "surveillance_stalking":       14,
+    "data_poisoning":              15,
+    "supply_chain_attack":         16,
+    "misinformation_synthetic":    17,
+    # ── LOW ──
+    "privacy_violation":           18,
+    "misinformation_factual":      19,
+    "regulatory_noncompliance":    20,
+    "intellectual_property_theft": 21,
+    "environmental_harm":          22,
 }
 
 PATHWAY_TO_COL = {
-    1: 0,  # P1 Interpretability
-    2: 1,  # P2 Behavior
-    3: 2,  # P3 Data
-    4: 3,  # P4 Robustness
-    5: 4,  # P5 Society
+    1: 0,  # RCT  (L1 — observational / Regression Causal Table)
+    2: 1,  # TCE  (L2 — Total Causal Effect / interventional)
+    3: 2,  # INTV (L2 — Deconfounded Intervention)
+    4: 3,  # MED  (L3 — Mediation / NDE+NIE)
+    5: 4,  # FLIP (L3 — PNS counterfactual)
 }
 
-# Current manual weights (Year 1 baseline)
+# v5.1 matrix weights (23x5 floats — RCT/TCE/INTV/MED/FLIP)
+# Values in [0.0, 1.0] | Row sum >= 4.0 -> CASCADE fires
+# Year 2: BO will auto-calibrate all 115 cells on AIAAIC 2223 incidents
 MANUAL_WEIGHTS = np.array([
-    [3, 2, 3, 2, 3],  # representation_bias
-    [2, 3, 2, 2, 4],  # criminal_justice
-    [3, 2, 4, 3, 3],  # healthcare
-    [3, 3, 3, 2, 2],  # credit_lending
-    [2, 3, 2, 2, 3],  # content_moderation
-    [4, 2, 3, 3, 3],  # surveillance
-    [4, 4, 2, 4, 4],  # autonomous_weapons
-    [3, 3, 3, 2, 4],  # disinformation
-    [4, 2, 3, 3, 3],  # privacy_breach
-    [3, 3, 3, 2, 2],  # financial_fraud
-    [3, 3, 3, 2, 4],  # mental_health
-    [3, 2, 3, 2, 3],  # education_bias
-    [3, 2, 3, 2, 3],  # employment_screening
-    [3, 3, 3, 2, 3],  # insurance_discrimination
-    [3, 2, 3, 2, 3],  # housing_discrimination
-    [3, 3, 2, 2, 4],  # political_manipulation
-    [4, 3, 3, 3, 4],  # child_safety
+    # CRITICAL tier
+    [0.85, 0.95, 0.89, 0.82, 0.91],  # csam
+    [0.79, 0.92, 0.85, 0.74, 0.88],  # weapon_synthesis
+    [0.72, 0.84, 0.78, 0.65, 0.81],  # child_safety
+    # HIGH tier
+    [0.65, 0.81, 0.73, 0.57, 0.76],  # violence
+    [0.61, 0.78, 0.69, 0.52, 0.71],  # medical_harm
+    [0.58, 0.73, 0.66, 0.51, 0.69],  # election_interference
+    [0.59, 0.74, 0.67, 0.53, 0.69],  # autonomous_ai_harm
+    # MEDIUM tier
+    [0.47, 0.62, 0.55, 0.41, 0.58],  # hate_speech
+    [0.50, 0.63, 0.59, 0.44, 0.57],  # bias_discrimination
+    [0.55, 0.71, 0.63, 0.48, 0.65],  # cybercrime
+    [0.54, 0.69, 0.61, 0.46, 0.64],  # deepfake
+    [0.53, 0.68, 0.60, 0.45, 0.63],  # financial_fraud
+    [0.51, 0.66, 0.58, 0.43, 0.61],  # psychological_manipulation
+    [0.55, 0.70, 0.62, 0.47, 0.65],  # social_engineering_attack
+    [0.53, 0.67, 0.60, 0.45, 0.63],  # surveillance_stalking
+    [0.52, 0.67, 0.59, 0.44, 0.62],  # data_poisoning
+    [0.57, 0.72, 0.64, 0.49, 0.67],  # supply_chain_attack
+    [0.44, 0.59, 0.52, 0.40, 0.55],  # misinformation_synthetic
+    # LOW tier
+    [0.44, 0.55, 0.51, 0.38, 0.49],  # privacy_violation
+    [0.35, 0.48, 0.42, 0.31, 0.44],  # misinformation_factual
+    [0.46, 0.57, 0.54, 0.39, 0.52],  # regulatory_noncompliance
+    [0.41, 0.53, 0.48, 0.35, 0.49],  # intellectual_property_theft
+    [0.28, 0.39, 0.34, 0.25, 0.36],  # environmental_harm
 ], dtype=float)
 
 
@@ -2458,7 +2484,7 @@ MANUAL_WEIGHTS = np.array([
 
 class BayesianMatrixCalibrator:
     """
-    Calibrates 17×5 = 85 matrix weights using Bayesian Optimization
+    Calibrates 23×5 = 115 matrix weights using Bayesian Optimization
     on AIAAIC-labeled incidents.
     
     USAGE:
@@ -2479,7 +2505,7 @@ class BayesianMatrixCalibrator:
         logger.info(f"Calibrator initialized:")
         logger.info(f"  Training cases: {len(train_cases)}")
         logger.info(f"  Test cases:     {len(test_cases)}")
-        logger.info(f"  Parameters:     85 (17×5 matrix)")
+        logger.info(f"  Parameters:     115 (23×5 matrix)")
     
     def _run_pipeline_with_weights(
         self, 
@@ -2535,7 +2561,7 @@ class BayesianMatrixCalibrator:
         Output: -F1 score (negative because BO minimizes)
         """
         self.iteration += 1
-        weights_matrix = np.array(weights_flat, dtype=float).reshape(17, 5)
+        weights_matrix = np.array(weights_flat, dtype=float).reshape(23, 5)
         
         metrics = self._run_pipeline_with_weights(weights_matrix, self.train_cases)
         f1 = metrics["f1"]
@@ -2574,7 +2600,7 @@ class BayesianMatrixCalibrator:
         logger.info(f"Manual baseline F1 = {baseline_f1:.4f}")
         
         # Define search space: 85 integers each in [1, 4]
-        space = [Integer(1, 4, name=f'w_{i}') for i in range(85)]
+        space = [Integer(1, 4, name=f'w_{i}') for i in range(115)]  # 23x5
         
         # Run BO
         self.start_time = time.time()
@@ -2595,7 +2621,7 @@ class BayesianMatrixCalibrator:
         
         # Extract optimal weights
         optimal_flat = result.x
-        optimal_matrix = np.array(optimal_flat, dtype=float).reshape(17, 5)
+        optimal_matrix = np.array(optimal_flat, dtype=float).reshape(23, 5)
         best_train_f1 = -result.fun
         
         # Evaluate on held-out TEST SET (never used in BO)
@@ -2792,7 +2818,7 @@ class WeightUpdateEvent:
 
 class AdaptiveMatrixUpdater:
     """
-    Continuously adapts 17×5 matrix weights based on:
+    Continuously adapts 23×5 matrix weights based on:
       1. Human expert corrections (Tier 2: SGD micro-updates)
       2. Scheduled full BO re-calibration (Tier 3: every 6 months)
     
@@ -3396,7 +3422,7 @@ Correct approach = PLUGIN ARCHITECTURE:
 ║  ║  S04 Tier Router                   ║                          ║
 ║  ║  S05 Domain Classifier             ║                          ║
 ║  ║  S06 SCM Engine v2  ←─────────────╫── Pearl L1/L2/L3        ║
-║  ║  S07 Causal Matrix  ←─────────────╫── 17×5 Sparse Activation ║
+║  ║  S07 Causal Matrix  ←─────────────╫── 23×5 Pearl L1→L3       ║
 ║  ║  S08 Fairness Layer                ║                          ║
 ║  ║  S09 Adversarial Defense           ║                          ║
 ║  ║  S10 Jurisdiction Engine           ║                          ║
@@ -3713,7 +3739,7 @@ User sends request (text / image / audio / agent action)
 YEAR 1 (Current — 2026) ← WHERE WE ARE NOW
   ✅ 12-step pipeline (complete)
   ✅ SCM Engine v2 — Pearl L1/L2/L3
-  ✅ 17×5 Sparse Causal Matrix
+  ✅ 23×5 Pearl Causal Matrix (RCT/TCE/INTV/MED/FLIP — v5.1)
   ✅ 195/195 tests passing
   ✅ Governed chatbot (Groq + Gemini)
   ✅ AIAAIC-style validation (F1=0.97)
@@ -4185,7 +4211,7 @@ coverage flagged as Year 2 improvement (DoWhy Phase 4).
     detect_harm_domain(query)       → (domain_key, confidence, matched_keywords)
     select_dag_from_prompt(query)   → (HarmDAG, domain, confidence, keywords)
 
-  17 harm domains covered with PRIMARY (conf=1.0) + SECONDARY (conf=0.6) patterns.
+  23 harm categories covered with PRIMARY (conf=1.0) + SECONDARY (conf=0.6) patterns.
 
   Three surgical changes in pipeline_v15.py:
     Tier 1 matrix:    9-line if/elif → dk, _conf, _kws = detect_harm_domain(query)
