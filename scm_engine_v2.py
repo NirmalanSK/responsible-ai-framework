@@ -1289,11 +1289,11 @@ if __name__ == "__main__":
 
 # ═══════════════════════════════════════════════════════════════════
 # SPARSE CAUSAL ACTIVATION MATRIX  (v2 addition)
-# User insight: 17×5 matrix with central nodes (weight ≥12)
+# User insight: 23×5 matrix with central nodes (weight ≥12)
 # that cascade to adjacent rows when activated
 # ═══════════════════════════════════════════════════════════════════
 
-# 17×5 weight matrix — [P1, P2, P3, P4, P5]
+# OLD: 17×5 integer [P1-P5] → now 23×5 float [RCT/TCE/INTV/MED/FLIP] (matrix_v2.py)
 # P1=Interpretability, P2=Behavior, P3=Data, P4=Robustness, P5=Society
 # ── 23×5 Pearl Matrix — UPGRADED from integer 17×5 (P1-P5) ─────────
 # Values now [0.0, 1.0] causal scores from matrix_v2.py

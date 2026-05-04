@@ -105,7 +105,7 @@ class ContextEngine:
                     -- ── Year 2 pipeline fields (NULL now, written later) ──
                     -- These columns exist TODAY so the DB never needs ALTER TABLE.
                     scm_risk_raw  REAL,     -- raw SCM causal score
-                    matrix_score  REAL,     -- 17×5 sparse matrix score
+                    matrix_score  REAL,     -- 23×5 sparse matrix score
                     legal_score   REAL,     -- legal layer score
                     cascade_bonus REAL,     -- cascade risk bonus
                     uncertainty   REAL,     -- epistemic uncertainty

@@ -438,11 +438,11 @@ body {
         <div class="card" onclick="tog('matrix',this)">
           <div class="badge">pipeline_v15.py · S06</div>
           <div class="card-title">Sparse Causal Activation Matrix 23×5 Pearl L1→L3</div>
-          <div class="card-sub">5 causal signals × 17 harm domains · manual weights [3,2,3,2,3] · central-node cascade</div>
+          <div class="card-sub">5 causal signals × 23 harm categories · column weights RCT:0.15/TCE:0.25/INTV:0.20/MED:0.10/FLIP:0.30 · central-node cascade</div>
           <span class="card-arrow">▶</span>
         </div>
         <div id="matrix" class="detail">
-          <strong>What it does now:</strong> 17 rows (harm domains) × 5 columns (TCE, mediation, flip-risk, intervention, RCT). Each cell = activation (0/1). Score = Σ(weight × activation).<br>
+          <strong>What it does now:</strong> 23 rows (harm categories) × 5 columns (RCT, TCE, INTV, MED, FLIP — L1→L3). Each cell = float [0.0, 1.0]. Score = Σ(column_weight × causal_score).<br>
           <strong>Ablation result:</strong> SCM = detection (4/5 cases affected) · Matrix = amplification (2/5 cases affected). Combined: "SCM detects, Matrix amplifies."<br>
           <strong>Central-node cascade:</strong> High-centrality nodes (weapons, bias) activate neighbouring domains automatically.<br>
           <strong>Current limit:</strong> Weights [3,2,3,2,3] are manual — theoretical, not empirical.<br>
