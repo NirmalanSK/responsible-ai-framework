@@ -221,7 +221,7 @@ select:focus{outline:1px solid #58a6ff}
 <script>
 // ── 23×5 Pearl Causal Activation Matrix (matrix_v2.py) ──────────────────────
 // Columns: RCT (L1), TCE (L2), INTV (L2 deconfounded), MED (L3 mediation), FLIP (L3 PNS)
-// Values ∈ [0.0, 1.0]  |  Row sum ≥ 4.0 → CASCADE fires (≥ 80% of max 5.0)
+// Values ∈ [0.0, 1.0]  |  Cascade: CRITICAL tier=always, HIGH tier=TCE≥12%
 const CAUSAL_MATRIX = {
   // ── CRITICAL TIER ──────────────────────────────────────────
   "csam":                      [0.85, 0.95, 0.89, 0.82, 0.91],
@@ -256,12 +256,18 @@ const ROW_ORDER = Object.keys(CAUSAL_MATRIX);
 const PATHWAY_NAMES = ["RCT (L1)","TCE (L2)","INTV (L2)","MED (L3)","FLIP/PNS (L3)"];
 const PATHWAY_SHORT = ["RCT","TCE","INTV","MED","FLIP"];
 
-// Cascade: row sum ≥ 4.0 (≥ 80% of max 5.0) → CRITICAL tier → fires cascade
+// Cascade logic (matches scm_engine_v2.py CASCADE_MAP exactly):
+//   CRITICAL tier → always fires
+//   HIGH tier     → fires only when TCE >= 12%
 const CASCADE_MAP = {
-  "csam":              ["child_safety","psychological_manipulation"],
-  "weapon_synthesis":  ["violence","cybercrime","supply_chain_attack"],
-  "bias_discrimination":["autonomous_ai_harm","regulatory_noncompliance","surveillance_stalking"],
-  "cybercrime":        ["supply_chain_attack","data_poisoning","social_engineering_attack"],
+  // CRITICAL tier — always cascade
+  "csam":                    ["child_safety","psychological_manipulation"],
+  "weapon_synthesis":        ["violence","cybercrime","data_poisoning"],
+  "child_safety":            ["psychological_manipulation","surveillance_stalking"],
+  // HIGH tier — cascade when TCE >= 12%
+  "bias_discrimination":     ["regulatory_noncompliance","medical_harm"],
+  "regulatory_noncompliance":["privacy_violation","data_poisoning"],
+  "medical_harm":            ["bias_discrimination","regulatory_noncompliance"],
 };
 // Direct domain key → matrix row mapping
 const DOMAIN_TO_ROW = {
@@ -322,8 +328,14 @@ function computeSCM(tce, med, flip, intv, rct){
 
 function computeMatrix(domain, tce, scm){
   let primaryRow = DOMAIN_TO_ROW[domain]||"weapon_synthesis";
-  let primaryTotal = CAUSAL_MATRIX[primaryRow].reduce((a,b)=>a+b,0);
-  let cascadeFired = primaryTotal >= 4.0; // ≥ 80% of max 5.0 → CRITICAL tier
+  // Cascade trigger logic — matches scm_engine_v2.py exactly:
+  //   CRITICAL tier (csam, weapon_synthesis, child_safety) → always fires
+  //   HIGH tier (bias_discrimination, regulatory_noncompliance, medical_harm) → fires when TCE >= 12%
+  const CRITICAL_ROWS = ["csam","weapon_synthesis","child_safety"];
+  const HIGH_ROWS     = ["bias_discrimination","regulatory_noncompliance","medical_harm"];
+  let isCritical = CRITICAL_ROWS.includes(primaryRow);
+  let isHighCasc = HIGH_ROWS.includes(primaryRow);
+  let cascadeFired = isCritical || (isHighCasc && tce >= 12);
   let cascadedRows = cascadeFired ? (CASCADE_MAP[primaryRow]||[]) : [];
   let activeRows = [...new Set([primaryRow,...cascadedRows])];
   
@@ -498,7 +510,7 @@ function renderMatrix(data){
     <div style="font-size:11px;color:#8b949e;margin-bottom:8px">
       Primary: <span style="color:#79c0ff;font-weight:700">${mat.primaryRow}</span>
       &nbsp;|&nbsp; Cascade: <span class="cascade-badge ${mat.cascadeFired?'fired':''}">
-        ${mat.cascadeFired?'FIRED — '+mat.cascadedRows.length+' rows cascade':'NOT FIRED (sum < 4.0)'}
+        ${mat.cascadeFired?'FIRED — '+mat.cascadedRows.length+' rows cascade':'NOT FIRED'}
       </span>
       &nbsp;|&nbsp; sevMult: <span style="color:#ffa657">${mat.sevMult.toFixed(2)}</span>
       &nbsp;|&nbsp; tceFactor: <span style="color:#ffa657">${mat.tceFactor.toFixed(3)}</span>
@@ -517,7 +529,9 @@ function renderMatrix(data){
     let isActive  = mat.activeRows.includes(row);
     let weights   = CAUSAL_MATRIX[row];
     let rowTotal  = weights.reduce((a,b)=>a+b,0);
-    let isCentral = rowTotal >= 4.0; // cascade threshold for 23×5 float matrix
+    const _CRIT = ["csam","weapon_synthesis","child_safety"];
+    const _HIGH_C = ["bias_discrimination","regulatory_noncompliance","medical_harm"];
+    let isCentral = _CRIT.includes(row) || _HIGH_C.includes(row); // tier-based, not sum-based
     let labelCls  = isPrimary?"primary":isCascade?"cascaded":"";
     
     html += `<tr>
@@ -624,7 +638,7 @@ function renderFormulas(data){
     <div class="scm-rule-title">Matrix Activation (Step 05 — 23×5 Pearl L1→L3)</div>
     <div class="scm-rule-body" style="font-family:monospace;line-height:2">
       primaryRow = <span style="color:#58a6ff">${mat.primaryRow}</span><br>
-      primaryTotal = ${CAUSAL_MATRIX[mat.primaryRow].map(v=>v.toFixed(2)).join('+')} = <span style="color:#ffa657">${CAUSAL_MATRIX[mat.primaryRow].reduce((a,b)=>a+b,0).toFixed(2)}</span> ${mat.cascadeFired?'≥ 4.0 → CASCADE FIRES':'< 4.0 → no cascade'}<br>
+      primaryTotal = ${CAUSAL_MATRIX[mat.primaryRow].map(v=>v.toFixed(2)).join('+')} = <span style="color:#ffa657">${CAUSAL_MATRIX[mat.primaryRow].reduce((a,b)=>a+b,0).toFixed(2)}</span> ${mat.cascadeFired?'→ CASCADE FIRES':'→ no cascade'}<br>
       columns = RCT | TCE | INTV | MED | FLIP  (Pearl L1 → L3)<br>
       activeRows = [${mat.activeRows.join(', ')}] (${mat.activeRows.length} rows)<br>
       sevMult = ${mat.sevMult.toFixed(2)} | tceFactor = min(${tce}/20, 1.0) = ${mat.tceFactor.toFixed(3)}<br>
