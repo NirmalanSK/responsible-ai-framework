@@ -1,6 +1,6 @@
 # Responsible AI Framework v5.1
 
-[🌐 Open Interactive Dashboard](https://nirmalansk.github.io/responsible-ai-framework/responsible_ai_v5_0.html) &nbsp;&nbsp; [🗺 Framework Mindmap](https://nirmalansk.github.io/responsible-ai-framework/rai_mindmap.html) &nbsp;&nbsp; [📖 Framework Deep-Dive](https://nirmalansk.github.io/responsible-ai-framework/framework_explanation.html) &nbsp;&nbsp; [⚗️ Dynamic Assessment Tool](https://nirmalansk.github.io/responsible-ai-framework/rai_dynamic_assessment.html) &nbsp;&nbsp; [📊 Pipeline Report](https://nirmalansk.github.io/responsible-ai-framework/pipeline_10case_report_v15k.html) &nbsp;&nbsp; [⚗️ Validation Report](https://nirmalansk.github.io/responsible-ai-framework/validation_10_cases.html)
+[🌐 Open Interactive Dashboard](https://nirmalansk.github.io/responsible-ai-framework/responsible_ai_v5_0.html) &nbsp;&nbsp; [🗺 Framework Mindmap](https://nirmalansk.github.io/responsible-ai-framework/rai_mindmap.html) &nbsp;&nbsp; [🏗️ Middleware Architecture](https://nirmalansk.github.io/responsible-ai-framework/rai-middleware-visual.html) &nbsp;&nbsp; [⚗️ Dynamic Assessment Tool](https://nirmalansk.github.io/responsible-ai-framework/rai_dynamic_assessment.html) &nbsp;&nbsp; [📊 Pipeline Report](https://nirmalansk.github.io/responsible-ai-framework/pipeline_10case_report_v15k.html) &nbsp;&nbsp; [⚗️ Validation Report](https://nirmalansk.github.io/responsible-ai-framework/validation_10_cases.html)
 
 [![Tests](https://github.com/NirmalanSK/responsible-ai-framework/actions/workflows/ci.yml/badge.svg)](https://github.com/NirmalanSK/responsible-ai-framework/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
@@ -760,7 +760,8 @@ responsible-ai-framework/
 └── docs/
     ├── rai_mindmap.html             # 🗺 Framework Mindmap — full system visual (all 14 stages · Pearl SCM · 23×5 matrix · pipeline flow)
     ├── responsible_ai_v5_0.html         # Interactive dashboard (DAG · Roadmap · Ablation · Latency · 23×5 Pearl Matrix tab · Calculator)
-    ├── framework_explanation.html       # Deep-dive: Pearl→Matrix link · 14-step pipeline · Step 05 trace · bias_discrimination worked example
+    ├── rai-middleware-visual.html       # 🏗️ Middleware Architecture — Three-Pillar position · Real-Time LLM integration flow · LLM adapter pattern · REST API · MCP · test results · roadmap
+    ├── rai-architecture.svg             # Architecture diagram embedded in README (dark theme · pipeline stages · three-pillar · real-time flow)
     ├── rai_dynamic_assessment.html      # Dynamic assessment — live sliders → 23×5 Pearl matrix activation + 14-step pipeline trace + SCM formulas
     ├── pipeline_10case_report_v15k.html # April 2026 — 10-case full 14-step pipeline trace + SCM per case (7B · 2W · 1A)
     ├── validation_10_cases.html         # April 2026 — Dynamic assessment formula validation (1B · 5W · 4A · 10/10 Python≡HTML match)

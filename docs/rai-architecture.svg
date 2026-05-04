@@ -1,0 +1,216 @@
+<svg viewBox="0 0 900 520" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a0e1a"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <linearGradient id="pillar1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+    <linearGradient id="pillar2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+    <linearGradient id="pillar3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#ec4899"/>
+    </linearGradient>
+    <linearGradient id="pipeGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="50%" stop-color="#06b6d4"/>
+      <stop offset="100%" stop-color="#22c55e"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="520" fill="url(#bgGrad)" rx="16"/>
+  <rect width="900" height="520" fill="none" stroke="#2a3550" stroke-width="1" rx="16"/>
+
+  <!-- Grid dots -->
+  <pattern id="dots" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+    <circle cx="15" cy="15" r="0.8" fill="#ffffff" fill-opacity="0.04"/>
+  </pattern>
+  <rect width="900" height="520" fill="url(#dots)" rx="16"/>
+
+  <!-- Title -->
+  <text x="450" y="38" text-anchor="middle" fill="#e2e8f0" font-size="18" font-weight="800">RAI Universal Middleware — Framework Architecture</text>
+  <text x="450" y="58" text-anchor="middle" fill="#94a3b8" font-size="11">NirmalanSK/responsible-ai-framework · Pearl L1–L3 · 14-Stage Pipeline · 212/212 Tests</text>
+
+  <!-- ========= THREE PILLAR SECTION ========= -->
+  <text x="450" y="90" text-anchor="middle" fill="#94a3b8" font-size="10" letter-spacing="2">THE THREE-PILLAR AI LIFECYCLE</text>
+
+  <!-- Pillar 1: VirnyFlow -->
+  <rect x="60" y="100" width="220" height="110" rx="12" fill="#0d1424" stroke="#06b6d4" stroke-width="1.5" stroke-opacity="0.6"/>
+  <rect x="60" y="100" width="220" height="4" rx="2" fill="url(#pillar1)"/>
+  <text x="80" y="126" fill="#06b6d4" font-size="11" font-weight="700">🏋️  PILLAR 1 — TRAINING</text>
+  <text x="80" y="146" fill="#e2e8f0" font-size="13" font-weight="800">VirnyFlow</text>
+  <text x="80" y="163" fill="#94a3b8" font-size="9.5">Stoyanovich et al.</text>
+  <text x="80" y="179" fill="#94a3b8" font-size="9">Fairness auditing during model training.</text>
+  <text x="80" y="192" fill="#94a3b8" font-size="9">Catches bias before model is built.</text>
+  <rect x="80" y="200" width="80" height="16" rx="8" fill="#06b6d420"/>
+  <text x="120" y="212" text-anchor="middle" fill="#06b6d4" font-size="8.5" font-weight="600">Pre-deployment</text>
+
+  <!-- Arrow 1→2 -->
+  <line x1="282" y1="155" x2="318" y2="155" stroke="#2a3550" stroke-width="2"/>
+  <polygon points="318,150 328,155 318,160" fill="#2a3550"/>
+
+  <!-- Pillar 2: SafeNudge -->
+  <rect x="330" y="100" width="240" height="110" rx="12" fill="#0d1424" stroke="#6366f1" stroke-width="1.5" stroke-opacity="0.6"/>
+  <rect x="330" y="100" width="240" height="4" rx="2" fill="url(#pillar2)"/>
+  <text x="350" y="126" fill="#818cf8" font-size="11" font-weight="700">✍️  PILLAR 2 — GENERATION</text>
+  <text x="350" y="146" fill="#e2e8f0" font-size="13" font-weight="800">SafeNudge</text>
+  <text x="350" y="163" fill="#94a3b8" font-size="9.5">Fonseca, Bell &amp; Stoyanovich 2025</text>
+  <text x="350" y="179" fill="#94a3b8" font-size="9">Safety nudges during LLM generation.</text>
+  <text x="350" y="192" fill="#94a3b8" font-size="9">arXiv:2501.02018 · Year 2 Integration</text>
+  <rect x="350" y="200" width="95" height="16" rx="8" fill="#6366f120"/>
+  <text x="397" y="212" text-anchor="middle" fill="#818cf8" font-size="8.5" font-weight="600">Generation-time</text>
+
+  <!-- Arrow 2→3 -->
+  <line x1="572" y1="155" x2="608" y2="155" stroke="#a855f7" stroke-width="2.5"/>
+  <polygon points="608,150 620,155 608,160" fill="#a855f7"/>
+
+  <!-- Pillar 3: RAI Middleware (highlighted) -->
+  <rect x="620" y="95" width="225" height="120" rx="12" fill="#0d1424" stroke="#a855f7" stroke-width="2.5" filter="url(#glow)"/>
+  <rect x="620" y="95" width="225" height="4" rx="2" fill="url(#pillar3)"/>
+  <text x="640" y="121" fill="#c084fc" font-size="11" font-weight="700">🛡️  PILLAR 3 — DEPLOYMENT</text>
+  <rect x="740" y="107" width="90" height="14" rx="7" fill="#a855f730"/>
+  <text x="785" y="118" text-anchor="middle" fill="#c084fc" font-size="8" font-weight="700">THIS FRAMEWORK</text>
+  <text x="640" y="141" fill="#e2e8f0" font-size="13" font-weight="800">RAI Middleware v5.0</text>
+  <text x="640" y="158" fill="#94a3b8" font-size="9">Real-time · Between app and LLM</text>
+  <text x="640" y="173" fill="#94a3b8" font-size="9">Safety + Causal + Legal + Privacy</text>
+  <text x="640" y="188" fill="#94a3b8" font-size="9">First unified middleware architecture</text>
+  <rect x="640" y="197" width="78" height="16" rx="8" fill="#a855f720"/>
+  <text x="679" y="209" text-anchor="middle" fill="#c084fc" font-size="8.5" font-weight="600">Deployment-time</text>
+
+  <!-- ========= REAL-TIME FLOW SECTION ========= -->
+  <line x1="60" y1="240" x2="840" y2="240" stroke="#2a3550" stroke-width="1"/>
+  <text x="450" y="260" text-anchor="middle" fill="#94a3b8" font-size="10" letter-spacing="2">REAL-TIME REQUEST FLOW (2–10ms PIPELINE + LLM GENERATE + SELF-VERIFY)</text>
+
+  <!-- App Box -->
+  <rect x="30" y="275" width="100" height="50" rx="10" fill="#1a2236" stroke="#6366f1" stroke-width="1.5"/>
+  <text x="80" y="297" text-anchor="middle" fill="#818cf8" font-size="11" font-weight="700">📱 App</text>
+  <text x="80" y="313" text-anchor="middle" fill="#94a3b8" font-size="8.5">Any client</text>
+
+  <!-- Arrow -->
+  <line x1="132" y1="300" x2="152" y2="300" stroke="#6366f1" stroke-width="2"/>
+  <polygon points="152,295 162,300 152,305" fill="#6366f1"/>
+
+  <!-- Pipeline box -->
+  <rect x="163" y="268" width="180" height="64" rx="10" fill="#1a2236" stroke="#06b6d4" stroke-width="1.5"/>
+  <text x="253" y="288" text-anchor="middle" fill="#06b6d4" font-size="10" font-weight="700">🔍 Pipeline S00→S13</text>
+  <text x="253" y="302" text-anchor="middle" fill="#94a3b8" font-size="8">Pearl SCM · Adversarial · Privacy</text>
+  <text x="253" y="315" text-anchor="middle" fill="#94a3b8" font-size="8">Legal · Ethics · Human Oversight</text>
+  <rect x="175" y="321" width="50" height="12" rx="6" fill="#22c55e20"/>
+  <text x="200" y="330" text-anchor="middle" fill="#22c55e" font-size="7.5" font-weight="600">2–10ms</text>
+
+  <!-- Arrow to decision -->
+  <line x1="345" y1="300" x2="365" y2="300" stroke="#06b6d4" stroke-width="2"/>
+  <polygon points="365,295 375,300 365,305" fill="#06b6d4"/>
+
+  <!-- Decision -->
+  <rect x="376" y="275" width="90" height="50" rx="10" fill="#1a2236" stroke="#22c55e" stroke-width="1.5"/>
+  <text x="421" y="297" text-anchor="middle" fill="#22c55e" font-size="10" font-weight="700">⚖️ Decision</text>
+  <text x="421" y="312" text-anchor="middle" fill="#94a3b8" font-size="8">ALLOW / WARN</text>
+  <text x="421" y="323" text-anchor="middle" fill="#ef4444" font-size="8">BLOCK / ESCALATE</text>
+
+  <!-- BLOCK path -->
+  <line x1="421" y1="325" x2="421" y2="358" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <rect x="370" y="358" width="100" height="28" rx="8" fill="#ef444415" stroke="#ef4444" stroke-width="1"/>
+  <text x="420" y="376" text-anchor="middle" fill="#ef4444" font-size="9" font-weight="700">🚫 BLOCK → Safe Msg</text>
+
+  <!-- Arrow to LLM -->
+  <line x1="468" y1="300" x2="490" y2="300" stroke="#22c55e" stroke-width="2"/>
+  <polygon points="490,295 500,300 490,305" fill="#22c55e"/>
+
+  <!-- SystemPrompt -->
+  <rect x="501" y="275" width="110" height="50" rx="10" fill="#1a2236" stroke="#eab308" stroke-width="1.5"/>
+  <text x="556" y="294" text-anchor="middle" fill="#eab308" font-size="9.5" font-weight="700">⚙️ SystemPrompt</text>
+  <text x="556" y="308" text-anchor="middle" fill="#94a3b8" font-size="8">Injects RAI context</text>
+  <text x="556" y="320" text-anchor="middle" fill="#94a3b8" font-size="8">+ decision signal</text>
+
+  <!-- Arrow to LLM -->
+  <line x1="613" y1="300" x2="633" y2="300" stroke="#eab308" stroke-width="2"/>
+  <polygon points="633,295 643,300 633,305" fill="#eab308"/>
+
+  <!-- LLM -->
+  <rect x="644" y="268" width="100" height="64" rx="10" fill="#1a2236" stroke="#a855f7" stroke-width="1.5"/>
+  <text x="694" y="288" text-anchor="middle" fill="#c084fc" font-size="10" font-weight="700">🤖 LLM</text>
+  <text x="694" y="302" text-anchor="middle" fill="#94a3b8" font-size="8">OpenAI · Claude</text>
+  <text x="694" y="314" text-anchor="middle" fill="#94a3b8" font-size="8">Groq · Gemini</text>
+  <text x="694" y="326" text-anchor="middle" fill="#94a3b8" font-size="8">Any adapter</text>
+
+  <!-- Arrow to SelfVerify -->
+  <line x1="746" y1="300" x2="766" y2="300" stroke="#a855f7" stroke-width="2"/>
+  <polygon points="766,295 776,300 766,305" fill="#a855f7"/>
+
+  <!-- Self Verify -->
+  <rect x="777" y="275" width="100" height="50" rx="10" fill="#1a2236" stroke="#f97316" stroke-width="1.5"/>
+  <text x="827" y="293" text-anchor="middle" fill="#f97316" font-size="9.5" font-weight="700">🔄 Self-Verify</text>
+  <text x="827" y="308" text-anchor="middle" fill="#94a3b8" font-size="8">Pass 2 · 2nd LLM</text>
+  <text x="827" y="320" text-anchor="middle" fill="#94a3b8" font-size="8">review draft output</text>
+
+  <!-- ========= PIPELINE STAGES ========= -->
+  <line x1="60" y1="415" x2="840" y2="415" stroke="#2a3550" stroke-width="1"/>
+  <text x="450" y="432" text-anchor="middle" fill="#94a3b8" font-size="10" letter-spacing="2">14-STAGE PIPELINE · PEARL L1–L3 CAUSAL ENGINE</text>
+
+  <!-- Stage pills -->
+  <rect x="30" y="443" width="58" height="22" rx="11" fill="#06b6d420" stroke="#06b6d4" stroke-width="1"/>
+  <text x="59" y="458" text-anchor="middle" fill="#06b6d4" font-size="8.5" font-weight="600">S00 Privacy</text>
+
+  <rect x="94" y="443" width="58" height="22" rx="11" fill="#a855f720" stroke="#a855f7" stroke-width="1"/>
+  <text x="123" y="458" text-anchor="middle" fill="#c084fc" font-size="8.5" font-weight="600">S00b Context</text>
+
+  <rect x="158" y="443" width="55" height="22" rx="11" fill="#6366f120" stroke="#6366f1" stroke-width="1"/>
+  <text x="185" y="458" text-anchor="middle" fill="#818cf8" font-size="8.5" font-weight="600">S01 Sanitize</text>
+
+  <rect x="219" y="443" width="58" height="22" rx="11" fill="#ec489920" stroke="#ec4899" stroke-width="1"/>
+  <text x="248" y="458" text-anchor="middle" fill="#ec4899" font-size="8.5" font-weight="600">S03 Emotion</text>
+
+  <rect x="283" y="443" width="52" height="22" rx="11" fill="#eab30820" stroke="#eab308" stroke-width="1"/>
+  <text x="309" y="458" text-anchor="middle" fill="#eab308" font-size="8.5" font-weight="600">S04 Tier</text>
+
+  <rect x="341" y="443" width="70" height="22" rx="11" fill="#a855f730" stroke="#a855f7" stroke-width="2"/>
+  <text x="376" y="458" text-anchor="middle" fill="#c084fc" font-size="8.5" font-weight="700">S05 Pearl SCM</text>
+
+  <rect x="417" y="443" width="52" height="22" rx="11" fill="#6366f120" stroke="#6366f1" stroke-width="1"/>
+  <text x="443" y="458" text-anchor="middle" fill="#818cf8" font-size="8.5" font-weight="600">S06 SHAP</text>
+
+  <rect x="475" y="443" width="64" height="22" rx="11" fill="#ef444420" stroke="#ef4444" stroke-width="1"/>
+  <text x="507" y="458" text-anchor="middle" fill="#ef4444" font-size="8.5" font-weight="600">S07 Adversarial</text>
+
+  <rect x="545" y="443" width="66" height="22" rx="11" fill="#eab30820" stroke="#eab308" stroke-width="1"/>
+  <text x="578" y="458" text-anchor="middle" fill="#eab308" font-size="8.5" font-weight="600">S08 Jurisdiction</text>
+
+  <rect x="617" y="443" width="52" height="22" rx="11" fill="#ec489920" stroke="#ec4899" stroke-width="1"/>
+  <text x="643" y="458" text-anchor="middle" fill="#ec4899" font-size="8.5" font-weight="600">S09 Ethics</text>
+
+  <rect x="675" y="443" width="60" height="22" rx="11" fill="#f9731620" stroke="#f97316" stroke-width="1"/>
+  <text x="705" y="458" text-anchor="middle" fill="#f97316" font-size="8.5" font-weight="600">S09b Human</text>
+
+  <rect x="741" y="443" width="60" height="22" rx="11" fill="#22c55e20" stroke="#22c55e" stroke-width="1"/>
+  <text x="771" y="458" text-anchor="middle" fill="#22c55e" font-size="8.5" font-weight="600">S10 Decision</text>
+
+  <rect x="807" y="443" width="60" height="22" rx="11" fill="#06b6d420" stroke="#06b6d4" stroke-width="1"/>
+  <text x="837" y="458" text-anchor="middle" fill="#06b6d4" font-size="8.5" font-weight="600">S12–S13 Output</text>
+
+  <!-- Pipeline connector line -->
+  <line x1="30" y1="454" x2="867" y2="454" stroke="url(#pipeGrad)" stroke-width="1" stroke-opacity="0.4" stroke-dasharray="3,3"/>
+
+  <!-- Stats row at bottom -->
+  <rect x="30" y="483" width="840" height="26" rx="8" fill="#1a2236"/>
+  <text x="80" y="500" text-anchor="middle" fill="#22c55e" font-size="9" font-weight="700">212/212 Tests ✅</text>
+  <text x="200" y="500" text-anchor="middle" fill="#818cf8" font-size="9" font-weight="700">23×5 Pearl Matrix</text>
+  <text x="320" y="500" text-anchor="middle" fill="#06b6d4" font-size="9" font-weight="700">2–10ms Latency</text>
+  <text x="440" y="500" text-anchor="middle" fill="#c084fc" font-size="9" font-weight="700">4 Attack Types</text>
+  <text x="560" y="500" text-anchor="middle" fill="#eab308" font-size="9" font-weight="700">4 Jurisdictions</text>
+  <text x="680" y="500" text-anchor="middle" fill="#f97316" font-size="9" font-weight="700">Pearl L1→L3 Full</text>
+  <text x="800" y="500" text-anchor="middle" fill="#ec4899" font-size="9" font-weight="700">Daubert-Aligned</text>
+
+  <!-- GitHub link -->
+  <text x="450" y="517" text-anchor="middle" fill="#2a3550" font-size="8.5">github.com/NirmalanSK/responsible-ai-framework · 2026</text>
+</svg>
