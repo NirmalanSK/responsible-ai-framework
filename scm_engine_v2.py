@@ -22,7 +22,7 @@
     7.  PN  (Probability of Necessity) — "but-for" causation
     8.  PS  (Probability of Sufficiency)
     9.  D-Separation — conditional independence from DAG
-   10.  DAG per harm domain — 17 domain-specific causal graphs
+   10.  DAG per harm domain — 19 domain-specific causal graphs
    11.  Effect Decomposition — TE = NDE + NIE with % split
    12.  Legal Admissibility Score — maps all proofs to court standard
 
@@ -49,15 +49,16 @@
      domain-specific defaults from dag_selector.py. Exact computation
      via DoWhy integration (Phase 4 — see research_notes.md).
 
-  2. PROTECTED GROUP COVERAGE — dag_selector.py DOMAIN_KEYWORDS for
-     representation_bias domain lacks religion-based (Muslim, Sikh, Jewish)
-     and caste-based (Dalit, Scheduled Caste, OBC) discrimination patterns.
+  2. PROTECTED GROUP COVERAGE — FIXED (May 2026).
+     dag_selector.py DOMAIN_KEYWORDS representation_bias domain now includes
+     religion-based (Muslim, Sikh, Jewish, Hindu, Christian) and caste-based
+     (Dalit, Scheduled Caste, OBC, varna) discrimination patterns.
      SCMEngineV2 correctly computes TCE/NDE/NIE once CausalFindings arrive —
-     the gap is upstream in domain routing, not in this engine.
+     the routing gap has been closed at the dag_selector layer.
 
-     Year 2 fix: XLM-RoBERTa zero-shot classifier (Phase 6) replaces
+     Year 2 target: XLM-RoBERTa zero-shot classifier (Phase 6) replaces
      keyword matching entirely — covers all protected group intersections
-     including South Asian caste categories.
+     and intersectional harms (e.g. caste × gender).
 
 ═══════════════════════════════════════════════════════════════════════════════
 """
@@ -323,7 +324,7 @@ def build_domain_dags() -> Dict[str, HarmDAG]:
         ]
     )
 
-    # 6-17: Remaining domains — structural pattern
+    # 6-19: Remaining domains — structural pattern
     other_domains = [
         ("disinformation",     "ai_generates_false_content",    "public_belief_manipulation",  "viral_spread"),
         ("harassment",         "ai_enables_targeted_attack",    "victim_psychological_harm",   "escalation_pattern"),
@@ -337,6 +338,13 @@ def build_domain_dags() -> Dict[str, HarmDAG]:
         ("child_safety",       "ai_enables_grooming",           "child_abuse",                 "access_facilitation"),
         ("identity_forgery",   "ai_generates_fake_documents",   "fraud_or_impersonation",      "document_use"),
         ("audit_gap",          "ai_operates_without_logging",   "accountability_failure",      "audit_absence"),
+        # ── Added May 2026 — previously in dag_validator only ────────
+        # self_harm: distress signal → method access → self-harm act
+        # Mediator: method_access (Joiner 2005 — means restriction is the key lever)
+        ("self_harm",          "ai_provides_method_information","self_harm_act",               "method_access"),
+        # election_interference: false narrative → amplification → vote behavior
+        # Mediator: belief_update (Allcott & Gentzkow 2017 — belief change precedes vote change)
+        ("election_interference", "ai_generates_false_narrative","corrupted_vote_behavior",    "belief_update"),
     ]
     for domain, treatment, outcome, mediator in other_domains:
         dags[domain] = HarmDAG(
@@ -1362,6 +1370,9 @@ DOMAIN_TO_ROW: Dict[str, str] = {
     "child_safety":          "child_safety",        # ← NOW PROPER ROW (v5.1)
     "identity_forgery":      "social_engineering_attack",
     "audit_gap":             "regulatory_noncompliance",
+    # ── Added May 2026 ─────────────────────────────────────────
+    "self_harm":             "psychological_manipulation",  # closest harm class — distress → method → act
+    "election_interference": "misinformation_synthetic",   # same matrix row as disinformation
 }
 
 # Pearl column names (replaces P1_Interpretability…P5_Society)

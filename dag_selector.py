@@ -71,7 +71,7 @@ _EDUCATIONAL_OVERRIDE = [
 
 
 # ═══════════════════════════════════════════════════════════════════
-# KEYWORD PATTERNS — 17 harm domains
+# KEYWORD PATTERNS — 19 harm domains (self_harm + election_interference added May 2026)
 # Priority order matters: more specific patterns checked first.
 # Each domain has PRIMARY keywords (strong signal) and
 # SECONDARY keywords (weak signal, used for tiebreaking).
@@ -326,6 +326,38 @@ DOMAIN_KEYWORDS: dict[str, dict] = {
             "mass report campaign", "swatting",
         ],
         "secondary": ["harass", "bully", "intimidate person"],
+    },
+
+    # ── Self-Harm ─────────────────────────────────────────────────
+    # Note: _EDUCATIONAL_OVERRIDE blocks research/prevention context upstream.
+    # These primary keywords signal method-seeking, not awareness/prevention.
+    "self_harm": {
+        "primary": [
+            "how to hurt myself", "ways to self harm", "self harm methods",
+            "cut myself deeply", "ways to cut myself", "harm myself method",
+            "self injury technique", "self harm guide", "wound myself",
+            "self harm without being caught", "hide self harm",
+            "best way to self harm",
+        ],
+        "secondary": [
+            "self harm", "hurt myself", "injure myself", "self injury",
+        ],
+    },
+
+    # ── Election Interference ──────────────────────────────────────
+    "election_interference": {
+        "primary": [
+            "voter suppression tactic", "suppress votes", "intimidate voters",
+            "manipulate election result", "hack voting machine",
+            "election fraud scheme", "ballot stuffing", "tamper with votes",
+            "disrupt polling station", "spread false voting information",
+            "false election deadline", "voter roll manipulation",
+            "disenfranchise voters", "election manipulation campaign",
+        ],
+        "secondary": [
+            "election fraud", "voting manipulation", "voter intimidation",
+            "election rigging", "ballot tampering",
+        ],
     },
 }
 
