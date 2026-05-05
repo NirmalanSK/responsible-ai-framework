@@ -31,6 +31,34 @@
     Pearl, J. (2018). The Book of Why. Basic Books.
     Tian, J. & Pearl, J. (2000). Probabilities of Causation. UAI.
     Pearl, J. (1995). Causal Diagrams for Empirical Research. Biometrika.
+
+  YEAR 1 KNOWN LIMITATIONS (Documented — Year 2 Targets)
+  ────────────────────────────────────────────────────────
+  1. TIER 1 HARDCODING — SCMEngineV2.run() receives full CausalFindings
+     with real tce/med/flip/intv/rct values when called at Tier 2/3.
+     At Tier 1, pipeline_v15.py Step05_SCMEngine passes DEFAULT_FINDINGS
+     (tce=7.0, med=60.0, flip=17.0) — a conservative safe-floor estimate,
+     not a query-specific computation. This means ~90% of benign queries
+     receive the same SCM baseline rather than individualized causal analysis.
+
+     Year 1 rationale: Tier 1 is low-risk by definition (Tier Router
+     verified no signals). SCM full analysis reserved for Tier 2/3 where
+     causal precision matters most (hiring bias, medical, criminal justice).
+
+     Year 2 fix: Per-domain lightweight CausalFindings at Tier 1 using
+     domain-specific defaults from dag_selector.py. Exact computation
+     via DoWhy integration (Phase 4 — see research_notes.md).
+
+  2. PROTECTED GROUP COVERAGE — dag_selector.py DOMAIN_KEYWORDS for
+     representation_bias domain lacks religion-based (Muslim, Sikh, Jewish)
+     and caste-based (Dalit, Scheduled Caste, OBC) discrimination patterns.
+     SCMEngineV2 correctly computes TCE/NDE/NIE once CausalFindings arrive —
+     the gap is upstream in domain routing, not in this engine.
+
+     Year 2 fix: XLM-RoBERTa zero-shot classifier (Phase 6) replaces
+     keyword matching entirely — covers all protected group intersections
+     including South Asian caste categories.
+
 ═══════════════════════════════════════════════════════════════════════════════
 """
 

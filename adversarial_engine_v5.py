@@ -4,13 +4,36 @@
 ║   Responsible AI Framework v5.0 — Living System                      ║
 ║   PhD Research · Nirmalan · Chapter 5 — Adversarial Evaluation       ║
 ║                                                                      ║
-║   Attack Types Implemented:                                          ║
+║   SCOPE — Conversation-Pattern Attack Detection                      ║
+║   ─────────────────────────────────────────────                      ║
+║   This engine detects HOW an attacker is manipulating the            ║
+║   conversation structure — not WHAT the content contains.            ║
+║                                                                      ║
+║   IN SCOPE (this file):                                              ║
 ║     ✅ Attack 1 — Slow Boiling       (Conversation Drift)            ║
 ║     ✅ Attack 2 — Role Play Wrapper  (Fictional Framing)             ║
 ║     ✅ Attack 3 — Authority Spoofing (Claimed Credentials)           ║
 ║                   + Context Poisoning (Legitimacy Building)          ║
-║     ✅ Attack 4 — Prompt Injection   (Hidden Instructions) ← NEW    ║
+║     ✅ Attack 4 — Prompt Injection   (Hidden Instructions)           ║
 ║     ⏳ Attack 5 — Distributed Attack (Year 3 — needs DB)             ║
+║                                                                      ║
+║   NOT IN SCOPE (by design — Single Responsibility Principle):        ║
+║     ❌ Content harm detection (weapon synthesis, CSAM, hate          ║
+║        speech, bias queries, etc.)                                   ║
+║        → Handled by Step07_AdversarialLayer inside pipeline_v15.py  ║
+║          which wraps this engine with full keyword + pattern         ║
+║          harm detection and leet-speak normalization.                ║
+║                                                                      ║
+║   ARCHITECTURAL SEPARATION:                                          ║
+║     This engine  = WHO is attacking  (attack pattern / vector)       ║
+║     Step07       = WHAT is harmful   (content classification)        ║
+║                                                                      ║
+║   This separation is deliberate:                                     ║
+║     • Prevents false positives from dual-detection overlap           ║
+║     • Allows independent Year 2 upgrades per layer                   ║
+║     • Follows Single Responsibility Principle (SRP)                  ║
+║     • Year 2: SBERT replaces Step07 content patterns;               ║
+║               this engine's conversation logic unchanged             ║
 ║                                                                      ║
 ║   Core Defense Principle (Pearl L2):                                 ║
 ║     do(remove_attack_wrapper) → if harmful intent remains → BLOCK   ║

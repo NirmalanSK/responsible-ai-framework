@@ -119,16 +119,36 @@ DOMAIN_KEYWORDS: dict[str, dict] = {
     # ── Representation / Hiring Bias ───────────────────────────────
     "representation_bias": {
         "primary": [
+            # ── Gender / Race (existing + expanded) ───────────────
             "reject female", "reject based on gender", "reject based on race",
+            "filter out women", "exclude women", "remove women candidates",
             "discriminate hiring", "biased hiring", "hiring algorithm bias",
             "amazon hiring", "resume screening bias", "job applicant gender",
             "loan denied race", "credit score race", "mortgage race",
             "insurance discrimination", "healthcare algorithm bias",
             "race in decision", "gender in decision", "use protected attribute",
+            # ── Religion-based discrimination (Gap 2 fix — May 2026) ──
+            "reject muslim", "reject sikh", "reject jewish", "reject christian",
+            "reject hindu applicant", "reject based on religion",
+            "discriminate religion", "religion-based hiring",
+            "filter muslim", "exclude muslim", "remove muslim candidates",
+            "religion in decision", "faith-based rejection",
+            # ── Caste-based discrimination (Gap 2 fix — May 2026) ─────
+            "downscore dalit", "reject dalit", "filter caste",
+            "exclude scheduled caste", "exclude sc applicant",
+            "caste-based hiring", "caste in decision",
+            "deprioritize obc", "lower score dalit", "screen out dalit",
+            "reject based on caste", "discriminate caste",
         ],
         "secondary": [
             "applicant", "hiring bias", "discriminat", "protected attribute",
             "race discriminat", "gender discriminat", "bias algorithm",
+            # ── Religion secondary signals ─────────────────────────
+            "muslim candidate", "sikh applicant", "jewish applicant",
+            "religious discriminat", "faith discriminat",
+            # ── Caste secondary signals ────────────────────────────
+            "dalit", "scheduled caste", "obc applicant", "caste bias",
+            "varna", "lower caste",
         ],
     },
 
