@@ -414,7 +414,7 @@ STEP 09b — HUMAN DECISION VERIFICATION
 | AdvBench | 520 | Recall = 65.0% |
 | HarmBench Standard | 200 | Recall = 14.5% (pattern ceiling — see below) |
 | **AIAAIC 50-Case Validation** | **50** | **F1=0.97 · Precision=100% · FPR=0%** |
-| Unit Tests | 212 | 212/212 (100%) |
+| Unit Tests | 227 | 227/227 (100%) |
 | Groq 60-Case RAI Validation | 60 | 60/60 (100%) · Accuracy=100% · 0 false alarms |
 
 **Live Pipeline Execution** (real adversarial queries run through full 14-step pipeline)
@@ -581,7 +581,7 @@ Step 05 formula layer tested in isolation: causal inputs (TCE, MED, FlipRate, IN
 | **Sparse Causal Matrix** | ✅ 23×5 Pearl L1-L3 | ❌ | ❌ | ❌ | ❌ | ❌ |
 | **Multi-Turn Detection** | ✅ ContextEngine (4 signals) | ❌ | ❌ | ❌ | ❌ | ❌ |
 | **LLM Explained Responses** | ✅ Two-pass self-verified | ❌ | ❌ | ❌ | ❌ | ❌ |
-| **Working Code + Tests** | ✅ 212/212 tests | ✅ | ✅ | ✅ | ✅ | ❌ Theory only |
+| **Working Code + Tests** | ✅ 227/227 tests | ✅ | ✅ | ✅ | ✅ | ❌ Theory only |
 | **Open Source** | ✅ MIT | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ### Key Differentiators
@@ -749,7 +749,7 @@ responsible-ai-framework/
 ├── adversarial_engine_v5.py     # Conversation-pattern attack detection (4 types: slow boiling · roleplay · authority spoof · prompt injection) — content harm detection in Step07 pipeline_v15.py by design (SRP)
 ├── context_engine.py            # Multi-turn attack detection (SQLite session memory)
 ├── output_verifier.py           # Two-pass LLM self-verification — model-agnostic (Year 2: S14 pipeline integration)
-├── test_v15.py                  # 212 unit tests (212/212 passing — 100%)
+├── test_v15.py                  # 227 unit tests (227/227 passing — 100%)
 ├── requirements.txt             # Dependencies
 │
 ├── chatbots/
@@ -801,7 +801,7 @@ python dag_validator.py
 # Run DAG Validation Bridge self-test (Γ-calibrated thresholds for all 21 domains)
 python dag_validation_bridge.py
 
-# Run unit tests (212/212)
+# Run unit tests (227/227)
 python -m unittest test_v15
 
 # Research-grade evaluation metrics
@@ -868,7 +868,7 @@ All live execution reports are stored in [`docs/`](docs/). Each report documents
 
 ## 🗂️ Version History — Year 1 (March–April 2026)
 
-**Final Status: 212/212 tests passing (100%)**
+**Final Status: 227/227 tests passing (100%)**
 
 ```
 Before March fixes:    1 passed, 178 failed  (catastrophic)
@@ -881,7 +881,7 @@ After v15i (April):  195 passed, 0 failed    ← Two-pass LLM self-verification 
 After v15j (April):  195 passed, 0 failed    ← Data Privacy Engine v1.0 ✅
 After v15+step09b (May): 212 passed, 0 failed ← Causal Human Oversight Verifier (+17 tests) ✅
 After v5.1 (May):    212 passed, 0 failed    ← 23×5 Pearl Matrix upgrade ✅
-After v5.2 (May):    212 passed, 0 failed    ← DAG Validation Layer + Bridge ✅
+After v5.2 (May):    227 passed, 0 failed    ← DAG Validation Layer + Bridge (+15 tests) ✅
 ```
 
 > ✅ **Independently verified:** All tests confirmed passing via GitHub Actions CI (May 2026).
@@ -1131,7 +1131,7 @@ New functions: `build_rai_context()`, `build_system_prompt()`, `build_verify_pro
 * Gap found: AI sentencing + protected class → ALLOW (wrong) — fixed via robust sentencing patterns
 * +16 new unit tests (TestV15dDeploymentGaps)
 
-### Test Class Summary (26 classes, 212 tests)
+### Test Class Summary (29 classes, 227 tests)
 
 | Class | Category |
 | --- | --- |
@@ -1161,6 +1161,9 @@ New functions: `build_rai_context()`, `build_system_prompt()`, `build_verify_pro
 | TestSCMEngineV2 | Pearl causality unit tests |
 | TestV15dDeploymentGaps | 16 live deployment gap tests |
 | **TestHumanDecisionVerifier** | **17 Step 09b: Pearl L3 Human Oversight Verification** |
+| **TestDAGSelector** | **5 dag_selector: self\_harm · election\_interference · religion/caste Gap 2** |
+| **TestDAGValidationBridge** | **6 dag\_validation\_bridge: Γ thresholds · mismatch map · audit row** |
+| **TestDAGValidatorStructure** | **4 dag\_validator: 21 domains · new domains present · base\_tce valid** |
 
 ---
 
