@@ -1,9 +1,10 @@
-# RAI Framework v5.0 — Dependencies
+# RAI Framework v5.2 — Dependencies
 
 # Core
 langdetect>=1.0.9
 deep-translator>=1.11.4
 numpy>=1.24.0
+pandas>=1.5.0
 
 # Chatbot backends
 groq>=0.4.0

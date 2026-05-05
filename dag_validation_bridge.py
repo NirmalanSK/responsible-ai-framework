@@ -110,7 +110,38 @@ _THRESHOLD_MIN: float = 0.50
 _THRESHOLD_MAX: float = 0.80
 
 # Fallback Γ for Year 2 domains (no validator DAG yet).
-_FALLBACK_GAMMA: float = 2.0  # conservative mid-range
+_FALLBACK_GAMMA: float = 2.0  # conservative mid-range — only used for truly unknown domains
+
+# ── Per-domain Γ fallback dict ─────────────────────────────────────
+# Used when dag_validator cannot be imported (e.g. pandas absent in CI).
+# Values derived from noise-aware Rosenbaum formula:
+#   bias_frac = (Γ-1)/(Γ+1); effect = TCE × (1 - bias_frac)
+#   Robust threshold: abs(effect) > Z_CRITICAL × SE × √Γ  (SE_MULTIPLIER=8.0)
+# DO NOT change without re-running dag_validator.py self-test.
+_DOMAIN_GAMMA_FALLBACK: Dict[str, float] = {
+    # dag_selector.py names (keys used by get_domain_gamma)
+    "child_safety":           3.0,   # TCE=0.78, noise=0.12 — highest robustness
+    "misuse_safety":          3.0,   # maps → weapon_synthesis  TCE=0.72
+    "context_poisoning":      3.0,   # TCE=0.71, noise=0.14
+    "self_harm":              3.0,   # TCE=0.66, noise=0.15
+    "medical_harm":           3.0,   # TCE=0.67, noise=0.16
+    "identity_forgery":       3.0,   # TCE=0.64, noise=0.17
+    "financial_fraud":        3.0,   # TCE=0.68, noise=0.17
+    "physical_violence":      3.0,   # maps → violence  TCE=0.65
+    "surveillance_stalking":  3.0,   # TCE=0.63, noise=0.16
+    "healthcare_bias":        3.0,   # TCE=0.52, noise=0.14
+    "criminal_justice_bias":  3.0,   # TCE=0.42, noise=0.13
+    "representation_bias":    2.5,   # maps → bias_discrimination  TCE=0.48
+    "cyberattack":            2.5,   # maps → cybercrime  TCE=0.61
+    "privacy_violation":      2.5,   # TCE=0.58, noise=0.19
+    "harassment":             2.5,   # TCE=0.57, noise=0.18
+    "drug_trafficking":       2.5,   # TCE=0.59, noise=0.20
+    "disinformation":         2.0,   # maps → disinformation_deepfake  TCE=0.44
+    "audit_gap":              2.0,   # TCE=0.53, noise=0.21
+    "data_poisoning":         2.0,   # TCE=0.55, noise=0.22 (validator name)
+    "decision_transparency":  2.0,   # Year 2 stub — conservative
+    "election_interference":  1.5,   # TCE=0.38, noise=0.24 — lowest robustness
+}
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -150,9 +181,17 @@ def get_domain_gamma(selector_domain: str) -> Optional[float]:
     try:
         from dag_validator import get_domain_validation
     except ImportError as e:
-        warnings.warn(f"[Bridge] dag_validator import failed: {e}. Using fallback γ.")
-        _GAMMA_CACHE[selector_domain] = None
-        return None
+        # dag_validator unavailable (e.g. pandas not installed in CI).
+        # Use per-domain fallback dict — preserves correct Γ differentiation
+        # even without the validator. Falls back to _FALLBACK_GAMMA only for
+        # truly unknown domains.
+        gamma = _DOMAIN_GAMMA_FALLBACK.get(selector_domain, _FALLBACK_GAMMA)
+        _GAMMA_CACHE[selector_domain] = gamma
+        warnings.warn(
+            f"[Bridge] dag_validator import failed: {e}. "
+            f"Using per-domain fallback Γ={gamma} for '{selector_domain}'."
+        )
+        return gamma
 
     validator_domain = _resolve_validator_domain(selector_domain)
     result = get_domain_validation(validator_domain)
@@ -201,8 +240,8 @@ def get_validated_threshold(
     gamma = get_domain_gamma(selector_domain)
 
     if gamma is None:
-        # Year 2 domain or import failure — use fallback
-        gamma = _FALLBACK_GAMMA
+        # Truly unknown domain — last resort fallback
+        gamma = _DOMAIN_GAMMA_FALLBACK.get(selector_domain, _FALLBACK_GAMMA)
 
     raw = base_threshold - _SLOPE * (gamma - _GAMMA_MID)
     calibrated = round(max(_THRESHOLD_MIN, min(_THRESHOLD_MAX, raw)), 3)
