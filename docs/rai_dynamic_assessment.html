@@ -930,29 +930,57 @@ function renderDecision(data){
     <div class="decision-label ${finalDecision}" style="color:${decColor}">${decIcon} ${finalDecision}</div>
     <div class="decision-reason">${finalReason}</div>
   </div>
-  
-  <div class="summary-grid">
-    <div class="summary-card">
-      <div class="sc-label">SCM CAUSAL RISK</div>
-      <div class="sc-value" style="color:${riskColor}">${combinedRisk.toFixed(1)}%</div>
-      <div style="margin-top:6px"><div class="risk-bar-wrap"><div class="risk-bar" style="width:${Math.min(combinedRisk,100)}%;background:${barColor}"></div></div></div>
-      <div class="risk-thresholds"><span>0</span><span style="margin-left:${30}%;color:#d29922">30</span><span style="margin-left:${40}%;color:#f85149">70</span><span>100</span></div>
-    </div>
-    <div class="summary-card">
-      <div class="sc-label">MATRIX AGGREGATE</div>
-      <div class="sc-value" style="color:#79c0ff">${(data.mat.aggregateRisk*100).toFixed(1)}%</div>
-      <div style="margin-top:4px;font-size:10px;color:#8b949e">Domain: ${mat.primaryRow.replace(/_/g,' ')}<br>Cascade: ${mat.cascadeFired?'FIRED ('+mat.activeRows.length+' rows)':'NOT fired'}</div>
-    </div>
-    <div class="summary-card">
-      <div class="sc-label">SEVERITY</div>
-      <div class="sc-value" style="color:${scm.sevAdj===4?'#f85149':scm.sevAdj===3?'#ffa657':scm.sevAdj===2?'#d29922':'#3fb950'}">${scm.sevLabel}</div>
-      <div style="margin-top:4px;font-size:10px;color:#8b949e">Edge: ${scm.edgeLabel} | Det: ${scm.detLabel}<br>Domain mult: ×${dm.mult} (${dm.label})</div>
-    </div>
-    <div class="summary-card">
-      <div class="sc-label">SIGNAL COUNTS</div>
-      <div class="sc-value">${blockCount>0?`<span style="color:#f85149">${blockCount} BLOCK</span>`:warnCount>0?`<span style="color:#d29922">${warnCount} WARN</span>`:'<span style="color:#3fb950">All CLEAR</span>'}</div>
-      <div style="margin-top:4px;font-size:10px;color:#8b949e">Warn: ${warnCount} | Block: ${blockCount}<br>Jurisdiction: ${jur}</div>
-    </div>
+
+  <!-- ── Risk Decomposition: Three-bar breakdown ── -->
+  <div class="panel-title" style="margin-top:14px">Risk Decomposition</div>
+  <div style="background:#161b22;border:1px solid #21262d;border-radius:8px;padding:16px 18px;margin-bottom:12px">
+
+    ${(()=>{
+      const scmR  = scm.base_risk;
+      const matR  = data.matRisk;
+      const combR = combinedRisk;
+      const scmC  = scmR>=70?'#f85149':scmR>=30?'#d29922':'#3fb950';
+      const matC  = matR>=70?'#f85149':matR>=30?'#d29922':'#3fb950';
+      const comC  = combR>=70?'#f85149':combR>=30?'#d29922':'#3fb950';
+
+      function bar(label, val, color, weight, note){
+        const w = Math.min(val,100);
+        return `
+        <div style="margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">
+            <span style="font-size:11px;color:#8b949e;letter-spacing:.06em;text-transform:uppercase">${label}</span>
+            <span style="display:flex;align-items:baseline;gap:10px">
+              <span style="font-size:18px;font-weight:700;font-family:monospace;color:${color}">${val.toFixed(1)}%</span>
+              <span style="font-size:10px;color:#484f58">${weight}</span>
+            </span>
+          </div>
+          <div style="background:#0d1117;border-radius:4px;height:10px;overflow:hidden;position:relative">
+            <div style="position:absolute;left:0;top:0;height:100%;width:${w}%;background:${color};border-radius:4px;transition:width .3s ease"></div>
+            <div style="position:absolute;left:30%;top:0;height:100%;width:1px;background:#d29922;opacity:0.4"></div>
+            <div style="position:absolute;left:70%;top:0;height:100%;width:1px;background:#f85149;opacity:0.4"></div>
+          </div>
+          <div style="font-size:10px;color:#484f58;margin-top:4px">${note}</div>
+        </div>`;
+      }
+
+      const formulaLine = `
+        <div style="margin-top:16px;padding:12px;background:#0d1117;border-radius:6px;font-size:11px;font-family:monospace;line-height:2">
+          <span style="color:#8b949e">combined</span> = 0.6 × <span style="color:#ffa657">${scmR.toFixed(1)}</span> + 0.4 × <span style="color:#79c0ff">${matR.toFixed(1)}</span>
+          = <span style="color:#e6edf3">${(0.6*scmR+0.4*matR).toFixed(1)}%</span>
+          ${combinedRisk!==(0.6*scmR+0.4*matR)?`× <span style="color:#d29922">×${dm.mult}</span> (domain mult) = <span style="color:${comC};font-weight:700">${combR.toFixed(1)}%</span>`:''}
+          <br>
+          <span style="color:#484f58">Thresholds: ALLOW &lt;30 | WARN 30–70 | BLOCK ≥70</span>
+        </div>`;
+
+      return bar('SCM Causal Risk', scmR, scmC, '×0.6 weight',
+          `Pearl L1–L3 | Severity:${scm.sevLabel} | Edge:${scm.edgeLabel} | Det:${scm.detLabel}`)
+        + bar('Matrix Aggregate Risk', matR, matC, '×0.4 weight',
+          `23×5 activation | Primary row: ${mat.primaryRow.replace(/_/g,' ')} | Cascade: ${mat.cascadeFired?'FIRED ('+mat.activeRows.length+' rows)':'not fired'} | Domain ×${dm.mult}`)
+        + bar('Combined Risk (Final)', combR, comC, 'Decision input',
+          `Signals: ${blockCount} BLOCK · ${warnCount} WARN | Jurisdiction: ${jur}`)
+        + formulaLine;
+    })()}
+
   </div>
 
   <div class="panel-title">Decision Priority Checks</div>
