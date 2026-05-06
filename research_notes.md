@@ -15,7 +15,7 @@ LAYER 1 — SAFETY (Steps 01, 04b, 07, 09):
   What: Harmful content detection, adversarial attack defense
   Who does this: Claude, GPT (built-in)
   Our addition: Adversarial engine (4 attack types + academic/fictional/symbolic wrappers)
-  Evidence: 212/212 tests passing (100%), 0/10 harmful output
+  Evidence: 227/227 tests passing (100%), 0/10 harmful output
 
 LAYER 2 — RESPONSIBLE AI (Steps 05, 06, 08, 11):
   What: Causal bias detection, protected group discrimination proof
@@ -810,7 +810,7 @@ Extended: Full technical plan added April 2026
   Month 8-9:  Validation
                 Amazon TCE ± 3% tolerance check
                 COMPAS flip rate ± 5% tolerance check
-                test_v15.py: verify 212/212 still passing
+                test_v15.py: verify 227/227 still passing
 
   Month 9:    FAccT/AIES paper draft begin
                 "Data-Driven SCM for Real-Time AI Safety"
@@ -4422,7 +4422,8 @@ coverage flagged as Year 2 improvement (DoWhy Phase 4).
 ### Test Result
 
   195 → 212 (+17)
-  212/212 passing ✅ (GitHub Actions CI confirmed)
+  212 → 227 (+15)  ← May 2026: Gap 2 fix (religion/caste test cases) + 4 new EXPERT_DAGS domains + human_decision_verifier + dag_validator tests
+  227/227 passing ✅ (GitHub Actions CI confirmed)
 
 ### PhD Defense Value
 
@@ -4603,9 +4604,11 @@ coverage flagged as Year 2 improvement (DoWhy Phase 4).
 ### Priority Order for Submission (PhD Application Readiness)
 ──────────────────────────────────────────────────────────────────────────────
 
-  🔴 Priority 1 (Fix before submission):
-    Gap 2 — Religion/Caste keywords → dag_selector.py + 3-4 new test cases
-    Estimated effort: 30 minutes. Zero risk of test regression.
+  ✅ Priority 1 (DONE — May 2026):
+    Gap 2 — Religion/Caste keywords → dag_selector.py FIXED + 2 new test cases added
+      test_representation_bias_religion_detected ✅
+      test_representation_bias_caste_detected    ✅
+    Also: README "Known Limitations" → Gap 2 updated to ✅ FIXED
 
   🔴 Priority 2 (Document clearly, fix Year 2):
     Gap 1 — SCM Tier 1 Hardcoding → documented in scm_engine_v2.py + README
@@ -4613,4 +4616,97 @@ coverage flagged as Year 2 improvement (DoWhy Phase 4).
 
   ✅ Priority 3 (Done):
     Gap 3 — Adversarial scope → docs updated in all 4 files. No code change.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+## Code-Verified Updates (May 2026) — Repo vs Notes Reconciliation
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Source: responsible-ai-framework-main (live GitHub zip, May 2026).
+  Method: Diff between research_notes.md (May 2026 snapshot) and actual codebase.
+  Verified: May 2026.
+
+──────────────────────────────────────────────────────────────────────────────
+### Update 1 — EXPERT_DAGS Expanded: 17 → 21 Domains [NEW — May 2026]
+──────────────────────────────────────────────────────────────────────────────
+
+  4 new domains added to EXPERT_DAGS (pipeline_v15.py):
+    • context_poisoning   — legitimacy-building / multi-turn trust poisoning
+    • identity_forgery    — impersonation / credential spoofing
+    • medical_harm        — medical advice harm (dedicated DAG, was under general)
+    • audit_gap           — organisations concealing RAI audit trails
+
+  Test added:
+    test_four_new_domains_present  ✅  (verifies all 4 in EXPERT_DAGS)
+    test_expert_dags_has_21_domains ✅  (verifies total count = 21)
+
+  PhD framing update:
+    Prior claim: "17 domain DAGs × 5 Pearl pathways (P1–P5)"
+    Updated:     "21 domain DAGs × 5 Pearl pathways (P1–P5)"
+    Note: MATRIX_23x5 in matrix_v2.py UNCHANGED — 21 conceptual DAGs map into
+          the same 23-row implementation (rows include shared/fallback entries).
+    Both framings still coexist:
+      21×5  = conceptual PhD label (updated from 17×5)
+      23×5  = live MATRIX_23x5 implementation (unchanged)
+
+──────────────────────────────────────────────────────────────────────────────
+### Update 2 — output_verifier.py Extracted to Standalone Module [NEW — May 2026]
+──────────────────────────────────────────────────────────────────────────────
+
+  Status: EXISTS in repo root (output_verifier.py).
+  Header: "DESIGN COMPLETE — Year 2 pipeline integration target (S14)"
+
+  What happened:
+    April 2026 (v15i): self_verify() built inside governed_chatbot.py (Groq)
+                        and gemini_governed_chatbot.py — duplicated per-chatbot.
+    May 2026:           Extracted into standalone output_verifier.py —
+                        model-agnostic, single source of truth.
+                        Both chatbots continue to call their own copy for now
+                        (pipeline untouched per Year 1 constraint).
+
+  Year 2 S14 integration plan (documented in file header):
+    Step 1: ✅ Extract self_verify() → output_verifier.py (done)
+    Step 2: Add S14 call in pipeline_v15.py after S13 (Output Privacy Scan)
+    Step 3: Both chatbots remove own self_verify() → delegate to S14
+    Step 4: New test class: TestS14OutputVerifier
+
+  Files: output_verifier.py (repo root), chatbots unchanged for now.
+
+──────────────────────────────────────────────────────────────────────────────
+### Update 3 — Evaluation Results Available [NEW — May 2026]
+──────────────────────────────────────────────────────────────────────────────
+
+  evaluation/AIAAIC_50Case_TestReport.md (April 2026):
+    Total: 50 queries (16 labeled, 34 unlabeled)
+    Accuracy (labeled): 15/16 = 93.8%
+    Overall F1: 0.97
+    False Positives: 0  |  False Negatives: 1
+    Avg Latency: 3.2ms
+    Decision distribution: BLOCK 66%, WARN 18%, ALLOW 14%, EXPERT_REVIEW 2%
+
+  evaluation/simulation_report.md (April 2026 — 16 labeled queries):
+    Accuracy: 16/16 = 100.0%
+    All 8 domains: Precision=1.0, Recall=1.0, F1=1.00, FPR=0.0%
+    Domains: audit_gap, criminal_justice_bias, financial_fraud, harassment,
+             hate_speech, healthcare_bias, privacy_violation, representation_bias
+
+  PhD defense value:
+    "AIAAIC 50-case evaluation (April 2026): 93.8% accuracy on labeled real-world
+     AI incidents, F1=0.97, zero false positives. Simulation baseline on 16 labeled
+     queries: 100% accuracy across 8 harm domains. These are external real-world
+     incidents — not hand-crafted test cases."
+
+  Year 2 target: Expand AIAAIC evaluation to 500+ cases with BO-calibrated weights.
+
+──────────────────────────────────────────────────────────────────────────────
+### Summary of All Changes Applied to This Document (May 2026 Reconciliation)
+──────────────────────────────────────────────────────────────────────────────
+
+  ✅ Test count updated: 212/212 → 227/227 (all references)
+  ✅ Test progression updated: added 212 → 227 (+15) line
+  ✅ Gap 2 Priority Order: 🔴 Priority 1 (Fix before submission) → ✅ DONE
+     with test names recorded (test_representation_bias_religion/caste_detected)
+  ✅ New: EXPERT_DAGS expanded to 21 domains — 4 new domains documented
+  ✅ New: output_verifier.py standalone extraction documented (S14 design)
+  ✅ New: AIAAIC 50-case + simulation evaluation results recorded
 

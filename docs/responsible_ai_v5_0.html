@@ -253,7 +253,7 @@ td:first-child{text-align:left;font-weight:600;font-size:.6rem;}
     <span class="vbadge" style="background:rgba(255,229,102,.1);color:var(--yellow);border:1px solid rgba(255,229,102,.25)">+ Sparse Causal Activation Matrix</span>
     <span class="vbadge" style="background:rgba(56,182,255,.1);color:var(--blue);border:1px solid rgba(56,182,255,.25)">+ Uncertainty Scorer S04b</span>
     <span class="vbadge" style="background:rgba(192,132,252,.1);color:var(--purple);border:1px solid rgba(192,132,252,.25)">+ Pearl Full Theory v2</span>
-    <span class="vbadge" style="background:rgba(255,69,96,.1);color:var(--red);border:1px solid rgba(255,69,96,.25)">pipeline_v15+step09b · 212/212 tests</span>
+    <span class="vbadge" style="background:rgba(255,69,96,.1);color:var(--red);border:1px solid rgba(255,69,96,.25)">pipeline_v15+step09b · 227/227 tests</span>
     <span class="vbadge" style="background:rgba(56,182,255,.1);color:var(--blue);border:1px solid rgba(56,182,255,.25)">+ Ablation Study</span>
     <span class="vbadge" style="background:rgba(163,230,53,.1);color:var(--social);border:1px solid rgba(163,230,53,.25)">+ Legal Claims Corrected</span>
     <span class="vbadge" style="background:rgba(0,255,157,.1);color:var(--green);border:1px solid rgba(0,255,157,.25)">Groq 60-case 100%</span>
@@ -472,7 +472,7 @@ td:first-child{text-align:left;font-weight:600;font-size:.6rem;}
         ✅ NDE + NIE (TE = NDE + NIE)<br>
         ✅ PNS / PN / PS — Tian-Pearl Bounds<br>
         ✅ do-calculus 3-Rule verification<br>
-        ✅ 17 domain-specific DAGs<br>
+        ✅ 21 domain-specific DAGs<br>
         ✅ Legal Admissibility Score (0–1)
       </div>
     </div>
@@ -1179,7 +1179,7 @@ function showDAG(key) {
     🔬 ABLATION STUDY — Study 1: Without SCM  |  Study 2: Without Matrix
   </div>
   <div style="font-size:.62rem;color:var(--muted);margin-bottom:1.2rem;">
-    Two independent ablation studies — live Python execution (pipeline_v15.py). Tests: 212/212 passing (100%). 26 test classes including TestHumanDecisionVerifier (17 tests — Step 09b Pearl L3 Human Oversight) and TestV15dDeploymentGaps (16 tests from live chatbot deployment).
+    Two independent ablation studies — live Python execution (pipeline_v15.py). Tests: 227/227 passing (100%). 26 test classes including TestHumanDecisionVerifier (17 tests — Step 09b Pearl L3 Human Oversight) and TestV15dDeploymentGaps (16 tests from live chatbot deployment).
     Study 1: Remove SCM Engine. Study 2: Remove Sparse Matrix. Together proves: neither layer is decorative.
   </div>
 
@@ -2243,7 +2243,7 @@ function calcRisk() {
     <h3>✅ Year 1 — Foundation (COMPLETE)</h3>
     <div style="font-size:.6rem;color:var(--green);font-family:'JetBrains Mono',monospace;margin-bottom:.5rem;">STATUS: DONE — Last updated May 2026 (v15+step09b)</div>
     <ul>
-      <li>14-Stage Pipeline (pipeline_v15+step09b, S00–S13 + Step 09b) — <span style="color:var(--green)">212/212 tests ✅</span></li>
+      <li>14-Stage Pipeline (pipeline_v15+step09b, S00–S13 + Step 09b) — <span style="color:var(--green)">227/227 tests ✅</span></li>
       <li>SCM Engine v2 — Full Pearl Theory (L1+L2+L3) ✅</li>
       <li>Adversarial Engine v5 — 4 attack types + skimming + suicide variants ✅</li>
       <li>Sparse Causal Activation Matrix 23×5 Pearl L1→L3 ✅</li>
@@ -2276,7 +2276,7 @@ function calcRisk() {
       <li style="color:var(--green)"><b>output_verifier.py</b> — self_verify() extracted as model-agnostic module; Year 2: S14 universal pipeline integration ✅</li>
       <li style="color:var(--purple)"><b>Step 09b: Causal Human Oversight Verifier (v15+step09b)</b> — Pearl L3 counterfactual + Risk Gap + Constitutional Ethics (5 principles) → ACCEPT / RE_ESCALATE ✅</li>
       <li style="color:var(--purple)">ethics_code.py + human_decision_verifier.py + verify_human_decision() pipeline method (v15+step09b) ✅</li>
-      <li style="color:var(--purple)">TestHumanDecisionVerifier — 17 new tests · 195 → 212/212 (100%) (v15+step09b) ✅</li>
+      <li style="color:var(--purple)">TestHumanDecisionVerifier — 17 new tests · 195 → 212/212 (100%) (v15+step09b) → 227/227 (May 2026, Gap 2 + 4 new domains) ✅</li>
     </ul>
 
     <div style="background:rgba(0,255,157,.05);border:1px solid rgba(0,255,157,.2);border-radius:8px;padding:.7rem;margin-top:.6rem;">
@@ -2289,7 +2289,7 @@ function calcRisk() {
         <span style="color:var(--red)">"s4r1n synthesis" → BLOCK (5ms)</span> ·
         <span style="color:var(--red)">"AI sentence Black defendant" → BLOCK (5ms)</span><br>
         <b style="color:var(--yellow)">Gap found:</b> AI sentencing + protected class scored 28.6% (below 30% WARN) → was ALLOW → fixed in v15d<br>
-        <b style="color:var(--text)">PhD value:</b> "Synthetic tests: 177/179 → Live deployment found gap #178 → Fixed same session → AIAAIC validation → 212/212 → Causal Human Oversight Verifier → 212/212 (100%) final."
+        <b style="color:var(--text)">PhD value:</b> "Synthetic tests: 177/179 → Live deployment found gap #178 → Fixed same session → AIAAIC validation → 212/212 → Causal Human Oversight Verifier → 212/212 → Gap 2 fix (religion/caste) + 4 new domains → 227/227 (100%) current."
       </div>
     </div>
 
@@ -2393,7 +2393,7 @@ function calcRisk() {
       <ul style="font-size:.62rem;color:var(--muted);line-height:1.8;margin:0;padding-left:1rem;">
         <li>pip install dowhy → auto-compute TCE/NIE/NDE from AIAAIC data</li>
         <li>Remove manual CausalFindings dependency</li>
-        <li>DAG sensitivity analysis + domain expert validation (17 DAGs)</li>
+        <li>DAG sensitivity analysis + domain expert validation (21 DAGs)</li>
         <li>GPT examiner "DAG validity" revision → ✅ SOLVED</li>
       </ul>
     </div>
@@ -2534,7 +2534,7 @@ function calcRisk() {
         </div>
         <div style="background:rgba(192,132,252,.04);border:1px solid rgba(192,132,252,.15);border-radius:6px;padding:.6rem;">
           <div style="font-family:'JetBrains Mono',monospace;font-size:.54rem;color:var(--purple);margin-bottom:.3rem;">Our Framework</div>
-          <div style="font-size:.58rem;color:var(--muted);line-height:1.6;"><b style="color:var(--text)">Full Pearl L1+L2+L3</b> (PNS/PN/PS)<br>Real-time middleware · US+EU<br>212/212 tests working</div>
+          <div style="font-size:.58rem;color:var(--muted);line-height:1.6;"><b style="color:var(--text)">Full Pearl L1+L2+L3</b> (PNS/PN/PS)<br>Real-time middleware · US+EU<br>227/227 tests working</div>
         </div>
       </div>
 
@@ -2542,7 +2542,7 @@ function calcRisk() {
         <div style="font-family:'JetBrains Mono',monospace;font-size:.56rem;color:var(--purple);margin-bottom:.3rem;">⚠️ CRITICAL WARNING from Binkytė (2023) PMLR paper</div>
         <div style="font-size:.6rem;color:var(--text);line-height:1.7;">
           "1 DAG edge flip → fairness verdict changes in ~50% of cases"<br>
-          <b style="color:var(--yellow)">Our current risk:</b> 17 domain DAGs are expert-defined. Examiner will ask: <i>"How do you validate your DAGs?"</i><br>
+          <b style="color:var(--yellow)">Our current risk:</b> 21 domain DAGs are expert-defined. Examiner will ask: <i>"How do you validate your DAGs?"</i><br>
           <b style="color:var(--green)">Year 2 fix:</b> DAG sensitivity analysis via DoWhy (Phase 4 extension)
         </div>
       </div>
@@ -5047,7 +5047,7 @@ hfCalc();
     <!-- Pipeline -->
     <div style="margin:.4rem auto;max-width:340px;border:1px solid var(--scm);border-radius:8px;padding:.55rem 1rem;background:rgba(139,92,246,.03);">
       <div style="font-size:.66rem;color:var(--scm);font-weight:700;">Pipeline v15k</div>
-      <div style="font-size:.52rem;color:var(--muted);margin-top:.1rem;">S01→S12 · SCM + Adversarial + VAC · 212/212 tests</div>
+      <div style="font-size:.52rem;color:var(--muted);margin-top:.1rem;">S01→S12 · SCM + Adversarial + VAC · 227/227 tests</div>
       <div style="margin-top:.4rem;display:flex;gap:.35rem;">
         <span style="font-size:.5rem;background:rgba(139,92,246,.08);color:var(--scm);border-radius:4px;padding:.1rem .3rem;">Pearl L1–L3</span>
         <span style="font-size:.5rem;background:rgba(139,92,246,.08);color:var(--scm);border-radius:4px;padding:.1rem .3rem;">23×5 Matrix</span>
@@ -5570,7 +5570,7 @@ hfCalc();
 ├── <span style="color:var(--cyan);">scm_engine_v2.py</span>             <span style="color:var(--muted);"># Full Pearl Theory engine · L1+L2+L3 · NDE/NIE · PNS/PN/PS bounds</span>
 ├── <span style="color:var(--cyan);">adversarial_engine_v5.py</span>     <span style="color:var(--muted);"># 4 attack types · prompt injection · authority spoof · role-play · obfuscation</span>
 ├── <span style="color:var(--cyan);">context_engine.py</span>            <span style="color:var(--muted);"># Multi-turn attack detection · SQLite session memory · 4 escalation signals</span>
-├── <span style="color:var(--cyan);">test_v15.py</span>                  <span style="color:var(--green);">212/212 tests passing (100%) ✅</span>
+├── <span style="color:var(--cyan);">test_v15.py</span>                  <span style="color:var(--green);">227/227 tests passing (100%) ✅</span>
 ├── requirements.txt             <span style="color:var(--muted);"># langdetect · deep-translator · scikit-learn · numpy · groq</span>
 ├── README.md                    <span style="color:var(--muted);"># Full framework documentation + NIST/ISO/IEEE standards comparison</span>
 ├── LICENSE
@@ -5610,7 +5610,7 @@ hfCalc();
   <!-- Key Stats Row -->
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-top:1rem;">
     <div style="border:1px solid rgba(0,255,157,.25);border-radius:8px;padding:.8rem;text-align:center;background:rgba(0,255,157,.04);">
-      <div style="font-size:1.1rem;font-weight:700;color:var(--green);">212/212</div>
+      <div style="font-size:1.1rem;font-weight:700;color:var(--green);">227/227</div>
       <div style="font-size:.52rem;color:var(--muted);margin-top:.2rem;">Unit Tests Passing</div>
     </div>
     <div style="border:1px solid rgba(56,182,255,.25);border-radius:8px;padding:.8rem;text-align:center;background:rgba(56,182,255,.04);">
@@ -5636,7 +5636,7 @@ pip install langdetect deep-translator scikit-learn numpy groq
 <span style="color:var(--green);"># Run full pipeline demo (14 stages active)</span>
 python pipeline_v15.py
 
-<span style="color:var(--green);"># Run all 212 unit tests</span>
+<span style="color:var(--green);"># Run all 227 unit tests</span>
 python -m unittest test_v15
 
 <span style="color:var(--green);"># Research-grade evaluation metrics</span>
