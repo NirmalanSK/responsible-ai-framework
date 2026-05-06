@@ -306,7 +306,7 @@ function getSevLabel(v){return["","LOW","MEDIUM","HIGH","CRITICAL"][v]||"LOW"}
 function getDetLabel(v){return{2:"HARD",3:"MODERATE",4:"EASY"}[v]||"HARD"}
 function getEdgeLabel(v){return["","WEAK","MODERATE","STRONG","CRITICAL"][v]||"WEAK"}
 
-function computeSCM(tce, med, flip, intv, rct){
+function computeSCM(tce, med, flip, intv, rct, domain="bias_discrimination"){
   // Rule 01
   let sev = tce>=10?4: tce>=5?3: tce>=2?2:1;
   // Rule 02
@@ -318,12 +318,44 @@ function computeSCM(tce, med, flip, intv, rct){
   if(intv>=80){sevAdj=Math.max(1,sev-1);rule04msg=`do(fix) ${intv}% → severity ${getSevLabel(sev)}→${getSevLabel(sevAdj)}`}
   else if(intv<=20&&sev<4){sevAdj=Math.min(4,sev+1);rule04msg=`do(fix) only ${intv}% → severity escalated ${getSevLabel(sev)}→${getSevLabel(sevAdj)}`}
   else{rule04msg=`do(fix) ${intv}% → no severity change`}
-  // Rule 05
-  let identifiable = !(tce<2&&flip<5&&!rct);
+  // Rule 05 — Graph-based identifiability (v16a fix)
+  // Mirrors scm_engine_v2.py rule_05_identifiability(dag=dag)
+  // Priority: RCT > Backdoor (latent=[]) > Frontdoor (mediator+latent) > NOT_ID
+  // DAG_ID_MAP: domain → {hasLatent, hasMediator} from build_domain_dags()
+  const DAG_ID_MAP = {
+    "decision_transparency":    {hasLatent:false, hasMediator:true},   // backdoor
+    "csam":                     {hasLatent:true,  hasMediator:true},   // frontdoor
+    "weapon_synthesis":         {hasLatent:true,  hasMediator:true},   // frontdoor
+    "child_safety":             {hasLatent:true,  hasMediator:true},   // frontdoor
+    "violence":                 {hasLatent:true,  hasMediator:true},   // frontdoor
+    "medical_harm":             {hasLatent:true,  hasMediator:true},   // frontdoor
+    "election_interference":    {hasLatent:true,  hasMediator:true},   // frontdoor
+    "autonomous_ai_harm":       {hasLatent:true,  hasMediator:true},   // frontdoor
+    "hate_speech":              {hasLatent:true,  hasMediator:true},   // frontdoor
+    "bias_discrimination":      {hasLatent:true,  hasMediator:true},   // frontdoor
+    "cybercrime":               {hasLatent:true,  hasMediator:true},   // frontdoor
+    "deepfake":                 {hasLatent:true,  hasMediator:true},   // frontdoor
+    "financial_fraud":          {hasLatent:true,  hasMediator:true},   // frontdoor
+    "privacy_violation":        {hasLatent:true,  hasMediator:true},   // frontdoor
+    "disinformation":           {hasLatent:true,  hasMediator:true},   // frontdoor
+    "regulatory_noncompliance": {hasLatent:true,  hasMediator:true},   // frontdoor
+  };
+  let _dag = DAG_ID_MAP[domain] || {hasLatent:true, hasMediator:true};
+  let identCriterion, identCriterionNote;
+  if(rct){
+    identCriterion="RCT"; identCriterionNote="do(X)=see(X) — exact, no adjustment";
+  } else if(!_dag.hasLatent){
+    identCriterion="BACKDOOR"; identCriterionNote="latent=∅ → Σ_z P(Y|X,Z)P(Z) applicable";
+  } else if(_dag.hasMediator){
+    identCriterion="FRONTDOOR"; identCriterionNote="M blocks X→Y, valid despite latent U";
+  } else {
+    identCriterion="NOT_ID"; identCriterionNote="latent present, no valid adjustment set";
+  }
+  let identifiable = identCriterion !== "NOT_ID";
   // Risk score formula
   let raw = 9 + sevAdj*3 + det*2 + edge*0.75;
   let base_risk = Math.min(100, raw/432*100*4.5);
-  return {sev,edge,det,sevAdj,rule04msg,identifiable,raw,base_risk,sevLabel:getSevLabel(sevAdj),edgeLabel:getEdgeLabel(edge),detLabel:getDetLabel(det)};
+  return {sev,edge,det,sevAdj,rule04msg,identifiable,identCriterion,identCriterionNote,raw,base_risk,sevLabel:getSevLabel(sevAdj),edgeLabel:getEdgeLabel(edge),detLabel:getDetLabel(det)};
 }
 
 function computeMatrix(domain, tce, scm){
@@ -377,7 +409,7 @@ function computeAll(){
   let domain= document.getElementById('sel-domain').value;
   let jur   = document.getElementById('sel-jur').value;
 
-  let scm = computeSCM(tce,med,flip,intv,rct);
+  let scm = computeSCM(tce,med,flip,intv,rct,domain);
   let mat = computeMatrix(domain, tce, scm);
   let dm  = getDomainMult(domain);
   
@@ -616,11 +648,16 @@ function renderFormulas(data){
     </div>
   </div>
   <div class="scm-rule">
-    <div class="scm-rule-title">Rule 05 — Identifiability Check</div>
+    <div class="scm-rule-title">Rule 05 — Identifiability Check (v16a: graph-based)</div>
     <div class="scm-rule-body">
-      tce=${tce} | flip=${flip} | rct=${rct} → 
-      ${scm.identifiable?'<span class="rule-result L">IDENTIFIABLE</span>':'<span class="rule-result C">NOT IDENTIFIABLE (epistemic risk floor=3)</span>'}<br>
-      Condition: <span style="color:#79c0ff">tce≥2 OR flip≥5 OR rct=true</span>
+      domain=${domain} | rct=${rct} →
+      ${scm.identCriterion==="RCT"?'<span class="rule-result L">RCT — EXACT</span>':
+        scm.identCriterion==="BACKDOOR"?'<span class="rule-result L">BACKDOOR — IDENTIFIABLE</span>':
+        scm.identCriterion==="FRONTDOOR"?'<span class="rule-result M">FRONTDOOR — IDENTIFIABLE</span>':
+        '<span class="rule-result C">NOT IDENTIFIABLE — no valid adjustment set</span>'}<br>
+      Criterion: <span style="color:#79c0ff">${scm.identCriterionNote}</span><br>
+      Method: <span style="color:#8b949e">Pearl (2000) graph topology — has_backdoor_set() / has_frontdoor_set() on HarmDAG</span><br>
+      <span style="color:#8b949e;font-size:10px">v16a fix: was tce≥2 OR flip≥5 OR rct (numeric). Now: DAG latent/mediator structure (graph-based).</span>
     </div>
   </div>
   <div class="scm-rule">

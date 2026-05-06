@@ -350,7 +350,7 @@ body {
 <div class="header">
   <div class="header-left">
     <h1>RAI Framework <span>v5.1</span> — Full System Mindmap</h1>
-    <div class="header-sub">pipeline_v15+step09b · S00–S13 + Step 09b · 14 stages · 212/212 tests (100%) · May 2026</div>
+    <div class="header-sub">pipeline_v16a · S00–S13 + Step 09b · 14 stages · 227/227 tests (100%) · May 2026</div>
   </div>
   <div class="header-badges">
     <span class="hbadge hb-green">✅ Year 1 Complete</span>
@@ -373,7 +373,7 @@ body {
 
   <!-- STATS -->
   <div class="stats-row">
-    <div class="stat-box"><div class="stat-val">212/212</div><div class="stat-lbl">Tests passing (100%)</div></div>
+    <div class="stat-box"><div class="stat-val">227/227</div><div class="stat-lbl">Tests passing (100%)</div></div>
     <div class="stat-box"><div class="stat-val">14</div><div class="stat-lbl">Pipeline stages (S00–S13)</div></div>
     <div class="stat-box"><div class="stat-val">23×5</div><div class="stat-lbl">Pearl L1→L3 causal matrix</div></div>
     <div class="stat-box"><div class="stat-val" style="color:var(--blue)">9+</div><div class="stat-lbl">Year 2 phases planned</div></div>
@@ -382,7 +382,7 @@ body {
 
   <!-- PIPELINE FLOW -->
   <div class="pipe-box">
-    <div class="pipe-title">Current pipeline flow — 14 stages + Step 09b (S00–S13) · v15+step09b</div>
+    <div class="pipe-title">Current pipeline flow — 14 stages + Step 09b (S00–S13) · v16a</div>
     <div class="pipe-steps">
       <span class="step s-g">S00 Privacy Gate</span><span class="sep">→</span>
       <span class="step s-g">S01 Sanitise</span><span class="sep">→</span>
@@ -410,7 +410,7 @@ body {
   <!-- ══ YEAR 1 NOW ══ -->
   <div class="sec-label">
     <div class="sec-line"></div>
-    <div class="sec-text st-green">Year 1 — working now (v15+step09b · May 2026)</div>
+    <div class="sec-text st-green">Year 1 — working now (v16a · May 2026)</div>
     <div class="sec-line"></div>
   </div>
 
@@ -420,12 +420,17 @@ body {
         <div class="card" onclick="tog('scm',this)">
           <div class="badge">scm_engine_v2.py · S05</div>
           <div class="card-title">SCM Engine — Full Pearl Theory</div>
-          <div class="card-sub">L1 Association · L2 Intervention · L3 Counterfactual · PNS/PN/PS bounds · 17 domain DAGs</div>
+          <div class="card-sub">L1 Association · L2 Intervention · L3 Counterfactual · PNS/PN/PS bounds · 19 domain DAGs (5 detailed + 14 domain-specific)</div>
           <span class="card-arrow">▶</span>
         </div>
         <div id="scm" class="detail">
-          <strong>What it does now:</strong> Every query → 17 domain DAGs → compute TCE/NIE/NDE/PNS/PN/PS → risk score.<br>
-          <strong>How:</strong> Backdoor/frontdoor adjustment, do-calculus, structural equations. Amazon Hiring case hardcoded as reference DAG.<br>
+          <strong>What it does now:</strong> Every query → 19 domain DAGs → compute TCE/NIE/NDE/PNS/PN/PS → risk score.<br>
+          <strong>How:</strong> Backdoor/frontdoor adjustment, do-calculus, structural equations. 5 hand-crafted DAGs (representation_bias, criminal_justice, misuse_safety, transparency, context_poisoning) + 14 domain-specific DAGs with literature-backed confounders (v16a).<br>
+          <strong>v16a fixes:</strong>
+          <span class="dtag dt-g">Identifiability</span> graph-based (DAG topology, not numeric threshold)
+          <span class="dtag dt-g">Backdoor</span> Σ_z with explicit uniform P(Z) prior documented
+          <span class="dtag dt-g">DAGs</span> 14 generic → domain-specific confounders
+          <span class="dtag dt-g">DoWhy</span> pipeline hook wired (Year 2: activate with data)<br>
           <strong>Pearl ladder:</strong>
           <span class="dtag dt-g">L1 — See</span> correlation
           <span class="dtag dt-g">L2 — Do</span> intervention (do-calculus)
@@ -929,10 +934,11 @@ body {
         </div>
         <div id="p3" class="detail">
           <strong>Problem:</strong> 17 domain DAGs manually drawn. GPT examiner flagged "DAG validity" — no empirical basis for causal structure claims.<br>
-          <strong>Phase 4 solution:</strong> DoWhy → CausalModel from AIAAIC incident data → TCE/NIE/NDE auto-computed. <code>CausalFindings</code> no longer manually entered.<br>
+          <strong>v16a partial fix (May 2026):</strong> 14 generic DAGs replaced with domain-specific confounders and latent variables (literature-backed: Joiner 2005, Allcott &amp; Gentzkow 2017, etc.). Identifiability now graph-based via DAG topology. DoWhy pipeline hook wired — activation requires empirical data.<br>
+          <strong>Phase 4 solution (Year 2):</strong> DoWhy → CausalModel from AIAAIC incident data → TCE/NIE/NDE auto-computed. <code>CausalFindings</code> no longer manually entered.<br>
           <strong>Phase 9 solution:</strong> Binkytė-inspired S05b DAG sensitivity → edge removal test → if risk score changes &gt;15% → DAG is fragile → flagged before BO.<br>
           <strong>S05c:</strong> Bias source attribution at edge level — "zip code → race proxy edge contributes 67% of discriminatory risk in hiring DAG."<br>
-          <strong>Defense answer:</strong> "DAGs validated by DoWhy empirical computation AND Binkytė-style sensitivity analysis. Not hand-drawn assumptions — empirically tested causal structures."
+          <strong>Defense answer:</strong> "Domain-specific DAGs with literature-backed confounders, graph-based identifiability checks, and DoWhy validation pipeline wired. Full empirical calibration is Year 2 milestone."
         </div>
       </div>
       <div>

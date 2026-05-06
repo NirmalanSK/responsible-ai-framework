@@ -1614,9 +1614,9 @@
       </tr>
       <tr>
         <td><strong>Domain Mapping Weak</strong></td>
-        <td>Keyword-based dag_selector misses nuances</td>
-        <td>XLM-RoBERTa intent classifier</td>
-        <td><span class="status-badge plan">📋 Year 2</span></td>
+        <td>Keyword-based dag_selector; 14 generic DAG templates with shared confounders</td>
+        <td>v16a: 14 domain-specific DAGs + graph-based identifiability. Year 2: XLM-RoBERTa classifier</td>
+        <td><span class="status-badge done">🔧 Partial v16a</span></td>
       </tr>
       <tr>
         <td><strong>No Async</strong></td>
@@ -1672,7 +1672,7 @@
   </div>
 
   <!-- LIVE CASE TABLE -->
-  <h3 style="font-size:1.1rem;margin:2rem 0 1rem">Live Pipeline Execution (v15k, April 2026)</h3>
+  <h3 style="font-size:1.1rem;margin:2rem 0 1rem">Live Pipeline Execution (v16a, May 2026)</h3>
   <div style="overflow-x:auto">
     <table class="gap-table">
       <thead>
@@ -1808,10 +1808,10 @@
       <div class="phase-content">
         <h4>Phase 5 — Advanced ML 📋 PLANNED</h4>
         <ul>
-          <li>XLM-RoBERTa intent classifier (replace dag_selector)</li>
-          <li>DoWhy-calibrated causal values (all 115 cells)</li>
+          <li>XLM-RoBERTa intent classifier (replace dag_selector keyword heuristic)</li>
+          <li>DoWhy empirical causal estimation — pipeline hook wired (v16a); activation requires AIAAIC incident DataFrame</li>
+          <li>Bayesian Optimization over 115 matrix weights (Year 3)</li>
           <li>Continuous learning from audit logs</li>
-          <li>Automated threshold tuning</li>
           <li>Federated privacy-preserving analytics</li>
         </ul>
       </div>
