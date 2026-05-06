@@ -1,6 +1,6 @@
 {
-  "generated": "2026-05-05T09:17:40",
-  "framework_version": "5.2",
+  "generated": "2026-05-06T08:43:43",
+  "framework_version": "5.0",
   "total_domains": 21,
   "results": [
     {
@@ -13,7 +13,7 @@
       "estimated_tce": 0.72,
       "overall_verdict": "VALIDATED",
       "confidence_score": 0.857,
-      "latency_ms": 1805.3,
+      "latency_ms": 10.5,
       "errors": [],
       "refutation": {
         "placebo_p_value": 0.5,
@@ -26,25 +26,25 @@
       "pc_discovery": {
         "shd": 4,
         "shd_grade": "MODERATE",
-        "missing_in_expert": [],
-        "extra_in_expert": [
+        "missing_in_expert": [
           [
             "material_access",
-            "physical_harm"
-          ],
-          [
-            "query_intent",
-            "material_access"
-          ],
-          [
-            "query_intent",
             "synthesis_knowledge"
           ],
           [
-            "synthesis_knowledge",
+            "physical_harm",
+            "query_intent"
+          ],
+          [
+            "query_intent",
             "physical_harm"
+          ],
+          [
+            "synthesis_knowledge",
+            "material_access"
           ]
-        ]
+        ],
+        "extra_in_expert": []
       },
       "rosenbaum": {
         "gamma_bound": 3.0,
@@ -64,8 +64,8 @@
       "literature": "Felson & Tedeschi (1993) \u2014 Social Interactionist theory of violence",
       "estimated_tce": 0.65,
       "overall_verdict": "VALIDATED",
-      "confidence_score": 0.943,
-      "latency_ms": 13.5,
+      "confidence_score": 0.857,
+      "latency_ms": 2.1,
       "errors": [],
       "refutation": {
         "placebo_p_value": 0.5,
@@ -76,19 +76,27 @@
         "confounder_passed": true
       },
       "pc_discovery": {
-        "shd": 2,
-        "shd_grade": "GOOD",
-        "missing_in_expert": [],
-        "extra_in_expert": [
+        "shd": 4,
+        "shd_grade": "MODERATE",
+        "missing_in_expert": [
           [
-            "threat_signal",
+            "opportunity",
+            "target_identification"
+          ],
+          [
+            "physical_harm",
+            "threat_signal"
+          ],
+          [
+            "target_identification",
             "opportunity"
           ],
           [
             "threat_signal",
-            "target_identification"
+            "physical_harm"
           ]
-        ]
+        ],
+        "extra_in_expert": []
       },
       "rosenbaum": {
         "gamma_bound": 3.0,
@@ -109,7 +117,7 @@
       "estimated_tce": 0.61,
       "overall_verdict": "VALIDATED",
       "confidence_score": 0.857,
-      "latency_ms": 12.2,
+      "latency_ms": 1.8,
       "errors": [],
       "refutation": {
         "placebo_p_value": 0.5,
@@ -124,24 +132,23 @@
         "shd_grade": "MODERATE",
         "missing_in_expert": [
           [
-            "system_compromise",
-            "exploit_knowledge"
-          ]
-        ],
-        "extra_in_expert": [
-          [
             "access_request",
-            "vulnerability"
+            "system_compromise"
           ],
           [
             "exploit_knowledge",
-            "system_compromise"
+            "vulnerability"
+          ],
+          [
+            "system_compromise",
+            "access_request"
           ],
           [
             "vulnerability",
-            "system_compromise"
+            "exploit_knowledge"
           ]
-        ]
+        ],
+        "extra_in_expert": []
       },
       "rosenbaum": {
         "gamma_bound": 2.5,
@@ -162,7 +169,7 @@
       "estimated_tce": 0.55,
       "overall_verdict": "VALIDATED",
       "confidence_score": 0.857,
-      "latency_ms": 12.8,
+      "latency_ms": 1.8,
       "errors": [],
       "refutation": {
         "placebo_p_value": 0.5,
@@ -177,24 +184,23 @@
         "shd_grade": "MODERATE",
         "missing_in_expert": [
           [
+            "biased_weights",
+            "malicious_input"
+          ],
+          [
             "downstream_harm",
+            "model_training"
+          ],
+          [
+            "malicious_input",
             "biased_weights"
+          ],
+          [
+            "model_training",
+            "downstream_harm"
           ]
         ],
-        "extra_in_expert": [
-          [
-            "biased_weights",
-            "downstream_harm"
-          ],
-          [
-            "malicious_input",
-            "downstream_harm"
-          ],
-          [
-            "malicious_input",
-            "model_training"
-          ]
-        ]
+        "extra_in_expert": []
       },
       "rosenbaum": {
         "gamma_bound": 2.0,
@@ -215,7 +221,7 @@
       "estimated_tce": 0.48,
       "overall_verdict": "VALIDATED",
       "confidence_score": 0.857,
-      "latency_ms": 12.5,
+      "latency_ms": 1.8,
       "errors": [],
       "refutation": {
         "placebo_p_value": 0.5,
@@ -228,25 +234,25 @@
       "pc_discovery": {
         "shd": 4,
         "shd_grade": "MODERATE",
-        "missing_in_expert": [],
-        "extra_in_expert": [
+        "missing_in_expert": [
           [
             "algorithm_input",
-            "score"
+            "hire_decision"
           ],
           [
-            "protected_attribute",
+            "hire_decision",
             "algorithm_input"
           ],
           [
-            "protected_attribute",
-            "score"
+            "hire_decision",
+            "protected_attribute"
           ],
           [
-            "score",
+            "protected_attribute",
             "hire_decision"
           ]
-        ]
+        ],
+        "extra_in_expert": []
       },
       "rosenbaum": {
         "gamma_bound": 2.5,
@@ -267,7 +273,7 @@
       "estimated_tce": 0.52,
       "overall_verdict": "VALIDATED",
       "confidence_score": 0.857,
-      "latency_ms": 11.9,
+      "latency_ms": 1.7,
       "errors": [],
       "refutation": {
         "placebo_p_value": 0.5,
@@ -280,25 +286,25 @@
       "pc_discovery": {
         "shd": 4,
         "shd_grade": "MODERATE",
-        "missing_in_expert": [],
-        "extra_in_expert": [
+        "missing_in_expert": [
           [
-            "race_ses",
+            "health_outcome",
+            "race_ses"
+          ],
+          [
+            "health_outcome",
             "risk_score_algorithm"
           ],
           [
             "race_ses",
-            "treatment_allocation"
+            "health_outcome"
           ],
           [
             "risk_score_algorithm",
-            "treatment_allocation"
-          ],
-          [
-            "treatment_allocation",
             "health_outcome"
           ]
-        ]
+        ],
+        "extra_in_expert": []
       },
       "rosenbaum": {
         "gamma_bound": 3.0,
@@ -319,7 +325,7 @@
       "estimated_tce": 0.42,
       "overall_verdict": "VALIDATED",
       "confidence_score": 0.857,
-      "latency_ms": 12.1,
+      "latency_ms": 1.8,
       "errors": [],
       "refutation": {
         "placebo_p_value": 0.5,
@@ -332,25 +338,25 @@
       "pc_discovery": {
         "shd": 4,
         "shd_grade": "MODERATE",
-        "missing_in_expert": [],
-        "extra_in_expert": [
+        "missing_in_expert": [
           [
-            "compas_score",
+            "prior_records_proxy",
             "sentencing_decision"
           ],
           [
-            "prior_records_proxy",
-            "compas_score"
+            "race",
+            "sentencing_decision"
           ],
           [
-            "race",
-            "compas_score"
-          ],
-          [
-            "race",
+            "sentencing_decision",
             "prior_records_proxy"
+          ],
+          [
+            "sentencing_decision",
+            "race"
           ]
-        ]
+        ],
+        "extra_in_expert": []
       },
       "rosenbaum": {
         "gamma_bound": 3.0,
@@ -371,7 +377,7 @@
       "estimated_tce": 0.68,
       "overall_verdict": "VALIDATED",
       "confidence_score": 0.857,
-      "latency_ms": 12.4,
+      "latency_ms": 1.7,
       "errors": [],
       "refutation": {
         "placebo_p_value": 0.5,
@@ -384,25 +390,25 @@
       "pc_discovery": {
         "shd": 4,
         "shd_grade": "MODERATE",
-        "missing_in_expert": [],
-        "extra_in_expert": [
+        "missing_in_expert": [
           [
             "credential_access",
-            "financial_action"
-          ],
-          [
-            "financial_action",
             "monetary_loss"
           ],
           [
-            "trust_signal",
+            "monetary_loss",
             "credential_access"
           ],
           [
+            "monetary_loss",
+            "trust_signal"
+          ],
+          [
             "trust_signal",
-            "financial_action"
+            "monetary_loss"
           ]
-        ]
+        ],
+        "extra_in_expert": []
       },
       "rosenbaum": {
         "gamma_bound": 3.0,
@@ -423,7 +429,7 @@
       "estimated_tce": 0.78,
       "overall_verdict": "VALIDATED",
       "confidence_score": 0.857,
-      "latency_ms": 12.5,
+      "latency_ms": 1.8,
       "errors": [],
       "refutation": {
         "placebo_p_value": 0.5,
@@ -436,25 +442,25 @@
       "pc_discovery": {
         "shd": 4,
         "shd_grade": "MODERATE",
-        "missing_in_expert": [],
-        "extra_in_expert": [
+        "missing_in_expert": [
           [
-            "access_gained",
-            "exploitation"
+            "exploitation",
+            "grooming_signal"
           ],
           [
-            "grooming_signal",
-            "access_gained"
-          ],
-          [
-            "grooming_signal",
+            "exploitation",
             "trust_building"
           ],
           [
+            "grooming_signal",
+            "exploitation"
+          ],
+          [
             "trust_building",
-            "access_gained"
+            "exploitation"
           ]
-        ]
+        ],
+        "extra_in_expert": []
       },
       "rosenbaum": {
         "gamma_bound": 3.0,
@@ -475,7 +481,7 @@
       "estimated_tce": 0.44,
       "overall_verdict": "VALIDATED",
       "confidence_score": 0.857,
-      "latency_ms": 12.2,
+      "latency_ms": 2.2,
       "errors": [],
       "refutation": {
         "placebo_p_value": 0.5,
@@ -488,25 +494,25 @@
       "pc_discovery": {
         "shd": 4,
         "shd_grade": "MODERATE",
-        "missing_in_expert": [],
-        "extra_in_expert": [
+        "missing_in_expert": [
           [
-            "belief_update",
-            "behavioral_change"
+            "behavioral_change",
+            "platform_amplification"
+          ],
+          [
+            "behavioral_change",
+            "synthetic_content"
           ],
           [
             "platform_amplification",
-            "belief_update"
+            "behavioral_change"
           ],
           [
             "synthetic_content",
-            "belief_update"
-          ],
-          [
-            "synthetic_content",
-            "platform_amplification"
+            "behavioral_change"
           ]
-        ]
+        ],
+        "extra_in_expert": []
       },
       "rosenbaum": {
         "gamma_bound": 2.0,
@@ -527,7 +533,7 @@
       "estimated_tce": 0.58,
       "overall_verdict": "VALIDATED",
       "confidence_score": 0.857,
-      "latency_ms": 11.3,
+      "latency_ms": 2.1,
       "errors": [],
       "refutation": {
         "placebo_p_value": 0.5,
@@ -542,24 +548,23 @@
         "shd_grade": "MODERATE",
         "missing_in_expert": [
           [
-            "personal_harm",
-            "profile_creation"
-          ]
-        ],
-        "extra_in_expert": [
+            "identity_linkage",
+            "personal_harm"
+          ],
           [
-            "pii_exposure",
+            "personal_harm",
             "identity_linkage"
           ],
           [
             "pii_exposure",
-            "personal_harm"
+            "profile_creation"
           ],
           [
             "profile_creation",
-            "personal_harm"
+            "pii_exposure"
           ]
-        ]
+        ],
+        "extra_in_expert": []
       },
       "rosenbaum": {
         "gamma_bound": 2.5,
@@ -580,7 +585,7 @@
       "estimated_tce": 0.63,
       "overall_verdict": "VALIDATED",
       "confidence_score": 0.857,
-      "latency_ms": 12.9,
+      "latency_ms": 2.0,
       "errors": [],
       "refutation": {
         "placebo_p_value": 0.5,
@@ -595,24 +600,23 @@
         "shd_grade": "MODERATE",
         "missing_in_expert": [
           [
-            "stalking_harm",
-            "target_identification"
-          ]
-        ],
-        "extra_in_expert": [
-          [
             "data_collection",
+            "target_identification"
+          ],
+          [
+            "pattern_analysis",
+            "stalking_harm"
+          ],
+          [
+            "stalking_harm",
             "pattern_analysis"
           ],
           [
-            "data_collection",
-            "stalking_harm"
-          ],
-          [
             "target_identification",
-            "stalking_harm"
+            "data_collection"
           ]
-        ]
+        ],
+        "extra_in_expert": []
       },
       "rosenbaum": {
         "gamma_bound": 3.0,
@@ -633,7 +637,7 @@
       "estimated_tce": 0.57,
       "overall_verdict": "VALIDATED",
       "confidence_score": 0.857,
-      "latency_ms": 12.5,
+      "latency_ms": 1.9,
       "errors": [],
       "refutation": {
         "placebo_p_value": 0.5,
@@ -646,25 +650,25 @@
       "pc_discovery": {
         "shd": 4,
         "shd_grade": "MODERATE",
-        "missing_in_expert": [],
-        "extra_in_expert": [
+        "missing_in_expert": [
           [
             "platform_amplification",
-            "psychological_harm"
+            "target_selection"
           ],
           [
-            "repeated_contact",
-            "platform_amplification"
-          ],
-          [
-            "repeated_contact",
-            "psychological_harm"
+            "psychological_harm",
+            "target_selection"
           ],
           [
             "target_selection",
-            "repeated_contact"
+            "platform_amplification"
+          ],
+          [
+            "target_selection",
+            "psychological_harm"
           ]
-        ]
+        ],
+        "extra_in_expert": []
       },
       "rosenbaum": {
         "gamma_bound": 2.5,
@@ -685,7 +689,7 @@
       "estimated_tce": 0.46,
       "overall_verdict": "VALIDATED",
       "confidence_score": 0.857,
-      "latency_ms": 13.0,
+      "latency_ms": 1.7,
       "errors": [],
       "refutation": {
         "placebo_p_value": 0.5,
@@ -700,24 +704,23 @@
         "shd_grade": "MODERATE",
         "missing_in_expert": [
           [
-            "social_harm",
-            "social_norm_shift"
-          ]
-        ],
-        "extra_in_expert": [
+            "dehumanization_framing",
+            "social_harm"
+          ],
           [
             "group_identity_signal",
+            "social_norm_shift"
+          ],
+          [
+            "social_harm",
             "dehumanization_framing"
           ],
           [
-            "group_identity_signal",
-            "social_harm"
-          ],
-          [
             "social_norm_shift",
-            "social_harm"
+            "group_identity_signal"
           ]
-        ]
+        ],
+        "extra_in_expert": []
       },
       "rosenbaum": {
         "gamma_bound": 2.0,
@@ -738,7 +741,7 @@
       "estimated_tce": 0.59,
       "overall_verdict": "VALIDATED",
       "confidence_score": 0.857,
-      "latency_ms": 11.9,
+      "latency_ms": 1.7,
       "errors": [],
       "refutation": {
         "placebo_p_value": 0.5,
@@ -751,25 +754,25 @@
       "pc_discovery": {
         "shd": 4,
         "shd_grade": "MODERATE",
-        "missing_in_expert": [],
-        "extra_in_expert": [
+        "missing_in_expert": [
           [
-            "delivery_mechanism",
+            "distribution_network",
             "physical_harm"
           ],
           [
-            "distribution_network",
-            "delivery_mechanism"
-          ],
-          [
-            "supply_query",
-            "delivery_mechanism"
-          ],
-          [
-            "supply_query",
+            "physical_harm",
             "distribution_network"
+          ],
+          [
+            "physical_harm",
+            "supply_query"
+          ],
+          [
+            "supply_query",
+            "physical_harm"
           ]
-        ]
+        ],
+        "extra_in_expert": []
       },
       "rosenbaum": {
         "gamma_bound": 2.5,
@@ -790,7 +793,7 @@
       "estimated_tce": 0.66,
       "overall_verdict": "VALIDATED",
       "confidence_score": 0.857,
-      "latency_ms": 11.2,
+      "latency_ms": 1.8,
       "errors": [],
       "refutation": {
         "placebo_p_value": 0.5,
@@ -803,25 +806,25 @@
       "pc_discovery": {
         "shd": 4,
         "shd_grade": "MODERATE",
-        "missing_in_expert": [],
-        "extra_in_expert": [
+        "missing_in_expert": [
           [
             "distress_signal",
-            "method_access"
-          ],
-          [
-            "distress_signal",
-            "social_isolation"
+            "self_harm_act"
           ],
           [
             "method_access",
-            "self_harm_act"
+            "social_isolation"
+          ],
+          [
+            "self_harm_act",
+            "distress_signal"
           ],
           [
             "social_isolation",
-            "self_harm_act"
+            "method_access"
           ]
-        ]
+        ],
+        "extra_in_expert": []
       },
       "rosenbaum": {
         "gamma_bound": 3.0,
@@ -842,7 +845,7 @@
       "estimated_tce": 0.38,
       "overall_verdict": "VALIDATED",
       "confidence_score": 0.857,
-      "latency_ms": 11.8,
+      "latency_ms": 1.9,
       "errors": [],
       "refutation": {
         "placebo_p_value": 0.5,
@@ -855,25 +858,25 @@
       "pc_discovery": {
         "shd": 4,
         "shd_grade": "MODERATE",
-        "missing_in_expert": [],
-        "extra_in_expert": [
+        "missing_in_expert": [
           [
             "amplification_network",
-            "belief_change"
-          ],
-          [
-            "belief_change",
             "vote_behavior"
           ],
           [
             "false_narrative",
+            "vote_behavior"
+          ],
+          [
+            "vote_behavior",
             "amplification_network"
           ],
           [
-            "false_narrative",
-            "belief_change"
+            "vote_behavior",
+            "false_narrative"
           ]
-        ]
+        ],
+        "extra_in_expert": []
       },
       "rosenbaum": {
         "gamma_bound": 1.5,
@@ -894,7 +897,7 @@
       "estimated_tce": 0.71,
       "overall_verdict": "VALIDATED",
       "confidence_score": 0.857,
-      "latency_ms": 12.1,
+      "latency_ms": 2.0,
       "errors": [],
       "refutation": {
         "placebo_p_value": 0.5,
@@ -907,25 +910,25 @@
       "pc_discovery": {
         "shd": 4,
         "shd_grade": "MODERATE",
-        "missing_in_expert": [],
-        "extra_in_expert": [
+        "missing_in_expert": [
           [
             "adversarial_input",
-            "harmful_output"
+            "safety_bypass"
           ],
           [
-            "adversarial_input",
+            "harmful_output",
             "instruction_override"
           ],
           [
             "instruction_override",
-            "safety_bypass"
+            "harmful_output"
           ],
           [
             "safety_bypass",
-            "harmful_output"
+            "adversarial_input"
           ]
-        ]
+        ],
+        "extra_in_expert": []
       },
       "rosenbaum": {
         "gamma_bound": 3.0,
@@ -946,7 +949,7 @@
       "estimated_tce": 0.64,
       "overall_verdict": "VALIDATED",
       "confidence_score": 0.857,
-      "latency_ms": 11.8,
+      "latency_ms": 1.8,
       "errors": [],
       "refutation": {
         "placebo_p_value": 0.5,
@@ -959,25 +962,25 @@
       "pc_discovery": {
         "shd": 4,
         "shd_grade": "MODERATE",
-        "missing_in_expert": [],
-        "extra_in_expert": [
+        "missing_in_expert": [
           [
             "authentication_bypass",
-            "system_access"
+            "identity_harm"
           ],
           [
             "forged_credential",
+            "identity_harm"
+          ],
+          [
+            "identity_harm",
             "authentication_bypass"
           ],
           [
-            "forged_credential",
-            "system_access"
-          ],
-          [
-            "system_access",
-            "identity_harm"
+            "identity_harm",
+            "forged_credential"
           ]
-        ]
+        ],
+        "extra_in_expert": []
       },
       "rosenbaum": {
         "gamma_bound": 3.0,
@@ -998,7 +1001,7 @@
       "estimated_tce": 0.67,
       "overall_verdict": "VALIDATED",
       "confidence_score": 0.857,
-      "latency_ms": 12.4,
+      "latency_ms": 1.8,
       "errors": [],
       "refutation": {
         "placebo_p_value": 0.5,
@@ -1011,25 +1014,25 @@
       "pc_discovery": {
         "shd": 4,
         "shd_grade": "MODERATE",
-        "missing_in_expert": [],
-        "extra_in_expert": [
+        "missing_in_expert": [
           [
             "harmful_medical_query",
-            "information_access"
-          ],
-          [
-            "harmful_medical_query",
-            "patient_action"
+            "physical_harm"
           ],
           [
             "information_access",
-            "patient_action"
+            "physical_harm"
           ],
           [
-            "patient_action",
-            "physical_harm"
+            "physical_harm",
+            "harmful_medical_query"
+          ],
+          [
+            "physical_harm",
+            "information_access"
           ]
-        ]
+        ],
+        "extra_in_expert": []
       },
       "rosenbaum": {
         "gamma_bound": 3.0,
@@ -1050,7 +1053,7 @@
       "estimated_tce": 0.53,
       "overall_verdict": "VALIDATED",
       "confidence_score": 0.857,
-      "latency_ms": 12.7,
+      "latency_ms": 1.8,
       "errors": [],
       "refutation": {
         "placebo_p_value": 0.5,
@@ -1063,25 +1066,25 @@
       "pc_discovery": {
         "shd": 4,
         "shd_grade": "MODERATE",
-        "missing_in_expert": [],
-        "extra_in_expert": [
+        "missing_in_expert": [
           [
             "absent_logging",
-            "harm_persistence"
+            "harm_undetected"
           ],
           [
-            "absent_logging",
+            "harm_persistence",
             "unaccountable_decision"
           ],
           [
             "harm_undetected",
-            "harm_persistence"
+            "absent_logging"
           ],
           [
             "unaccountable_decision",
-            "harm_undetected"
+            "harm_persistence"
           ]
-        ]
+        ],
+        "extra_in_expert": []
       },
       "rosenbaum": {
         "gamma_bound": 2.0,
@@ -1092,6 +1095,5 @@
         "interpretation": "\u0393=2.0: Strong robustness. Daubert-defensible \u2014 hidden confounders up to 2.0\u00d7 odds ratio tolerated."
       }
     }
-  ],
-  "gamma_fix_note": "v5.2: Rosenbaum Gamma ceiling fixed. Old: flat 10% threshold \u2192 all domains Gamma=3.0. New: noise-aware Z_CRITICAL x SE x sqrt(Gamma) test. Gamma now differentiated by domain TCE + noise. election_interference Gamma=1.5 (low TCE=0.38, high noise=0.24); child_safety Gamma=3.0 (high TCE=0.78, low noise=0.12)."
+  ]
 }
