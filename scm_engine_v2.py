@@ -325,46 +325,142 @@ def build_domain_dags() -> Dict[str, HarmDAG]:
     )
 
     # 6-19: Remaining domains — structural pattern
-    other_domains = [
-        ("disinformation",     "ai_generates_false_content",    "public_belief_manipulation",  "viral_spread"),
-        ("harassment",         "ai_enables_targeted_attack",    "victim_psychological_harm",   "escalation_pattern"),
-        ("cyberattack",        "ai_provides_exploit_code",      "system_breach",               "vulnerability_exploitation"),
-        ("privacy_violation",  "ai_reveals_personal_data",      "identity_theft_or_stalking",  "data_exposure"),
-        ("financial_fraud",    "ai_facilitates_fraud_scheme",   "financial_loss",              "victim_deception"),
-        ("medical_harm",       "ai_provides_harmful_dosage",    "patient_injury_or_death",     "clinical_decision"),
-        ("physical_violence",  "ai_provides_attack_guidance",   "physical_harm",               "actor_capability"),
-        ("hate_speech",        "ai_generates_hate_content",     "societal_harm",               "amplification"),
-        ("drug_trafficking",   "ai_provides_synthesis_guide",   "drug_supply_increase",        "production_capability"),
-        ("child_safety",       "ai_enables_grooming",           "child_abuse",                 "access_facilitation"),
-        ("identity_forgery",   "ai_generates_fake_documents",   "fraud_or_impersonation",      "document_use"),
-        ("audit_gap",          "ai_operates_without_logging",   "accountability_failure",      "audit_absence"),
-        # ── Added May 2026 — previously in dag_validator only ────────
-        # self_harm: distress signal → method access → self-harm act
-        # Mediator: method_access (Joiner 2005 — means restriction is the key lever)
-        ("self_harm",          "ai_provides_method_information","self_harm_act",               "method_access"),
-        # election_interference: false narrative → amplification → vote behavior
-        # Mediator: belief_update (Allcott & Gentzkow 2017 — belief change precedes vote change)
-        ("election_interference", "ai_generates_false_narrative","corrupted_vote_behavior",    "belief_update"),
+    # ── Domains 6–19: Domain-specific causal structures ─────────────────────
+    # v2 fix: each domain now has empirically-motivated confounders and latent variables
+    # rather than a shared generic template. Sources: AIAAIC Database, EU AI Act Annex III,
+    # domain-specific AI harm literature (see research_notes.md for citations).
+    #
+    # Confounder choice rationale (examiner-ready):
+    #   Observed Z: variables the system can measure from context/metadata.
+    #   Latent U:   variables that confound X→Y but are unobservable at inference time.
+    #
+    # Year 2: validate confounder sets via DoWhy refutation tests on real incident data.
+
+    specific_domains = [
+        # (domain, treatment, outcome, mediator, confounders, latent)
+        ("disinformation",
+         "ai_generates_false_content",
+         "public_belief_manipulation",
+         "viral_spread",
+         ["platform_algorithm_boost", "media_literacy_of_audience"],
+         ["political_actor_coordination", "existing_belief_bias"]),
+
+        ("harassment",
+         "ai_enables_targeted_attack",
+         "victim_psychological_harm",
+         "escalation_pattern",
+         ["platform_moderation_presence", "prior_victim_exposure"],
+         ["attacker_psychological_state"]),
+
+        ("cyberattack",
+         "ai_provides_exploit_code",
+         "system_breach",
+         "vulnerability_exploitation",
+         ["existing_system_access_level", "patch_status_of_target"],
+         ["attacker_skill_level", "attacker_intent"]),
+
+        ("privacy_violation",
+         "ai_reveals_personal_data",
+         "identity_theft_or_stalking",
+         "data_exposure",
+         ["data_sensitivity_level", "user_consent_status"],
+         ["requestor_true_intent"]),
+
+        ("financial_fraud",
+         "ai_facilitates_fraud_scheme",
+         "financial_loss",
+         "victim_deception",
+         ["victim_financial_literacy", "platform_fraud_detection_strength"],
+         ["criminal_network_involvement"]),
+
+        ("medical_harm",
+         "ai_provides_harmful_dosage",
+         "patient_injury_or_death",
+         "clinical_decision",
+         ["physician_oversight_presence", "patient_comorbidity_profile"],
+         ["patient_true_condition", "contraindication_knowledge"]),
+
+        ("physical_violence",
+         "ai_provides_attack_guidance",
+         "physical_harm",
+         "actor_capability",
+         ["prior_access_to_means", "law_enforcement_proximity"],
+         ["attacker_intent", "mental_state"]),
+
+        ("hate_speech",
+         "ai_generates_hate_content",
+         "societal_harm",
+         "amplification",
+         ["platform_community_norms", "content_moderation_active"],
+         ["radicalization_state_of_audience"]),
+
+        ("drug_trafficking",
+         "ai_provides_synthesis_guide",
+         "drug_supply_increase",
+         "production_capability",
+         ["precursor_chemical_access", "lab_infrastructure_available"],
+         ["actor_criminal_network", "law_enforcement_awareness"]),
+
+        ("child_safety",
+         "ai_enables_grooming",
+         "child_abuse",
+         "access_facilitation",
+         ["platform_age_verification_strength", "parental_supervision_level"],
+         ["predator_intent", "child_vulnerability_state"]),
+
+        ("identity_forgery",
+         "ai_generates_fake_documents",
+         "fraud_or_impersonation",
+         "document_use",
+         ["verification_system_strength", "document_type_scrutiny_level"],
+         ["forger_criminal_network"]),
+
+        ("audit_gap",
+         "ai_operates_without_logging",
+         "accountability_failure",
+         "audit_absence",
+         ["regulatory_oversight_active", "internal_compliance_process"],
+         ["organizational_intent_to_evade"]),
+
+        ("self_harm",
+         "ai_provides_method_information",
+         "self_harm_act",
+         "method_access",
+         ["platform_crisis_intervention_active", "user_expressed_distress_signal"],
+         ["underlying_mental_health_state"]),  # Joiner (2005): means restriction key lever
+
+        ("election_interference",
+         "ai_generates_false_narrative",
+         "corrupted_vote_behavior",
+         "belief_update",
+         ["media_literacy_of_electorate", "fact_checking_infrastructure"],
+         ["political_actor_coordination"]),    # Allcott & Gentzkow (2017)
     ]
-    for domain, treatment, outcome, mediator in other_domains:
+
+    for domain, treatment, outcome, mediator, confounders, latent in specific_domains:
         dags[domain] = HarmDAG(
             domain=domain.replace("_", " ").title(),
             treatment=treatment, outcome=outcome, mediator=mediator,
-            confounders=["context", "user_intent_signal"],
-            latent=["true_user_intent"],
+            confounders=confounders,
+            latent=latent,
             nodes=[
-                CausalNode(treatment, f"AI action causing potential harm"),
-                CausalNode(mediator,  "Intermediate pathway"),
+                CausalNode(treatment, "AI action causing potential harm"),
+                CausalNode(mediator,  "Intermediate causal pathway"),
                 CausalNode(outcome,   "Final harm realized"),
-                CausalNode("context", "Situational context (observed)"),
-                CausalNode("user_intent_signal", "Observable intent signal"),
-                CausalNode("true_user_intent", "Actual intent (unobserved)", measured=False),
+            ] + [
+                CausalNode(c, f"Observed confounder: {c.replace('_', ' ')}")
+                for c in confounders
+            ] + [
+                CausalNode(u, f"Latent confounder: {u.replace('_', ' ')}", measured=False)
+                for u in latent
             ],
             edges=[
                 CausalEdge(treatment, mediator),
                 CausalEdge(mediator,  outcome),
-                CausalEdge("context", treatment),
-                CausalEdge("true_user_intent", treatment),
+            ] + [
+                CausalEdge(c, treatment) for c in confounders
+            ] + [
+                CausalEdge(u, treatment) for u in latent
             ]
         )
 
@@ -664,11 +760,36 @@ def compute_backdoor(f: CausalFindings, dag: HarmDAG) -> BackdoorResult:
                 "no confounding adjustment needed (do(X) = see(X) in RCT)")
         method = AdjustmentMethod.BACKDOOR
     elif applicable:
-        py_do_x1 = _clamp(f.p_y_given_x)
-        py_do_x0 = _clamp(f.p_y_given_notx)
+        # ── Backdoor adjustment: Σ_z P(Y|X,Z=z)·P(Z=z) ──────────────────
+        # Year 1 assumption: P(Z=z) = 1/|Z| (uniform prior over confounder levels).
+        # This is the correct STRUCTURAL form of the backdoor formula.
+        # Year 2: replace with empirical P(Z) from calibrated dataset (DoWhy Phase 4).
+        #
+        # Pearl (2000, Def 3.3.2): when Z satisfies backdoor criterion,
+        # deconfounding reduces to marginalising P(Y|X,Z) over the marginal P(Z).
+        # With uniform P(Z) and binary Z levels {0,1}:
+        #   P(Y|do(X=1)) ≈ 0.5·P(Y|X=1,Z=0) + 0.5·P(Y|X=1,Z=1)
+        # We proxy: P(Y|X=1,Z=0) ≈ p_y_given_x · (1 − confounder_bias_factor)
+        #           P(Y|X=1,Z=1) ≈ p_y_given_x · (1 + confounder_bias_factor)
+        # where confounder_bias_factor = 0 (no confounder data) → sum collapses to p_y_given_x.
+        # This makes the Year 1 assumption EXPLICIT rather than silent.
+        n_z = max(1, len(dag.confounders))
+        uniform_pz = 1.0 / n_z
+        # Without stratum-level data: P(Y|X,Z=z) ≈ P(Y|X) for all z (no-interaction assumption)
+        py_do_x1 = _clamp(
+            sum(uniform_pz * _clamp(f.p_y_given_x) for _ in range(n_z))
+        )
+        py_do_x0 = _clamp(
+            sum(uniform_pz * _clamp(f.p_y_given_notx) for _ in range(n_z))
+        )
         ate_computed = py_do_x1 - py_do_x0
-        note = (f"Backdoor set Z = {dag.confounders} blocks all backdoor paths X←Z→Y. "
-                f"P(Y|do(X)) = Σ_z P(Y|X,Z=z)·P(Z=z) ≈ TCE={f.tce}%")
+        note = (
+            f"Backdoor set Z = {dag.confounders} (|Z|={n_z}) blocks all X←Z→Y paths. "
+            f"P(Y|do(X)) = Σ_z P(Y|X,Z=z)·P(Z=z). "
+            f"Year 1: uniform P(Z=z)={uniform_pz:.3f}, no-interaction assumption across strata. "
+            f"ATE = {ate_computed*100:.1f}%. "
+            f"Year 2: empirical P(Z) from DoWhy calibration will replace uniform prior."
+        )
         method = AdjustmentMethod.BACKDOOR
     else:
         py_do_x1 = _clamp(f.p_y_given_x + ate * 0.5)
@@ -1053,10 +1174,55 @@ def rule_04_adjust(severity: Severity, intv: float) -> Tuple[Severity, str]:
         return new, f"do(fix) barely reduced harm ({intv}%) → severity escalated to {new.name}"
     return severity, f"do(fix) reduction {intv}% → no severity change"
 
-def rule_05_identifiability(tce, flip, rct) -> Tuple[bool, str]:
+def rule_05_identifiability(tce, flip, rct, dag: "HarmDAG | None" = None) -> Tuple[bool, str]:
+    """
+    Causal identifiability check — v2 (graph-based).
+
+    Priority order (Pearl 2000, Ch. 3):
+      1. RCT: do(X) = see(X) — exact identification, no adjustment needed.
+      2. Backdoor criterion: latent=[] → all confounding paths blocked by Z.
+         Applicable: P(Y|do(X)) = Σ_z P(Y|X,Z=z)·P(Z=z)
+      3. Frontdoor criterion: mediator M exists + latent U present.
+         Applicable: P(Y|do(X)) = Σ_m P(M|X)·Σ_x' P(Y|M,X=x')·P(X=x')
+      4. NOT IDENTIFIABLE: latent confounders + no valid adjustment set.
+         System honestly reports: "Cannot make causal claim without additional assumptions."
+
+    Year 1: uses DAG.has_backdoor_set() and DAG.has_frontdoor_set() (structural flags).
+    Year 2: full d-separation via networkx (PhD Phase 5 — polynomial-time algorithm).
+    """
+    if dag is not None:
+        if rct:
+            return True, (
+                "RCT: do(X) = see(X) — exact causal identification. "
+                "No confounding adjustment needed."
+            )
+        if dag.has_backdoor_set():
+            z_list = ", ".join(dag.confounders) if dag.confounders else "∅"
+            return True, (
+                f"Backdoor criterion satisfied (Pearl 2000, Def 3.3.1). "
+                f"Observed adjustment set Z = {{{z_list}}} blocks all backdoor paths X←Z→Y. "
+                f"No latent confounders. P(Y|do(X)) = Σ_z P(Y|X,Z=z)·P(Z=z) is identifiable."
+            )
+        if dag.has_frontdoor_set():
+            return True, (
+                f"Frontdoor criterion satisfied (Pearl 1995). "
+                f"Mediator M = '{dag.mediator}' blocks all X→Y directed paths. "
+                f"Latent confounders U = {dag.latent} present but bypassed via M. "
+                f"P(Y|do(X)) identified through frontdoor formula. Year 2: DoWhy empirical estimation."
+            )
+        # Not identifiable — system must be honest
+        return False, (
+            f"NOT IDENTIFIABLE (Pearl 2000, Ch.3): "
+            f"Latent confounders U = {dag.latent} present, "
+            f"no valid backdoor or frontdoor adjustment set found. "
+            f"Cannot make point causal claim from observational data alone. "
+            f"Partial identification bounds apply. Year 2: IV or sensitivity analysis."
+        )
+
+    # Legacy numeric fallback (no DAG provided — should not occur in v2 pipeline)
     if tce < 2 and flip < 5 and not rct:
-        return False, "Low TCE+Flip → epistemic risk ACTIVATED (Severity floor=3)"
-    return True, "Effect identifiable via Rule 2 backdoor or RCT"
+        return False, "Low TCE+Flip → epistemic risk ACTIVATED (Severity floor=3) [legacy path]"
+    return True, "Effect identifiable via Rule 2 backdoor or RCT [legacy path — pass dag= for graph check]"
 
 def calculate_risk_score(severity_adj, detection, edge_strength,
                          domain_multiplier: float = 1.0) -> float:
@@ -1137,7 +1303,7 @@ class SCMEngineV2:
         edge  = rule_02_edge(findings.med)
         det   = rule_03_detection(findings.flip)
         sev_a, adj_note = rule_04_adjust(sev, findings.intv)
-        ident, ident_note = rule_05_identifiability(findings.tce, findings.flip, findings.rct)
+        ident, ident_note = rule_05_identifiability(findings.tce, findings.flip, findings.rct, dag=dag)
         if not ident:
             sev_a = Severity(max(sev_a.value, 3))
         # Domain multiplier handled by pipeline (single source of truth)
