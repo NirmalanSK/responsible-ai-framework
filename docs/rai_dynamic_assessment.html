@@ -105,6 +105,33 @@ select:focus{outline:1px solid #58a6ff}
 .chk.warn{background:#2a1f00;color:#d29922;border:1px solid #4a3700}
 .no-data{text-align:center;color:#484f58;padding:40px;font-size:11px}
 @media(max-width:700px){.main{grid-template-columns:1fr;height:auto}.sidebar{border-right:none;border-bottom:1px solid #21262d}}
+
+/* ── DAG Graph Tab ── */
+.dag-wrap{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
+.dag-canvas-wrap{flex:1;min-width:340px;background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:8px;position:relative}
+.dag-canvas-wrap svg{width:100%;height:auto;display:block}
+.dag-info{flex:0 0 260px;display:flex;flex-direction:column;gap:8px}
+.dag-legend{background:#161b22;border:1px solid #21262d;border-radius:6px;padding:12px;font-size:11px}
+.dag-legend-row{display:flex;align-items:center;gap:8px;padding:3px 0}
+.dag-legend-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.dag-node-card{background:#161b22;border:1px solid #21262d;border-radius:6px;padding:12px;font-size:11px}
+.dag-node-card .dnc-title{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8b949e;margin-bottom:8px}
+.dag-node-row{padding:4px 0;border-bottom:1px solid #21262d;line-height:1.5}
+.dag-node-row:last-child{border-bottom:none}
+.dag-node-tag{display:inline-block;padding:1px 5px;border-radius:3px;font-size:9px;margin-right:4px;font-weight:700}
+.dnt-X{background:#1a2a3a;color:#58a6ff;border:1px solid #1a4a6a}
+.dnt-Y{background:#2a1a1a;color:#f85149;border:1px solid #4a1a1a}
+.dnt-M{background:#1a2a1a;color:#3fb950;border:1px solid #1a4a1a}
+.dnt-Z{background:#2a2a0d;color:#d29922;border:1px solid #4a4a1a}
+.dnt-U{background:#21262d;color:#8b949e;border:1px solid #30363d}
+.dag-criterion-card{background:#161b22;border:1px solid #21262d;border-radius:6px;padding:12px;font-size:11px}
+.dag-crit-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #21262d}
+.dag-crit-row:last-child{border-bottom:none}
+.dag-id-badge{padding:2px 8px;border-radius:3px;font-size:10px;font-weight:700}
+.dag-id-bd{background:#0d2a1a;color:#3fb950;border:1px solid #1a4a2a}
+.dag-id-fd{background:#0d2a2a;color:#79c0ff;border:1px solid #1a4a4a}
+.dag-id-rct{background:#1a2a1a;color:#3fb950;border:1px solid #1a4a1a}
+.dag-id-no{background:#2a0d0d;color:#f85149;border:1px solid #4a1a1a}
 </style>
 </head>
 <body>
@@ -209,12 +236,14 @@ select:focus{outline:1px solid #58a6ff}
     <div class="tab" data-tab="matrix">23×5 Activation Matrix</div>
     <div class="tab" data-tab="formulas">SCM Formulas</div>
     <div class="tab" data-tab="decision">Final Decision</div>
+    <div class="tab" data-tab="dag">DAG Graph</div>
   </div>
 
   <div class="tab-panel active" id="tab-pipeline"></div>
   <div class="tab-panel" id="tab-matrix"></div>
   <div class="tab-panel" id="tab-formulas"></div>
   <div class="tab-panel" id="tab-decision"></div>
+  <div class="tab-panel" id="tab-dag"></div>
 </div>
 </div>
 
@@ -609,7 +638,7 @@ function renderMatrix(data){
 }
 
 function renderFormulas(data){
-  let {tce,med,flip,intv,rct,scm,mat,dm,matRisk,combinedRisk} = data;
+  let {tce,med,flip,intv,rct,domain,scm,mat,dm,matRisk,combinedRisk} = data;
   let html = `
   <div class="scm-rule">
     <div class="scm-rule-title">Rule 01 — Severity from TCE (L2 Backdoor)</div>
@@ -695,8 +724,201 @@ function renderFormulas(data){
   document.getElementById('tab-formulas').innerHTML = html;
 }
 
+// ── DAG Definitions (mirrors scm_engine_v2.py build_domain_dags v16a) ────────
+const DAG_DEFS = {
+  "csam":                  {X:"ai_generates_csam",       M:"distribution_channel",    Y:"child_exploitation",      Z:["platform_detection_rate","age_verification_strength"], U:["offender_network","victim_access"],   crit:"FRONTDOOR"},
+  "weapon_synthesis":      {X:"ai_provides_synth_guide", M:"synthesis_capability",    Y:"weapon_produced",         Z:["precursor_access","lab_infrastructure"],               U:["actor_intent","network_support"],      crit:"FRONTDOOR"},
+  "child_safety":          {X:"ai_enables_grooming",     M:"access_facilitation",     Y:"child_abuse",             Z:["platform_age_verify","parental_supervision"],          U:["predator_intent","child_vulnerability"],crit:"FRONTDOOR"},
+  "violence":              {X:"ai_provides_attack_guide",M:"actor_capability",         Y:"physical_harm",           Z:["prior_means_access","law_enforcement_proximity"],      U:["attacker_intent","mental_state"],      crit:"FRONTDOOR"},
+  "medical_harm":          {X:"ai_provides_harmful_dose",M:"clinical_decision",        Y:"patient_injury",          Z:["physician_oversight","patient_comorbidity"],           U:["patient_true_condition","contraindication_knowledge"], crit:"FRONTDOOR"},
+  "election_interference": {X:"ai_generates_false_narr", M:"belief_update",            Y:"corrupted_vote_behavior", Z:["media_literacy","fact_check_infrastructure"],         U:["political_coordination"],              crit:"FRONTDOOR"},
+  "autonomous_ai_harm":    {X:"ai_acts_autonomously",    M:"unintended_action",        Y:"real_world_harm",         Z:["human_oversight_present","kill_switch_active"],        U:["system_goal_drift"],                   crit:"FRONTDOOR"},
+  "hate_speech":           {X:"ai_generates_hate",       M:"amplification",            Y:"societal_harm",           Z:["platform_moderation","community_norms"],              U:["radicalization_state"],                crit:"FRONTDOOR"},
+  "bias_discrimination":   {X:"ai_decision",             M:"biased_ranking_score",     Y:"discriminatory_outcome",  Z:["protected_attr_proxy","audit_trail_available"],       U:["historical_bias","systemic_inequality"],crit:"FRONTDOOR"},
+  "cybercrime":            {X:"ai_provides_exploit",     M:"vulnerability_exploitation",Y:"system_breach",          Z:["existing_access_level","patch_status"],               U:["attacker_skill","attacker_intent"],    crit:"FRONTDOOR"},
+  "deepfake":              {X:"ai_generates_synthetic",  M:"deception_delivery",       Y:"reputation_or_fraud_harm",Z:["platform_detect_rate","victim_media_literacy"],       U:["actor_motivation"],                    crit:"FRONTDOOR"},
+  "financial_fraud":       {X:"ai_facilitates_fraud",    M:"victim_deception",         Y:"financial_loss",          Z:["victim_financial_literacy","fraud_detection_strength"],U:["criminal_network"],                   crit:"FRONTDOOR"},
+  "psychological_manipulation":{X:"ai_generates_manipulative_content",M:"belief_shift",Y:"behavioral_control",     Z:["target_critical_thinking","platform_disclosure_rules"],U:["target_vulnerability","actor_intent"], crit:"FRONTDOOR"},
+  "social_engineering_attack":{X:"ai_crafts_phishing",  M:"victim_trust_exploitation",Y:"credential_or_data_loss", Z:["org_security_training","2fa_enabled"],               U:["attacker_social_graph"],               crit:"FRONTDOOR"},
+  "surveillance_stalking": {X:"ai_enables_tracking",     M:"location_exposure",        Y:"victim_harm",             Z:["privacy_law_enforcement","victim_awareness"],         U:["stalker_intent","victim_routines"],    crit:"FRONTDOOR"},
+  "data_poisoning":        {X:"ai_corrupts_training_data",M:"model_degradation",       Y:"downstream_harm",         Z:["data_validation_present","model_monitoring_active"],  U:["attacker_access_level"],               crit:"FRONTDOOR"},
+  "supply_chain_attack":   {X:"ai_injects_malicious_component",M:"dependency_propagation",Y:"system_compromise",   Z:["code_review_process","signing_verification_active"],  U:["attacker_network_access"],             crit:"FRONTDOOR"},
+  "misinformation_synthetic":{X:"ai_generates_false_content",M:"viral_spread",         Y:"public_belief_harm",     Z:["platform_algorithm_boost","media_literacy"],          U:["political_coordination","existing_bias"],crit:"FRONTDOOR"},
+  "privacy_violation":     {X:"ai_reveals_personal_data",M:"data_exposure",            Y:"identity_theft_or_stalking",Z:["data_sensitivity_level","user_consent_status"],     U:["requestor_true_intent"],               crit:"FRONTDOOR"},
+  "misinformation_factual":{X:"ai_states_false_fact",    M:"belief_update",            Y:"decision_harm",           Z:["source_credibility_signal","fact_check_access"],      U:["actor_intent_to_mislead"],             crit:"FRONTDOOR"},
+  "regulatory_noncompliance":{X:"ai_operates_without_compliance",M:"audit_absence",    Y:"accountability_failure",  Z:["regulatory_oversight_active","internal_compliance"],  U:["org_intent_to_evade"],                 crit:"FRONTDOOR"},
+  "intellectual_property_theft":{X:"ai_reproduces_ip",  M:"unauthorized_distribution",Y:"creator_economic_harm",   Z:["copyright_detection_active","platform_dmca_process"], U:["actor_commercial_intent"],             crit:"FRONTDOOR"},
+  "environmental_harm":    {X:"ai_recommends_harmful_practice",M:"adoption",           Y:"environmental_damage",    Z:["regulatory_compliance_check","public_awareness"],     U:["industrial_actor_interest"],           crit:"FRONTDOOR"},
+  // Backdoor-identifiable (latent = [])
+  "disinformation":        {X:"ai_generates_false_content",M:"viral_spread",           Y:"public_belief_manipulation",Z:["platform_algorithm_boost","media_literacy_of_audience"],U:[],                                 crit:"BACKDOOR"},
+  "decision_transparency": {X:"ai_makes_opaque_decision",M:"unaccountable_action",     Y:"accountability_failure",  Z:["audit_trail_available"],                              U:[],                                      crit:"BACKDOOR"},
+};
+
+function getDagDef(domain){ return DAG_DEFS[domain] || DAG_DEFS["bias_discrimination"]; }
+
+function renderDAG(data){
+  let {domain, scm, tce, med, flip, rct} = data;
+  let dag = getDagDef(domain);
+  let crit = rct ? "RCT" : dag.crit;
+
+  // ── SVG layout constants ──────────────────────────────────────
+  const W=560, H=340, cx=W/2;
+  // Node positions: X(left), M(centre), Y(right), Z(bottom-left), U(top-left dashed)
+  const pos = {
+    X:  {x:105, y:170},
+    M:  {x:cx,  y:170},
+    Y:  {x:455, y:170},
+    Z1: {x:85,  y:290},
+    Z2: {x:200, y:300},
+    U1: {x:85,  y:60},
+    U2: {x:200, y:50},
+  };
+  const NR = 30; // node radius
+
+  function arrowPath(from, to, bend=0, dashed=false){
+    let dx=to.x-from.x, dy=to.y-from.y, len=Math.sqrt(dx*dx+dy*dy);
+    let ux=dx/len, uy=dy/len;
+    let sx=from.x+ux*NR, sy=from.y+uy*NR;
+    let ex=to.x-ux*(NR+6), ey=to.y-uy*(NR+6);
+    if(bend!==0){
+      let mx=(sx+ex)/2+bend*-uy, my=(sy+ey)/2+bend*ux;
+      return `<path d="M${sx},${sy} Q${mx},${my} ${ex},${ey}" fill="none" stroke="${dashed?'#484f58':'#30363d'}" stroke-width="1.5" stroke-dasharray="${dashed?'5,3':''}" marker-end="url(#arr${dashed?'D':''})" opacity="${dashed?0.5:0.85}"/>`;
+    }
+    return `<path d="M${sx},${sy} L${ex},${ey}" fill="none" stroke="${dashed?'#484f58':'#30363d'}" stroke-width="1.5" stroke-dasharray="${dashed?'5,3':''}" marker-end="url(#arr${dashed?'D':''})" opacity="${dashed?0.5:0.85}"/>`;
+  }
+
+  function node(p, label, type, sublabel=""){
+    const colors={X:'#1a3a5c',M:'#1a3a1a',Y:'#3a1a1a',Z:'#3a2a00',U:'#21262d'};
+    const strokes={X:'#58a6ff',M:'#3fb950',Y:'#f85149',Z:'#d29922',U:'#484f58'};
+    return `<g>
+      <circle cx="${p.x}" cy="${p.y}" r="${NR}" fill="${colors[type]}" stroke="${strokes[type]}" stroke-width="1.5" ${type==='U'?'stroke-dasharray="4,2"':''}/>
+      <text x="${p.x}" y="${p.y-4}" text-anchor="middle" font-size="12" font-weight="700" fill="${strokes[type]}" font-family="monospace">${label}</text>
+      ${sublabel?`<text x="${p.x}" y="${p.y+11}" text-anchor="middle" font-size="8" fill="${strokes[type]}" opacity="0.7">${sublabel}</text>`:''}
+    </g>`;
+  }
+
+  // Identifiability criterion color on DAG
+  const critColor = crit==="RCT"?'#3fb950':crit==="BACKDOOR"?'#3fb950':crit==="FRONTDOOR"?'#79c0ff':'#f85149';
+  const critLabel = crit==="RCT"?"RCT — EXACT":crit==="BACKDOOR"?"BACKDOOR — identifiable":crit==="FRONTDOOR"?"FRONTDOOR — identifiable":"NOT IDENTIFIABLE";
+  const hasLatent = dag.U.length>0;
+  const hasMed = !!dag.M;
+  // Highlight X→M→Y path in blue for frontdoor, green for backdoor
+  const pathColor = crit==="FRONTDOOR"?'#58a6ff':crit==="BACKDOOR"?'#3fb950':'#484f58';
+
+  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M1 1L9 5L1 9" fill="none" stroke="#30363d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arrD" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M1 1L9 5L1 9" fill="none" stroke="#484f58" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arrH" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+      <path d="M1 1L9 5L1 9" fill="none" stroke="${pathColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+  <rect width="${W}" height="${H}" fill="#0d1117" rx="6"/>
+
+  <!-- Background criterion badge -->
+  <rect x="10" y="8" width="200" height="22" rx="4" fill="#161b22" opacity="0.9"/>
+  <text x="18" y="23" font-size="10" fill="${critColor}" font-family="monospace" font-weight="700">${critLabel}</text>
+
+  <!-- Confounders Z → X arcs (observed) -->
+  ${dag.Z.length>0?arrowPath(pos.Z1, pos.X, 20):''}
+  ${dag.Z.length>1?arrowPath(pos.Z2, pos.X, 0):''}
+  ${dag.Z.length>0?arrowPath(pos.Z1, pos.Y, -30):''}
+  ${dag.Z.length>1?arrowPath(pos.Z2, pos.Y, 0):''}
+
+  <!-- Latent U → X, U → Y (dashed — unobserved) -->
+  ${hasLatent?arrowPath(pos.U1, pos.X, -20, true):''}
+  ${hasLatent?arrowPath(pos.U1, pos.Y, -60, true):''}
+  ${hasLatent&&dag.U.length>1?arrowPath(pos.U2, pos.X, 0, true):''}
+
+  <!-- Main causal path X → M → Y (highlighted) -->
+  <path d="M${pos.X.x+NR+2},${pos.X.y} L${pos.M.x-NR-2},${pos.M.y}" fill="none" stroke="${pathColor}" stroke-width="2.5" marker-end="url(#arrH)" opacity="0.9"/>
+  <path d="M${pos.M.x+NR+2},${pos.M.y} L${pos.Y.x-NR-8},${pos.Y.y}" fill="none" stroke="${pathColor}" stroke-width="2.5" marker-end="url(#arrH)" opacity="0.9"/>
+
+  <!-- Nodes -->
+  ${node(pos.X, 'X', 'X', 'Treatment')}
+  ${node(pos.M, 'M', 'M', 'Mediator')}
+  ${node(pos.Y, 'Y', 'Y', 'Outcome')}
+  ${dag.Z.length>0?node(pos.Z1,'Z₁','Z','Confounder'):''}
+  ${dag.Z.length>1?node(pos.Z2,'Z₂','Z',''):''}
+  ${hasLatent?node(pos.U1,'U','U','Latent'):''}
+
+  <!-- Labels below nodes -->
+  <text x="${pos.X.x}" y="${pos.X.y+NR+16}" text-anchor="middle" font-size="9" fill="#8b949e" font-family="monospace">${dag.X.replace(/_/g,'_\u200b').substring(0,18)}</text>
+  <text x="${pos.M.x}" y="${pos.M.y+NR+16}" text-anchor="middle" font-size="9" fill="#8b949e" font-family="monospace">${dag.M.replace(/_/g,'_\u200b').substring(0,18)}</text>
+  <text x="${pos.Y.x}" y="${pos.Y.y+NR+16}" text-anchor="middle" font-size="9" fill="#8b949e" font-family="monospace">${dag.Y.replace(/_/g,'_\u200b').substring(0,18)}</text>
+
+  <!-- PNS / TCE annotation on X→M path -->
+  <text x="${(pos.X.x+pos.M.x)/2}" y="${pos.X.y-14}" text-anchor="middle" font-size="9" fill="${pathColor}" font-family="monospace" opacity="0.85">TCE=${tce}% | MED=${med}%</text>
+  <text x="${(pos.M.x+pos.Y.x)/2}" y="${pos.Y.y-14}" text-anchor="middle" font-size="9" fill="${pathColor}" font-family="monospace" opacity="0.85">PNS≈${flip}%</text>
+</svg>`;
+
+  // ── Info panels ────────────────────────────────────────────────
+  let zHtml = dag.Z.map((z,i)=>`<div class="dag-node-row"><span class="dag-node-tag dnt-Z">Z${i+1}</span><span style="color:#d29922">${z.replace(/_/g,' ')}</span><span style="color:#484f58;font-size:10px"> — observed</span></div>`).join('');
+  let uHtml = dag.U.length===0
+    ? `<div class="dag-node-row"><span style="color:#3fb950">✓ No latent confounders — backdoor identifiable</span></div>`
+    : dag.U.map((u,i)=>`<div class="dag-node-row"><span class="dag-node-tag dnt-U">U${i+1}</span><span style="color:#8b949e">${u.replace(/_/g,' ')}</span><span style="color:#484f58;font-size:10px"> — unobserved</span></div>`).join('');
+
+  let idRows = [
+    {label:"Backdoor", ok: dag.U.length===0,     note:`latent U = ${dag.U.length===0?'∅ ✓':'present ✕'}`},
+    {label:"Frontdoor",ok: dag.U.length>0 && !!dag.M, note:`M="${dag.M||'none'}" ${dag.U.length>0&&dag.M?'✓':'✕'}`},
+    {label:"RCT",      ok: rct,                  note:rct?"data available ✓":"not available"},
+  ];
+  let idHtml = idRows.map(r=>`<div class="dag-crit-row">
+    <span style="color:${r.ok?'#e6edf3':'#484f58'}">${r.label}</span>
+    <span class="dag-id-badge ${r.label==="RCT"&&r.ok?'dag-id-rct':r.label==="Backdoor"&&r.ok?'dag-id-bd':r.label==="Frontdoor"&&r.ok?'dag-id-fd':''}" style="${!r.ok?'background:#21262d;color:#484f58;border:1px solid #30363d':''}">${r.note}</span>
+  </div>`).join('');
+
+  let activeCrit = `<div style="margin-top:8px;padding:8px;background:#0d1117;border-radius:4px;font-size:11px">
+    <span style="color:#8b949e">Active criterion: </span>
+    <span style="color:${critColor};font-weight:700">${critLabel}</span><br>
+    <span style="color:#484f58;font-size:10px">Formula: ${
+      crit==="RCT"?"do(X) = see(X) — exact estimation"
+      :crit==="BACKDOOR"?"Σ_z P(Y|X,Z=z)·P(Z=z)"
+      :crit==="FRONTDOOR"?"Σ_m P(M|X)·Σ_x' P(Y|M,X=x')·P(X=x')"
+      :"No closed-form identification — partial bounds only"
+    }</span>
+  </div>`;
+
+  let html = `
+  <div style="margin-bottom:12px">
+    <span style="font-size:11px;color:#8b949e">Domain: </span>
+    <span style="color:#58a6ff;font-weight:700;font-size:12px">${domain.replace(/_/g,' ')}</span>
+    <span style="font-size:10px;color:#484f58;margin-left:8px">HarmDAG from scm_engine_v2.py build_domain_dags() v16a</span>
+  </div>
+  <div class="dag-wrap">
+    <div class="dag-canvas-wrap">${svg}</div>
+    <div class="dag-info">
+      <div class="dag-node-card">
+        <div class="dnc-title">Causal Nodes</div>
+        <div class="dag-node-row"><span class="dag-node-tag dnt-X">X</span><span style="color:#58a6ff">${dag.X.replace(/_/g,' ')}</span></div>
+        <div class="dag-node-row"><span class="dag-node-tag dnt-M">M</span><span style="color:#3fb950">${dag.M.replace(/_/g,' ')}</span></div>
+        <div class="dag-node-row"><span class="dag-node-tag dnt-Y">Y</span><span style="color:#f85149">${dag.Y.replace(/_/g,' ')}</span></div>
+        ${zHtml}${uHtml}
+      </div>
+      <div class="dag-criterion-card">
+        <div class="dnc-title">Identifiability Check</div>
+        ${idHtml}${activeCrit}
+      </div>
+      <div class="dag-legend">
+        <div class="dnc-title" style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8b949e;margin-bottom:6px">Legend</div>
+        <div class="dag-legend-row"><div class="dag-legend-dot" style="background:#1a3a5c;border:1.5px solid #58a6ff"></div><span style="color:#58a6ff">X — Treatment</span></div>
+        <div class="dag-legend-row"><div class="dag-legend-dot" style="background:#1a3a1a;border:1.5px solid #3fb950"></div><span style="color:#3fb950">M — Mediator</span></div>
+        <div class="dag-legend-row"><div class="dag-legend-dot" style="background:#3a1a1a;border:1.5px solid #f85149"></div><span style="color:#f85149">Y — Outcome</span></div>
+        <div class="dag-legend-row"><div class="dag-legend-dot" style="background:#3a2a00;border:1.5px solid #d29922"></div><span style="color:#d29922">Z — Observed Confounder</span></div>
+        <div class="dag-legend-row"><div class="dag-legend-dot" style="background:#21262d;border:1.5px dashed #484f58"></div><span style="color:#8b949e">U — Latent (unobserved)</span></div>
+        <div style="margin-top:8px;padding-top:6px;border-top:1px solid #21262d;font-size:10px;color:#484f58">Highlighted path = active adjustment strategy.<br>Dashed edges = unobservable confounding.</div>
+      </div>
+    </div>
+  </div>`;
+  document.getElementById('tab-dag').innerHTML = html;
+}
+
 function renderDecision(data){
-  let {finalDecision,finalReason,combinedRisk,steps,warnCount,blockCount,scm,mat,dm,tce,med,flip,intv,jur,mat:m} = data;
+  let {finalDecision,finalReason,combinedRisk,steps,warnCount,blockCount,scm,mat,dm,tce,med,flip,intv,jur,domain} = data;
   let decColor = {ALLOW:'#3fb950',WARN:'#d29922',BLOCK:'#f85149',EXPERT_REVIEW:'#a371f7'}[finalDecision];
   let decIcon  = {ALLOW:'✓',WARN:'⚠',BLOCK:'✕',EXPERT_REVIEW:'⊕'}[finalDecision];
   
@@ -787,6 +1009,7 @@ function update(){
     renderMatrix(data);
     renderFormulas(data);
     renderDecision(data);
+    renderDAG(data);
     updateSidebar(data);
     document.getElementById('lbl-tce').textContent  = parseFloat(document.getElementById('sl-tce').value).toFixed(1)+'%';
     document.getElementById('lbl-med').textContent  = document.getElementById('sl-med').value+'%';
