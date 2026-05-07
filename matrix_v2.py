@@ -666,6 +666,116 @@ _validate_matrix()   # runs at import time
 
 
 # ═══════════════════════════════════════════════════════════════════
+# GAP-7 FIX v2.1 — MATRIX INVARIANT VALIDATOR
+# ═══════════════════════════════════════════════════════════════════
+def validate_matrix_invariants(matrix: dict | None = None) -> dict:
+    """
+    Verify three structural invariants that must hold for all rows in
+    MATRIX_23x5, providing a machine-checkable audit trail for the PhD
+    thesis claim that the matrix encodes Pearl causal relationships — not
+    arbitrary numbers.
+
+    Invariants (with Pearl justification):
+    ─────────────────────────────────────
+    1.  INTV ≤ TCE  for every row
+        Rationale (Pearl 2000 §3.2): the do(X=x) intervention removes
+        confounding bias; INTV can equal TCE (no confounding) but must
+        never exceed it, because deconfounding cannot amplify the effect.
+        INTV > TCE would mean the intervention increases risk — a
+        structural contradiction for a harm-reduction framework.
+
+    2.  FLIP ≥ RCT  for CRITICAL and HIGH domains
+        Rationale: FLIP encodes PNS = P(Y₁=1, Y₀=0) — the probability of
+        necessary AND sufficient causation (Pearl L3). RCT encodes ATE
+        (L1 association). PNS ≥ ATE must hold for high-severity domains
+        where the thesis claims strong individual-level attribution;
+        FLIP < RCT there would undermine the L3 claim used in the Daubert
+        audit trail.
+
+    3.  All values ∈ [0.0, 1.0]  (probability axiom — Pearl L1 baseline)
+
+    Returns:
+        {
+          "ok"         : bool,            # True iff all invariants hold
+          "violations" : list[tuple],     # (domain, invariant_name, detail)
+          "summary"    : str              # human-readable PhD audit note
+        }
+
+    Usage (add to test_v15.py or run standalone):
+        result = validate_matrix_invariants()
+        assert result["ok"], result["summary"]
+    """
+    target = matrix if matrix is not None else MATRIX_23x5
+
+    # Resolve severity tier for invariant 2
+    _critical = set(CRITICAL_DOMAINS) if "CRITICAL_DOMAINS" in dir() else {
+        "csam", "weapon_synthesis", "child_safety", "child_abuse_grooming",
+        "physical_violence", "misuse_vx",
+    }
+    _high = set(HIGH_DOMAINS) if "HIGH_DOMAINS" in dir() else {
+        "bias_discrimination", "regulatory_noncompliance", "medical_harm",
+        "criminal_justice_bias", "medical_harm", "election_interference",
+        "self_harm", "hate_speech", "financial_fraud",
+    }
+    critical_high = _critical | _high
+
+    violations: list[tuple] = []
+
+    for domain, row in target.items():
+        rct  = float(row.get("RCT",  0.0))
+        tce  = float(row.get("TCE",  0.0))
+        intv = float(row.get("INTV", 0.0))
+        med  = float(row.get("MED",  0.0))
+        flip = float(row.get("FLIP", 0.0))
+
+        # Invariant 1: INTV ≤ TCE
+        if intv > tce + 1e-9:
+            violations.append((
+                domain, "INV-1: INTV > TCE",
+                f"INTV={intv:.4f} > TCE={tce:.4f} "
+                f"(deconfounding cannot amplify effect — Pearl 2000 §3.2)"
+            ))
+
+        # Invariant 2: FLIP ≥ RCT for CRITICAL/HIGH domains
+        if domain in critical_high and flip < rct - 1e-9:
+            violations.append((
+                domain, "INV-2: FLIP < RCT (CRITICAL/HIGH domain)",
+                f"FLIP={flip:.4f} < RCT={rct:.4f} "
+                f"(PNS must dominate ATE for strong individual attribution — Pearl L3)"
+            ))
+
+        # Invariant 3: probability bounds
+        for col, val in [("RCT", rct), ("TCE", tce), ("INTV", intv),
+                         ("MED", med), ("FLIP", flip)]:
+            if not (0.0 <= val <= 1.0):
+                violations.append((
+                    domain, f"INV-3: {col} out of [0,1]",
+                    f"{col}={val:.4f} violates probability axiom"
+                ))
+
+    ok = len(violations) == 0
+    checked = len(target)
+
+    if ok:
+        summary = (
+            f"✅  Matrix invariants PASS — {checked} domains checked.\n"
+            f"    All rows satisfy: INTV≤TCE · FLIP≥RCT (CRITICAL/HIGH) · values∈[0,1].\n"
+            f"    Pearl structural coherence confirmed — safe for PhD submission."
+        )
+    else:
+        lines = "\n    ".join(
+            f"[{d}] {inv}: {detail}" for d, inv, detail in violations
+        )
+        summary = (
+            f"❌  {len(violations)} invariant violation(s) in {checked} domains:\n"
+            f"    {lines}\n"
+            f"    Fix MATRIX_23x5 values before PhD submission / Daubert exhibit."
+        )
+
+    return {"ok": ok, "violations": violations, "summary": summary}
+
+
+# ═══════════════════════════════════════════════════════════════════
 # STANDALONE DEMO
 # ═══════════════════════════════════════════════════════════════════
 

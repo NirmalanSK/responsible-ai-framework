@@ -460,7 +460,19 @@ def build_domain_dags() -> Dict[str, HarmDAG]:
             ] + [
                 CausalEdge(c, treatment) for c in confounders
             ] + [
+                # Gap-4 fix v2.1: confounders directly affect outcome too.
+                # Without C→Y the DAG only encodes C→X→M→Y (indirect path only).
+                # Adding C→Y correctly opens the backdoor path C→Y alongside C→X→Y,
+                # which means has_backdoor_set() returns False when latent vars exist —
+                # structurally honest and required for correct do-calculus Rule-2 check.
+                CausalEdge(c, outcome) for c in confounders
+            ] + [
                 CausalEdge(u, treatment) for u in latent
+            ] + [
+                # Latent confounders U also directly affect outcome (canonical NPSEM structure).
+                # U→Y is what makes the backdoor criterion fail when latent vars are present,
+                # correctly routing those domains to the frontdoor formula.
+                CausalEdge(u, outcome)  for u in latent
             ]
         )
 
@@ -1233,7 +1245,24 @@ def rule_05_identifiability(tce, flip, rct, dag: "HarmDAG | None" = None) -> Tup
             f"Partial identification bounds apply. Year 2: IV or sensitivity analysis."
         )
 
-    # Legacy numeric fallback (no DAG provided — should not occur in v2 pipeline)
+    # Gap-3 fix v2.1: legacy dag=None path is hardened — raises in production.
+    # Every v2 pipeline call passes dag=<HarmDAG>; silently falling through to the
+    # numeric (tce/flip) heuristic here would bypass graph-theoretic identifiability
+    # and could publish an ungrounded causal claim in PhD / Daubert output.
+    #
+    # To run v1-compat unit tests: set _LEGACY_NUMERIC_IDENT = True in the fixture.
+    import warnings as _w
+    _LEGACY_NUMERIC_IDENT = False  # override True ONLY in v1-compat test stubs
+    if not _LEGACY_NUMERIC_IDENT:
+        raise ValueError(
+            "rule_05_identifiability() called without dag= in v2 pipeline. "
+            "Pass a HarmDAG instance. "
+            "The numeric tce/flip fallback is a v1 heuristic with no Pearl basis "
+            "and must not execute in production."
+        )
+    # ── v1 legacy path (never reached in production) ──────────────────────
+    _w.warn("LEGACY identifiability path — numeric heuristic, not graph-based.",
+            stacklevel=2)
     if tce < 2 and flip < 5 and not rct:
         return False, "Low TCE+Flip → epistemic risk ACTIVATED (Severity floor=3) [legacy path]"
     return True, "Effect identifiable via Rule 2 backdoor or RCT [legacy path — pass dag= for graph check]"

@@ -90,6 +90,35 @@ except ImportError:
     _DAGValidator = None
     _DAG_VALIDATOR_AVAILABLE = False
 
+# ── DAG Validation Bridge (Gap-5 fix v1.1) ───────────────────────────────
+# dag_validation_bridge exposes three functions that make validated Rosenbaum
+# gamma bounds and per-domain audit rows available to the pipeline without
+# requiring dowhy to be installed:
+#
+#   get_bridge_audit_row(domain)      → dict with gamma / p-values / status
+#   get_validated_threshold(domain)   → float warn threshold (bridge-calibrated)
+#   gamma_gate_promotion(domain, tce) → bool — should WARN promote to BLOCK?
+#
+# Year 1: graceful stub fallback when bridge not importable (CI / no pandas).
+# Year 2: bridge fully active once real incident DataFrames are passed.
+try:
+    from dag_validation_bridge import (
+        get_bridge_audit_row      as _get_bridge_audit_row,
+        get_validated_threshold   as _get_validated_threshold,
+        gamma_gate_promotion      as _gamma_gate_promotion,
+    )
+    _BRIDGE_AVAILABLE = True
+except ImportError:
+    def _get_bridge_audit_row(domain: str) -> dict:
+        return {"status": "bridge_unavailable", "domain": domain,
+                "gamma": None, "note": "pip install pandas to enable bridge"}
+    def _get_validated_threshold(domain: str, warn: float = 30.0, block: float = 70.0):
+        return {"warn": warn, "block": block, "source": "config_fallback"}
+    def _gamma_gate_promotion(domain: str, tce: float,
+                              current_action: str = "WARN") -> bool:
+        return False   # never auto-promote without bridge
+    _BRIDGE_AVAILABLE = False
+
 # ── Human Decision Verifier (Step 09b) ───────────────────────────────────
 # "Who watches the watchman?" — Pearl L3 verification of human reviewer
 # decisions. Integrated via verify_human_decision() method.
@@ -1398,6 +1427,22 @@ class Step05_SCMEngine:
         _dag_for_domain = _DOMAIN_DAGS_LOCAL.get(findings.domain, _DOMAIN_DAGS_LOCAL["misuse_safety"])
         _dowhy_status = self._run_dag_validation(findings, _dag_for_domain)
 
+        # ── Gap-5 fix v1.1: DAG Validation Bridge ─────────────────
+        # Bridge exposes Rosenbaum gamma bounds and validated thresholds
+        # computed by dag_validator without requiring dowhy to be installed.
+        # Year 1: returns config fallback values when bridge unavailable.
+        # Year 2: live gamma/p-values flow from DoWhy refutation tests.
+        _bridge_audit   = _get_bridge_audit_row(findings.domain)
+        _bridge_thresh  = _get_validated_threshold(
+            findings.domain,
+            warn  = cfg.WARN_THRESHOLD,
+            block = cfg.BLOCK_THRESHOLD,
+        )
+        # gamma_gate_promotion: if Rosenbaum gamma < 1.5 for a WARN-level
+        # result, the effect is fragile to unmeasured confounding and should
+        # be promoted to BLOCK.  Year 1: always False (no data); Year 2: live.
+        _gamma_promoted = _gamma_gate_promotion(findings.domain, findings.tce)
+
         # ── v15c: Sparse Causal Activation Matrix ─────────────────
         matrix_detail = ""
         dom_tag2 = ""
@@ -1460,6 +1505,21 @@ class Step05_SCMEngine:
             "step": 5, "risk_pct": risk_pct, "signal": signal,
             "latency_ms": round(ms, 2)
         })
+        # Gap-5 fix v1.1: include bridge audit row in StepResult detail.
+        # gamma_gate_promotion upgrades WARN→BLOCK if Rosenbaum gamma < 1.5
+        # (effect fragile to unmeasured confounding). Year 1: always False.
+        if _gamma_promoted and signal == "WARN":
+            signal = "BLOCK"   # gamma gate upgrade
+        _bridge_tag = ""
+        if _BRIDGE_AVAILABLE:
+            _gamma_val = _bridge_audit.get("gamma", None)
+            _bridge_tag = (
+                f" | bridge=γ{_gamma_val:.2f}" if _gamma_val is not None
+                else f" | bridge={_bridge_audit.get('status', 'ok')}"
+            )
+        elif not _BRIDGE_AVAILABLE:
+            _bridge_tag = " | bridge=stub(Year2)"
+
         return risk_pct, StepResult(
             step_num  = 5,
             step_name = "SCM Engine + Activation Matrix",
@@ -1468,7 +1528,7 @@ class Step05_SCMEngine:
             detail    = (
                 f"TCE={findings.tce}% | Med={findings.med}% | "
                 f"Flip={findings.flip}% | Risk={risk_pct:.1f}% → "
-                f"{result.decision.value}{matrix_detail}"
+                f"{result.decision.value}{matrix_detail}{_bridge_tag}"
             ),
             latency_ms= round(ms, 2),
         )
