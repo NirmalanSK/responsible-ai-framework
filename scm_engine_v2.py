@@ -663,7 +663,7 @@ class CounterfactualBounds:
 
     # Legal interpretation
     legal_strength: str   # STRONG / MODERATE / WEAK
-    but_for_causal: bool  # True if PN_lower > 0.5 (more likely than not)
+    but_for_causal: bool  # True if PN_lower > 0.0 AND pn_point >= 0.5 (bounds informative + more likely than not)
 
 
 @dataclass
@@ -792,11 +792,19 @@ def compute_backdoor(f: CausalFindings, dag: HarmDAG) -> BackdoorResult:
         )
         method = AdjustmentMethod.BACKDOOR
     else:
-        py_do_x1 = _clamp(f.p_y_given_x + ate * 0.5)
+        # Latent confounders exist — backdoor criterion NOT satisfied.
+        # Best available: raw observational P(Y|X) minus P(Y|X=0).
+        # This is the BIASED (confounded) ATE — latent U creates spurious correlation.
+        # Frontdoor formula gives the true causal ATE; use f.tce/100 as SCM-measured canonical.
+        # FIX v5.2: was `p_y_given_x + ate*0.5` (arbitrary inflation → 18.2% mismatch).
+        # Now: use observational as-is, note confounding explicitly.
+        py_do_x1 = _clamp(f.p_y_given_x)
         py_do_x0 = _clamp(f.p_y_given_notx)
         ate_computed = py_do_x1 - py_do_x0
-        note = (f"Latent confounders {dag.latent} present. Backdoor not sufficient. "
-                f"Frontdoor adjustment required. ATE bounds wider.")
+        note = (f"Latent confounders {dag.latent} present. Backdoor NOT applicable. "
+                f"Observational ATE = {ate_computed*100:.1f}% (confounded by U — upward bias expected). "
+                f"SCM-measured canonical TCE = {f.tce:.1f}% used in EffectSizes. "
+                f"Frontdoor formula needed for true do-calculus ATE — deferred to Year 2 DoWhy.")
         method = AdjustmentMethod.FRONTDOOR
 
     return BackdoorResult(
@@ -1012,14 +1020,20 @@ def compute_counterfactual_bounds(f: CausalFindings) -> CounterfactualBounds:
     # Legal strength
     if pns_lo >= 0.5:
         legal_strength = "STRONG — PNS lower bound > 0.5: AI decision more likely than not BOTH necessary and sufficient for harm"
-    elif pn_pt >= 0.5:
+    elif pn_pt >= 0.5 and pn_lo > 0.0:
+        # FIX v5.2: pn_lo must be > 0 — if bounds = [0, 1], midpoint 0.5 is uninformative.
         legal_strength = "MODERATE — PN > 0.5: AI decision more likely than not NECESSARY for harm (but-for causation met)"
     elif pns_hi > 0.2:
         legal_strength = "MODERATE — PNS upper bound suggests causal role, but uncertainty wide without RCT data"
     else:
         legal_strength = "WEAK — PNS bounds include zero: causal responsibility uncertain from observational data alone"
 
-    but_for = pn_pt >= 0.5
+    # FIX v5.2: was `pn_pt >= 0.5` — triggered even when PN bounds = [0, 1] (uninformative).
+    # When pn_lo = 0, the midpoint (0.5) is meaningless: bounds include zero necessity.
+    # Correct standard: PN lower bound must be > 0 (positively establishes necessity),
+    # AND point estimate ≥ 0.5 (more likely than not).
+    # Daubert "but-for" requires affirmative evidence — uninformative bounds do not qualify.
+    but_for = pn_lo > 0.0 and pn_pt >= 0.5
 
     return CounterfactualBounds(
         pn_lower=pn_lo,  pn_upper=pn_hi,  pn_point=pn_pt,
@@ -1513,6 +1527,9 @@ CASCADE_MAP: Dict[str, List[str]] = {
     "bias_discrimination":        ["regulatory_noncompliance", "medical_harm"],
     "regulatory_noncompliance":   ["privacy_violation", "data_poisoning"],
     "medical_harm":               ["bias_discrimination", "regulatory_noncompliance"],
+    # FIX v5.2: election_interference now maps to its own HIGH row → can cascade
+    # Logical co-occurrence: election interference always involves synthetic content + deepfakes
+    "election_interference":      ["misinformation_synthetic", "deepfake"],
 }
 
 # Domain → 23×5 Pearl category mapping
@@ -1538,7 +1555,10 @@ DOMAIN_TO_ROW: Dict[str, str] = {
     "audit_gap":             "regulatory_noncompliance",
     # ── Added May 2026 ─────────────────────────────────────────
     "self_harm":             "psychological_manipulation",  # closest harm class — distress → method → act
-    "election_interference": "misinformation_synthetic",   # same matrix row as disinformation
+    # FIX v5.2: election_interference has its OWN HIGH-tier row in matrix_v2.
+    # Was: "misinformation_synthetic" (MEDIUM) → wrong tier → cascade never fired.
+    # Now: "election_interference" (HIGH) → correct tier → cascade fires when TCE ≥ 12.
+    "election_interference": "election_interference",
 }
 
 # Pearl column names (replaces P1_Interpretability…P5_Society)
