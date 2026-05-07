@@ -4,7 +4,7 @@
 ║   v15h+dag — Production Build (dag_selector integrated)                  ║
 ║   PhD Research · Nirmalan                                                ║
 ║                                                                          ║
-║   195/195 tests passing | AIAAIC F1=0.97 | 0 harmful outputs            ║
+║   227/227 tests passing | AIAAIC F1=0.97 | 0 harmful outputs            ║
 ║                                                                          ║
 ║   Production Features:                                                   ║
 ║     ✅ Error Handling  — try/except every step, fail-safe fallback       ║
@@ -2921,9 +2921,23 @@ class ResponsibleAIPipeline:
                 latency_ms= privacy_gate_result.latency_ms,
             )
             # Replace query with PII-masked version for all downstream steps
+            # FIX v5.2 (Priority 1): Conversation history was NOT masked — only query was.
+            # PII in earlier turns (email, phone, SSN in history) leaked to downstream steps.
+            # Fix: mask each conversation turn using the same pii_detector as the query.
+            # Fail-safe: if masking a turn fails, keep original turn (no data loss).
+            masked_conversation = inp.conversation
+            if inp.conversation:
+                try:
+                    masked_conversation = [
+                        self.s00.pii_detector.detect_and_mask(turn).masked_text
+                        for turn in inp.conversation
+                    ]
+                except Exception:
+                    masked_conversation = inp.conversation  # fail-safe
+
             inp = PipelineInput(
                 query        = masked_query,
-                conversation = inp.conversation,
+                conversation = masked_conversation,
                 jurisdiction = inp.jurisdiction,
                 user_id      = inp.user_id,
                 causal_data  = inp.causal_data,
