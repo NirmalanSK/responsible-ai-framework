@@ -1253,7 +1253,10 @@ def run_tests(verbosity=1, pattern=None):
                 if pattern.lower() in name.lower():
                     suite.addTests(loader.loadTestsFromTestCase(obj))
     else:
-        suite = loader.loadTestsFromModule(sys.modules[__name__])
+        # Fix: import the module fresh so all classes defined after run_tests() are included.
+        import importlib, test_v15 as _self_module
+        importlib.reload(_self_module)
+        suite = loader.loadTestsFromModule(_self_module)
 
     runner = unittest.TextTestRunner(
         verbosity=verbosity,
@@ -2024,5 +2027,21 @@ class TestDAGValidatorStructure(unittest.TestCase):
                 f"EXPERT_DAGS['{domain}'] base_tce={tce} must be > 0")
             self.assertLess(tce, 1.0,
                 f"EXPERT_DAGS['{domain}'] base_tce={tce} must be < 1")
+
+    def test_matrix_invariants_pass(self):
+        """
+        MATRIX_23x5 Pearl structural invariants — Gap-7 regression guard.
+
+        Three invariants that must hold for all 24 rows:
+          INV-1  INTV <= TCE           (deconfounding cannot amplify — Pearl 2000 s3.2)
+          INV-2  FLIP >= RCT           (PNS >= ATE for CRITICAL/HIGH — L3 claim)
+          INV-3  all values in [0, 1]  (probability axiom)
+
+        Catches any future Bayesian calibration or manual edit that silently
+        violates a Pearl constraint before it reaches PhD submission.
+        """
+        from matrix_v2 import validate_matrix_invariants
+        result = validate_matrix_invariants()
+        self.assertTrue(result["ok"], result["summary"])
 
 

@@ -721,12 +721,9 @@ def validate_matrix_invariants(matrix: dict | None = None) -> dict:
 
     violations: list[tuple] = []
 
+    # MATRIX_23x5 row format: [RCT, TCE, INTV, MED, FLIP]  (list, not dict)
     for domain, row in target.items():
-        rct  = float(row.get("RCT",  0.0))
-        tce  = float(row.get("TCE",  0.0))
-        intv = float(row.get("INTV", 0.0))
-        med  = float(row.get("MED",  0.0))
-        flip = float(row.get("FLIP", 0.0))
+        rct, tce, intv, med, flip = (float(v) for v in row[:5])
 
         # Invariant 1: INTV ≤ TCE
         if intv > tce + 1e-9:
@@ -745,8 +742,7 @@ def validate_matrix_invariants(matrix: dict | None = None) -> dict:
             ))
 
         # Invariant 3: probability bounds
-        for col, val in [("RCT", rct), ("TCE", tce), ("INTV", intv),
-                         ("MED", med), ("FLIP", flip)]:
+        for col, val in zip(["RCT","TCE","INTV","MED","FLIP"], row[:5]):
             if not (0.0 <= val <= 1.0):
                 violations.append((
                     domain, f"INV-3: {col} out of [0,1]",
